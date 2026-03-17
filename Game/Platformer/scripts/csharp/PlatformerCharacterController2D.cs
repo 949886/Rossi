@@ -59,8 +59,10 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
     #region Attack Parameters
 
     [ExportGroup("Attack")]
-    [Export] private float heavyAttackHoldTime = 0.3f;
-    [Export] private float jumpAttackLift = 150f;
+    [Export] private float attackDashSpeed = 900f;
+    [Export] private float attackDashDuration = 0.12f;
+    [Export] private float attackCooldown = 0.15f;
+    [Export] private float airAttackLiftDecay = 0.4f; // Decreases lift by this ratio per air attack
     [Export] private PackedScene shurikenScene;
     [Export] private Vector2 shurikenSpawnOffset = new Vector2(10f, -15f);
 
@@ -93,13 +95,9 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
         Fall,
         Landing,
         FallToIdle,
-        Attack1,
-        Attack2,
-        Attack3,
-        HeavyAttack,
+        DirectionalAttack,
         Dash,
         WallSlide,
-        JumpAttack,
         Throw,
         AirThrow,
         Die
@@ -108,7 +106,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
     private State _currentState = State.Idle;
     private int _facingDirection = 1; // 1 = right, -1 = left
     private bool _hasDoubleJump = true;
-    private bool _hasJumpAttack = true;
+    
 
     // Dash tracking
     private int _dashCharges;
@@ -121,10 +119,10 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
     public float DashRechargeProgress => _dashCharges < maxDashCharges ? (_dashRechargeTimer / dashCooldown) : 0f;
 
     // Attack tracking
-    private float _attackPressTime = 0f;
-    private bool _attackButtonHeld = false;
-    private bool _comboRequested = false;
-    private bool _heavyAttackTriggered = false;
+    private int _airAttackCount = 0;
+    private float _attackDashTimer = 0f;
+    private float _attackCooldownTimer = 0f;
+    private Vector2 _attackDirection = Vector2.Zero;
 
     // Wall slide tracking
     private int _wallDirection = 0; // -1 = wall on left, 1 = wall on right
@@ -161,7 +159,9 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
 
     public override void _PhysicsProcess(double delta)
     {
+        if (_attackCooldownTimer > 0f) _attackCooldownTimer -= (float)delta;
         float dt = (float)delta;
+        if (this.IsOnFloor()) { _airAttackCount = 0; }
 
         // Recharge dash charges
         if (_dashCharges < maxDashCharges)
@@ -215,23 +215,17 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
             case State.WallSlide:
                 ProcessWallSlide(dt);
                 break;
-            case State.JumpAttack:
-                ProcessJumpAttack(dt);
-                break;
+            
             case State.Throw:
                 ProcessThrow(dt);
                 break;
             case State.AirThrow:
                 ProcessAirThrow(dt);
                 break;
-            case State.Attack1:
-            case State.Attack2:
-            case State.Attack3:
-                ProcessAttack(dt);
+            case State.DirectionalAttack:
+                ProcessDirectionalAttack(dt);
                 break;
-            case State.HeavyAttack:
-                ProcessHeavyAttack(dt);
-                break;
+            
             case State.Dash:
                 ProcessDash(dt);
                 break;
@@ -242,44 +236,28 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
 
     public override void _Input(InputEvent @event)
     {
-        // Track attack button press/release for heavy attack detection
-        if (@event.IsActionPressed("attack"))
-        {
-            _attackPressTime = 0f;
-            _attackButtonHeld = true;
-            _heavyAttackTriggered = false;
-        }
-        else if (@event.IsActionReleased("attack"))
-        {
-            _attackButtonHeld = false;
-        }
     }
 
     #region State Processors
+
+    private bool TryAttack()
+    {
+        if (_attackCooldownTimer > 0f) return false;
+        
+        if (Input.IsActionJustPressed("attack"))
+        {
+            ChangeState(State.DirectionalAttack);
+            return true;
+        }
+        return false;
+    }
 
     private void ProcessIdle(float dt)
     {
         ApplyGravity(dt);
         ApplyFriction(dt, true);
 
-        // Heavy attack detection (hold mouse)
-        if (_attackButtonHeld)
-        {
-            _attackPressTime += dt;
-            if (_attackPressTime >= heavyAttackHoldTime && !_heavyAttackTriggered)
-            {
-                _heavyAttackTriggered = true;
-                ChangeState(State.HeavyAttack);
-                return;
-            }
-        }
-
-        // Short press attack — trigger on button release
-        if (Input.IsActionJustReleased("attack") && !_heavyAttackTriggered)
-        {
-            ChangeState(State.Attack1);
-            return;
-        }
+        if (TryAttack()) return;
 
         if (Input.IsActionJustPressed("dash") && _dashCharges > 0)
         {
@@ -345,23 +323,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
         ApplyGravity(dt);
         ApplyMovement(dt, true);
 
-        // Heavy attack detection
-        if (_attackButtonHeld)
-        {
-            _attackPressTime += dt;
-            if (_attackPressTime >= heavyAttackHoldTime && !_heavyAttackTriggered)
-            {
-                _heavyAttackTriggered = true;
-                ChangeState(State.HeavyAttack);
-                return;
-            }
-        }
-
-        if (Input.IsActionJustReleased("attack") && !_heavyAttackTriggered)
-        {
-            ChangeState(State.Attack1);
-            return;
-        }
+        if (TryAttack()) return;
 
         if (Input.IsActionJustPressed("dash") && _dashCharges > 0)
         {
@@ -462,11 +424,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
             return;
         }
 
-        if (Input.IsActionJustPressed("attack") && _hasJumpAttack)
-        {
-            ChangeState(State.JumpAttack);
-            return;
-        }
+        if (TryAttack()) return;
 
         // Transition to fall when starting to descend
         if (this.Velocity.Y > 0)
@@ -504,11 +462,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
             return;
         }
 
-        if (Input.IsActionJustPressed("attack") && _hasJumpAttack)
-        {
-            ChangeState(State.JumpAttack);
-            return;
-        }
+        if (TryAttack()) return;
 
         if (this.IsOnFloor())
         {
@@ -545,11 +499,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
             return;
         }
 
-        if (Input.IsActionJustPressed("attack") && _hasJumpAttack)
-        {
-            ChangeState(State.JumpAttack);
-            return;
-        }
+        if (TryAttack()) return;
 
         if (this.Velocity.Y > 0)
         {
@@ -586,11 +536,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
             return;
         }
 
-        if (Input.IsActionJustPressed("attack") && _hasJumpAttack)
-        {
-            ChangeState(State.JumpAttack);
-            return;
-        }
+        if (TryAttack()) return;
 
         if (this.IsOnFloor())
         {
@@ -679,79 +625,45 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
         // AnimationFinished callback handles transition to Idle
     }
 
-    private void ProcessAttack(float dt)
+    private void ProcessDirectionalAttack(float dt)
     {
-        ApplyGravity(dt);
-        ApplyFriction(dt, this.IsOnFloor());
-
-        // Dash cancels attack — leave afterimage
-        if (Input.IsActionJustPressed("dash") && _dashCharges > 0)
-        {
-            SpawnAfterimage();
-            ChangeState(State.Dash);
-            return;
-        }
-
-        // Jump cancels attack — leave afterimage
-        if (Input.IsActionJustPressed("jump") && this.IsOnFloor())
-        {
-            SpawnAfterimage();
-            ChangeState(State.Jump);
-            return;
-        }
-
-        // Buffer combo input during attack animation
-        if (Input.IsActionJustReleased("attack") && !_heavyAttackTriggered)
-        {
-            _comboRequested = true;
-        }
-
-        // AnimationFinished callback handles combo chain / return to Idle
-    }
-
-    private void ProcessHeavyAttack(float dt)
-    {
-        ApplyGravity(dt);
-        ApplyFriction(dt, this.IsOnFloor());
-
-        // Dash cancels heavy attack — leave afterimage
-        if (Input.IsActionJustPressed("dash") && _dashCharges > 0)
-        {
-            SpawnAfterimage();
-            ChangeState(State.Dash);
-            return;
-        }
-
-        // Jump cancels heavy attack — leave afterimage
-        if (Input.IsActionJustPressed("jump") && this.IsOnFloor())
-        {
-            SpawnAfterimage();
-            ChangeState(State.Jump);
-            return;
-        }
-
-        // AnimationFinished callback handles return to Idle
-    }
-
-    private void ProcessJumpAttack(float dt)
-    {
-        ApplyGravity(dt);
-        ApplyMovement(dt, false);
-
-        if (Input.IsActionJustPressed("dash") && _dashCharges > 0)
-        {
-            SpawnAfterimage();
-            ChangeState(State.Dash);
-            return;
-        }
-
-        if (this.IsOnFloor())
-        {
-            ChangeState(State.Landing);
-            return;
-        }
+        _attackDashTimer -= dt;
         
-        // AnimationFinished callback handles transition back to Fall
+        // Dash cancels attack -> leave afterimage
+        if (Input.IsActionJustPressed("dash") && _dashCharges > 0)
+        {
+            SpawnAfterimage();
+            ChangeState(State.Dash);
+            return;
+        }
+
+        var vel = _attackDirection * attackDashSpeed;
+
+        // Apply decay to upward lift in air
+        if (!this.IsOnFloor())
+        {
+            if (vel.Y < 0) 
+            {
+                float liftMultiplier = Mathf.Max(0f, 1f - (_airAttackCount * airAttackLiftDecay));
+                vel.Y *= liftMultiplier;
+            } 
+            else 
+            {
+                // Gradually reintroduce gravity for horizontal/downward spam
+                vel.Y += gravity * dt * (_airAttackCount * airAttackLiftDecay * 1.5f);
+            }
+        }
+
+        this.Velocity = vel;
+
+        if (_attackDashTimer <= 0f)
+        {
+            this.Velocity = Vector2.Zero; // Stop immediately after dash
+            if (this.IsOnFloor())
+                ChangeState(State.Idle);
+            else
+                ChangeState(State.Fall);
+        }
     }
 
     private void ProcessThrow(float dt)
@@ -866,7 +778,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
             case State.Idle:
                 PlayAnimation("idle");
                 _hasDoubleJump = true;
-                _hasJumpAttack = true;
+                
                 break;
 
             case State.IdleToRun:
@@ -910,7 +822,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
 
             case State.Landing:
                 _hasDoubleJump = true;
-                _hasJumpAttack = true;
+                
                 PlayAnimation("landing");
                 break;
 
@@ -918,23 +830,17 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
                 PlayAnimation("fall_to_idle");
                 break;
 
-            case State.Attack1:
-                _comboRequested = false;
-                PlayAnimation("attack1");
-                break;
-
-            case State.Attack2:
-                _comboRequested = false;
-                PlayAnimation("attack2");
-                break;
-
-            case State.Attack3:
-                _comboRequested = false;
-                PlayAnimation("attack3");
-                break;
-
-            case State.HeavyAttack:
-                PlayAnimation("heavy_attack");
+            case State.DirectionalAttack:
+                _attackCooldownTimer = attackCooldown;
+                _attackDashTimer = attackDashDuration;
+                if (!this.IsOnFloor()) _airAttackCount++;
+                
+                Vector2 mousePos = GetGlobalMousePosition();
+                _attackDirection = (mousePos - this.GlobalPosition).Normalized();
+                
+                UpdateFacing(_attackDirection.X);
+                SpawnAfterimage();
+                PlayAnimation("attack1"); // Reuse attack animation for now
                 break;
 
             case State.Dash:
@@ -944,13 +850,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
                 PlayAnimation("dash");
                 break;
 
-            case State.JumpAttack:
-                _hasJumpAttack = false;
-                var jaVel = this.Velocity;
-                jaVel.Y = -jumpAttackLift;
-                this.Velocity = jaVel;
-                PlayAnimation("jump_attack");
-                break;
+            
 
             case State.Throw:
                 if (_pendingThrowAngle.HasValue)
@@ -986,7 +886,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
                 break;
 
             case State.WallSlide:
-                _hasJumpAttack = true;
+                
                 PlayAnimation("fall"); // Reuse fall animation for wall slide
                 break;
         }
@@ -1267,30 +1167,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
                 break;
 
             // Attack combo chain
-            case "attack1":
-                if (_currentState == State.Attack1)
-                {
-                    if (_comboRequested)
-                        ChangeState(State.Attack2);
-                    else
-                        ChangeState(State.Idle);
-                }
-                break;
-
-            case "attack2":
-                if (_currentState == State.Attack2)
-                {
-                    if (_comboRequested)
-                        ChangeState(State.Attack3);
-                    else
-                        ChangeState(State.Idle);
-                }
-                break;
-
-            case "attack3":
-            case "heavy_attack":
-                ChangeState(State.Idle);
-                break;
+            
 
             case "shuriken":
                 if (_currentState == State.Throw)
@@ -1306,12 +1183,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
                 }
                 break;
 
-            case "jump_attack":
-                if (_currentState == State.JumpAttack)
-                {
-                    ChangeState(State.Fall);
-                }
-                break;
+            
 
             case "dash":
                 if (_currentState == State.Dash)
