@@ -1,0 +1,17 @@
+[gd_scene format=3 uid="uid://hthi1t4oeq54"]
+
+[ext_resource type="Script" uid="uid://dksekmj0xp70s" path="res://Game/Platformer/scripts/csharp/LaserBeam.cs" id="1_laser"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_beam"]
+resource_local_to_scene = true
+size = Vector2(32, 10)
+
+[node name="LaserBeam" type="Node2D" unique_id=1612016808]
+script = ExtResource("1_laser")
+
+[node name="DamageArea" type="Area2D" parent="." unique_id=835615188]
+monitoring = false
+monitorable = false
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="DamageArea" unique_id=1415187205]
+shape = SubResource("RectangleShape2D_beam")
