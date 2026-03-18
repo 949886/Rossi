@@ -39,6 +39,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
     [ExportGroup("Dash")]
     [Export] private float dashSpeed = 1000f;
     [Export] private float dashDuration = 0.15f;
+    [Export] private float dashInvulnerabilityDuration = 0.15f;
     [Export] private float dashCooldown = 0.8f;
     [Export] private int maxDashCharges = 2;
     [Export] private float afterimageFadeDuration = 0.3f;
@@ -84,6 +85,14 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
 
     #endregion
 
+    #region Survival Parameters
+
+    [ExportGroup("Survival")]
+    [Export] private float respawnDelay = 0.6f;
+    [Export] private Vector2 defaultRespawnPosition = Vector2.Zero;
+
+    #endregion
+
     #region State Machine
 
     private enum State
@@ -103,7 +112,8 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
         WallSlide,
         Throw,
         AirThrow,
-        Die
+        Die,
+        Respawn
     }
 
     private State _currentState = State.Idle;
@@ -114,11 +124,18 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
     private int _dashCharges;
     private float _dashRechargeTimer;
     private float _dashTimer;
+    private float _invulnerabilityTimer;
+    private bool _isDead;
+    private Vector2 _currentRespawnPosition;
+    private SceneTreeTimer _respawnTimer;
 
     // Public API for UI to display dash cooldown and charges
     public int DashCharges => _dashCharges;
     public int MaxDashCharges => maxDashCharges;
     public float DashRechargeProgress => _dashCharges < maxDashCharges ? (_dashRechargeTimer / dashCooldown) : 0f;
+    public bool IsDead => _isDead;
+    public bool IsInvulnerable => !_isDead && _invulnerabilityTimer > 0f;
+    public Vector2 CurrentRespawnPosition => _currentRespawnPosition;
 
     // Attack tracking
     private float _attackTimer = 0f;
@@ -154,6 +171,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
         animationPlayer.AnimationFinished += OnAnimationFinished;
 
         _dashCharges = maxDashCharges;
+        _currentRespawnPosition = defaultRespawnPosition == Vector2.Zero ? GlobalPosition : defaultRespawnPosition;
         _rng.Randomize();
 
         // Start in idle
@@ -163,6 +181,16 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
     public override void _PhysicsProcess(double delta)
     {
         float dt = (float)delta;
+
+        if (_invulnerabilityTimer > 0f)
+            _invulnerabilityTimer = Mathf.Max(0f, _invulnerabilityTimer - dt);
+
+        if (_isDead)
+        {
+            ProcessDie(dt);
+            this.MoveAndSlide();
+            return;
+        }
         
         if (this.IsOnFloor()) _airAttackCount = 0;
         
@@ -181,7 +209,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
         }
 
         // Press throw again while a shuriken exists to teleport to it.
-        if (Input.IsActionJustPressed("throw") && TryFlyingThunderGodTeleport())
+        if (_currentState != State.Respawn && Input.IsActionJustPressed("throw") && TryFlyingThunderGodTeleport())
             return;
 
         // Handle state-specific logic
@@ -232,6 +260,12 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
                 break;
             case State.Dash:
                 ProcessDash(dt);
+                break;
+            case State.Die:
+                ProcessDie(dt);
+                break;
+            case State.Respawn:
+                ProcessRespawn(dt);
                 break;
         }
 
@@ -772,6 +806,18 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
         }
     }
 
+    private void ProcessDie(float dt)
+    {
+        // ApplyGravity(dt);
+        ApplyFriction(dt, this.IsOnFloor());
+    }
+
+    private void ProcessRespawn(float dt)
+    {
+        ApplyGravity(dt);
+        ApplyFriction(dt, this.IsOnFloor());
+    }
+
     #endregion
 
     #region State Transitions
@@ -853,6 +899,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
                 _dashCharges--;
                 _dashRechargeTimer = dashCooldown;
                 _dashTimer = dashDuration;
+                _invulnerabilityTimer = Mathf.Max(_invulnerabilityTimer, dashInvulnerabilityDuration);
                 PlayAnimation("dash");
                 break;
 
@@ -890,17 +937,82 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
                 break;
 
             case State.WallSlide:
-                
                 PlayAnimation("fall"); // Reuse fall animation for wall slide
+                break;
+
+            case State.Die:
+                _isDead = true;
+                _invulnerabilityTimer = 0f;
+                Velocity = Vector2.Zero;
+                PlayAnimation("die");
+                break;
+
+            case State.Respawn:
+                Velocity = Vector2.Zero;
+                PlayAnimation("respawn");
                 break;
         }
     }
     
     private bool TryAttack()
     {
+        if (_isDead) return false;
         if (_attackCooldownTimer > 0f) return false;
         ChangeState(State.Attack);
         return true;
+    }
+
+    public void Kill()
+    {
+        if (_isDead || _currentState == State.Respawn)
+            return;
+
+        _respawnTimer = null;
+
+        if (GodotObject.IsInstanceValid(_activeShuriken))
+            _activeShuriken.QueueFree();
+
+        _pendingThrowAngle = null;
+        _attackTimer = 0f;
+        _attackCooldownTimer = 0f;
+        _attackAfterimageTimer = 0f;
+        ChangeState(State.Die);
+
+        _respawnTimer = GetTree().CreateTimer(respawnDelay);
+        _respawnTimer.Timeout += OnRespawnTimerTimeout;
+    }
+
+    public void Respawn(Vector2 spawnPosition)
+    {
+        _respawnTimer = null;
+        _isDead = false;
+        _invulnerabilityTimer = 0f;
+        _attackTimer = 0f;
+        _attackCooldownTimer = 0f;
+        _attackAfterimageTimer = 0f;
+        _dashTimer = 0f;
+        _dashCharges = maxDashCharges;
+        _dashRechargeTimer = dashCooldown;
+        _hasDoubleJump = true;
+        _airAttackCount = 0;
+        _pendingThrowAngle = null;
+        Velocity = Vector2.Zero;
+        GlobalPosition = spawnPosition;
+        SetCheckpoint(spawnPosition);
+        ChangeState(State.Respawn);
+    }
+
+    public void SetCheckpoint(Vector2 checkpointPosition)
+    {
+        _currentRespawnPosition = checkpointPosition;
+    }
+
+    private void OnRespawnTimerTimeout()
+    {
+        if (!IsInstanceValid(this))
+            return;
+
+        Respawn(_currentRespawnPosition);
     }
 
     #endregion
@@ -1137,7 +1249,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
 
          switch (name)
         {
-            // Transition animations → advance to next state
+            // Transition animations ↁEadvance to next state
             case "idle_to_run":
                 if (_currentState == State.IdleToRun)
                     ChangeState(State.Run);
@@ -1159,7 +1271,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
                     ChangeState(State.Idle);
                 break;
 
-            // Jump finishes → transition to fall if descending
+            // Jump finishes ↁEtransition to fall if descending
             case "jump":
                 if (_currentState == State.Jump)
                 {
@@ -1208,6 +1320,13 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
                         ChangeState(State.Idle);
                     else
                         ChangeState(State.Fall);
+                }
+                break;
+
+            case "respawn":
+                if (_currentState == State.Respawn)
+                {
+                    ChangeState(this.IsOnFloor() ? State.Idle : State.Fall);
                 }
                 break;
         }
@@ -1404,5 +1523,6 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
 
     #endregion
 }
+
 
 
