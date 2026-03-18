@@ -59,15 +59,17 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
     #region Attack Parameters
 
     [ExportGroup("Attack")]
-    [Export] private float slashSpeed = 720f;
-    [Export] private float slashDuration = 0.12f;
-    [Export] private float slashRecoveryGravityScale = 0.35f;
-    [Export] private float slashExitMomentumScale = 0.28f;
-    [Export] private float slashAfterimageInterval = 0.035f;
+    [Export] private float attackSpeed = 720f;
+    [Export] private float attackDuration = 0.12f;
+    [Export] private float attackCooldown = 0f;
+    [Export] private float attackGravityScale = 0.35f;
+    [Export] private float attackExitMomentumScale = 0.28f;
+    [Export] private float attackAfterimageInterval = 0.035f;
+    [Export] private float airAttackLiftDecay = 0.4f; // Decreases lift by this ratio per air attack
+    
+    [ExportGroup("Shuriken")]
     [Export] private PackedScene shurikenScene;
     [Export] private Vector2 shurikenSpawnOffset = new Vector2(10f, -15f);
-
-    [ExportGroup("Flying Thunder God")]
     [Export] private int teleportAfterimageCount = 6;
     [Export] private float teleportAfterimageFadeDuration = 0.16f;
     [Export] private Color teleportAfterimageColor = new Color(1.0f, 0.35f, 0.35f, 0.72f);
@@ -119,9 +121,11 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
     public float DashRechargeProgress => _dashCharges < maxDashCharges ? (_dashRechargeTimer / dashCooldown) : 0f;
 
     // Attack tracking
-    private float _slashTimer = 0f;
-    private float _slashAfterimageTimer = 0f;
-    private Vector2 _slashDirection = Vector2.Right;
+    private float _attackTimer = 0f;
+    private float _attackCooldownTimer = 0f;
+    private float _attackAfterimageTimer = 0f;
+    private Vector2 _attackDirection = Vector2.Right;
+    private int _airAttackCount = 0;
 
     // Wall slide tracking
     private int _wallDirection = 0; // -1 = wall on left, 1 = wall on right
@@ -159,6 +163,11 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
     public override void _PhysicsProcess(double delta)
     {
         float dt = (float)delta;
+        
+        if (this.IsOnFloor()) _airAttackCount = 0;
+        
+        if (_attackCooldownTimer > 0f) 
+            _attackCooldownTimer -= dt;
 
         // Recharge dash charges
         if (_dashCharges < maxDashCharges)
@@ -237,8 +246,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
         ApplyFriction(dt, true);
         if (Input.IsActionJustPressed("attack"))
         {
-            ChangeState(State.Attack);
-            return;
+            if (TryAttack()) return;
         }
         if (Input.IsActionJustPressed("dash") && _dashCharges > 0)
         {
@@ -300,8 +308,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
         ApplyMovement(dt, true);
         if (Input.IsActionJustPressed("attack"))
         {
-            ChangeState(State.Attack);
-            return;
+            if (TryAttack()) return;
         }
         if (Input.IsActionJustPressed("dash") && _dashCharges > 0)
         {
@@ -399,8 +406,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
 
         if (Input.IsActionJustPressed("attack"))
         {
-            ChangeState(State.Attack);
-            return;
+            if (TryAttack()) return;
         }
 
         // Transition to fall when starting to descend
@@ -441,8 +447,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
 
         if (Input.IsActionJustPressed("attack"))
         {
-            ChangeState(State.Attack);
-            return;
+            if (TryAttack()) return;
         }
 
         if (this.IsOnFloor())
@@ -482,8 +487,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
 
         if (Input.IsActionJustPressed("attack"))
         {
-            ChangeState(State.Attack);
-            return;
+            if (TryAttack()) return;
         }
 
         if (this.Velocity.Y > 0)
@@ -523,8 +527,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
 
         if (Input.IsActionJustPressed("attack"))
         {
-            ChangeState(State.Attack);
-            return;
+            if (TryAttack()) return;
         }
 
         if (this.IsOnFloor())
@@ -575,8 +578,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
 
         if (Input.IsActionJustPressed("attack"))
         {
-            ChangeState(State.Attack);
-            return;
+            if (TryAttack()) return;
         }
 
         // Let go of wall
@@ -611,8 +613,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
 
         if (Input.IsActionJustPressed("attack"))
         {
-            ChangeState(State.Attack);
-            return;
+            if (TryAttack()) return;
         }
 
         float inputDir = GetMoveInput();
@@ -628,32 +629,43 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
 
     private void ProcessAttack(float dt)
     {
-        if (_slashTimer > 0f)
+        ApplyGravity(dt);
+        ApplyFriction(dt, this.IsOnFloor());
+        
+        if (_attackTimer > 0f)
         {
-            _slashTimer -= dt;
-            this.Velocity = _slashDirection * slashSpeed;
-            _slashAfterimageTimer -= dt;
-            if (_slashAfterimageTimer <= 0f)
+            _attackTimer -= dt;
+            _attackAfterimageTimer -= dt;
+            
+            if (_attackAfterimageTimer <= 0f)
             {
                 SpawnAfterimage();
-                _slashAfterimageTimer = slashAfterimageInterval;
+                _attackAfterimageTimer = attackAfterimageInterval;
             }
-            if (_slashTimer <= 0f)
+            
+            var velocity = _attackDirection * attackSpeed;
+            if (_attackTimer <= 0f) velocity *= attackExitMomentumScale;
+            
+            // Apply decay to upward lift in air
+            if (!this.IsOnFloor())
             {
-                this.Velocity *= slashExitMomentumScale;
+                if (velocity.Y < 0) 
+                {
+                    float liftMultiplier = Mathf.Max(-attackGravityScale, 1f - (_airAttackCount * airAttackLiftDecay));
+                    velocity.Y *= liftMultiplier;
+                } 
             }
+            this.Velocity = velocity;
         }
-        else
-        {
-            ApplyScaledGravity(dt, slashRecoveryGravityScale);
-            ApplyFriction(dt, this.IsOnFloor());
-        }
+        
+        // Dash cancels attack -> leave afterimage
         if (Input.IsActionJustPressed("dash") && _dashCharges > 0)
         {
             SpawnAfterimage();
             ChangeState(State.Dash);
             return;
         }
+        
         if (Input.IsActionJustPressed("jump") && this.IsOnFloor())
         {
             SpawnAfterimage();
@@ -827,10 +839,12 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
                 break;
 
             case State.Attack:
-                _slashDirection = GetSlashDirection();
-                _slashTimer = slashDuration;
-                _slashAfterimageTimer = 0f;
-                this.Velocity = _slashDirection * slashSpeed;
+                _attackDirection = GetSlashDirection();
+                _attackTimer = attackDuration;
+                _attackAfterimageTimer = 0f;
+                if (!this.IsOnFloor()) _airAttackCount++;
+                
+                UpdateFacing(_attackDirection.X);
                 SpawnAfterimage();
                 PlayAnimation(GetSlashAnimationName());
                 break;
@@ -880,6 +894,13 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
                 PlayAnimation("fall"); // Reuse fall animation for wall slide
                 break;
         }
+    }
+    
+    private bool TryAttack()
+    {
+        if (_attackCooldownTimer > 0f) return false;
+        ChangeState(State.Attack);
+        return true;
     }
 
     #endregion
@@ -1073,8 +1094,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
     {
         // Create a ghost sprite at the current position
         var ghost = new Sprite2D();
-        ghost.Texture = animatedSprite.SpriteFrames.GetFrameTexture(
-            animatedSprite.Animation, animatedSprite.Frame);
+        ghost.Texture = animatedSprite.SpriteFrames.GetFrameTexture(animatedSprite.Animation, animatedSprite.Frame);
         ghost.FlipH = animatedSprite.FlipH;
         ghost.TextureFilter = CanvasItem.TextureFilterEnum.Nearest;
 
@@ -1202,17 +1222,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
         return Input.GetAxis("move_left", "move_right");
     }
 
-    private void ApplyGravity(float dt)
-    {
-        if (!this.IsOnFloor())
-        {
-            var vel = this.Velocity;
-            vel.Y = Mathf.Min(vel.Y + gravity * dt, maxFallSpeed);
-            this.Velocity = vel;
-        }
-    }
-
-    private void ApplyScaledGravity(float dt, float gravityScale)
+    private void ApplyGravity(float dt, float gravityScale = 1.0f)
     {
         if (!this.IsOnFloor())
         {
@@ -1268,7 +1278,6 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
             toMouse = new Vector2(_facingDirection, 0f);
 
         Vector2 direction = toMouse.Normalized();
-        UpdateFacing(direction.X);
         return direction;
     }
 
