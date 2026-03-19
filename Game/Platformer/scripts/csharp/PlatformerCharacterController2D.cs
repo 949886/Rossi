@@ -150,6 +150,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
     // Animations that should loop (all others play once)
     private static readonly string[] LoopingAnimations = { "idle", "run", "fall" };
     
+    private float? _pendingAttackAngle = null;
     private float? _pendingThrowAngle = null;
     private Shuriken _activeShuriken = null;
     private readonly RandomNumberGenerator _rng = new();
@@ -974,6 +975,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
         if (GodotObject.IsInstanceValid(_activeShuriken))
             _activeShuriken.QueueFree();
 
+        _pendingAttackAngle = null;
         _pendingThrowAngle = null;
         _attackTimer = 0f;
         _attackCooldownTimer = 0f;
@@ -997,6 +999,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
         _dashRechargeTimer = dashCooldown;
         _hasDoubleJump = true;
         _airAttackCount = 0;
+        _pendingAttackAngle = null;
         _pendingThrowAngle = null;
         Velocity = Vector2.Zero;
         GlobalPosition = spawnPosition;
@@ -1394,6 +1397,15 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
 
     private Vector2 GetSlashDirection()
     {
+        if (_pendingAttackAngle.HasValue)
+        {
+            var pendingDirection = Vector2.Right.Rotated(_pendingAttackAngle.Value);
+            _pendingAttackAngle = null;
+
+            if (pendingDirection.LengthSquared() >= 0.0001f)
+                return pendingDirection.Normalized();
+        }
+
         Vector2 toMouse = GetGlobalMousePosition() - GlobalPosition;
         if (toMouse.LengthSquared() < 0.0001f)
             toMouse = new Vector2(_facingDirection, 0f);
@@ -1498,6 +1510,20 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
         return false;
     }
 
+    public void OnVirtualAttackActivated(float aimAngle)
+    {
+        if (_isDead || _currentState == State.Respawn || _currentState == State.Attack)
+            return;
+
+        if (!CanStartAttackFromCurrentState())
+            return;
+
+        _pendingAttackAngle = aimAngle;
+
+        if (!TryAttack())
+            _pendingAttackAngle = null;
+    }
+
     /// <summary>
     /// Handles throw event triggered directly by the on-screen Virtual Direction Button.
     /// Needs an angle in Radians from the button.
@@ -1521,6 +1547,22 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
         {
             ChangeState(State.AirThrow);
         }
+    }
+
+    private bool CanStartAttackFromCurrentState()
+    {
+        return _currentState switch
+        {
+            State.Idle => true,
+            State.Run => true,
+            State.Jump => true,
+            State.JumpToFall => true,
+            State.DoubleJump => true,
+            State.Fall => true,
+            State.WallSlide => true,
+            State.Landing => true,
+            _ => false
+        };
     }
 
     #endregion

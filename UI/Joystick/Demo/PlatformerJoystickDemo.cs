@@ -10,7 +10,7 @@ public partial class PlatformerJoystickDemo : Node2D
     // Node references – resolved from the scene tree
     private VirtualJoystick _joystick;
     private VirtualButton _jumpButton;
-    private VirtualButton _attackButton;
+    private VirtualDirectionButton _attackButton;
     private VirtualProgressButton _dashButton;
     private VirtualDirectionButton _throwButton;
     private Label _infoLabel;
@@ -26,7 +26,7 @@ public partial class PlatformerJoystickDemo : Node2D
         // Resolve nodes placed in the .tscn scene
         _joystick = GetNodeOrNull<VirtualJoystick>("TouchUI/TouchControls/JoystickArea/Joystick");
         _jumpButton = GetNodeOrNull<VirtualButton>("TouchUI/TouchControls/ButtonArea/JumpBtn");
-        _attackButton = GetNodeOrNull<VirtualButton>("TouchUI/TouchControls/ButtonArea/AttackBtn");
+        _attackButton = GetNodeOrNull<VirtualDirectionButton>("TouchUI/TouchControls/ButtonArea/AttackBtn");
         _dashButton = GetNodeOrNull<VirtualProgressButton>("TouchUI/TouchControls/ButtonArea/DashBtn");
         _throwButton = GetNodeOrNull<VirtualDirectionButton>("TouchUI/TouchControls/ButtonArea/ThrowBtn");
         _infoLabel = GetNodeOrNull<Label>("TouchUI/InfoPanel/InfoLabel");
@@ -44,6 +44,11 @@ public partial class PlatformerJoystickDemo : Node2D
         }
 
         _player = GetNodeOrNull<PlatformerCharacterController2D>("Playground/CharacterBody2D");
+
+        if (_attackButton != null && _player != null)
+        {
+            _attackButton.DirectionActivated += _player.OnVirtualAttackActivated;
+        }
 
         // Connect the directional throw button directly to the Player controller.
         if (_throwButton != null && _player != null)
