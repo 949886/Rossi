@@ -591,7 +591,7 @@ _data = {
 &"shuriken_air": SubResource("Animation_mye0c")
 }
 
-[node name="CharacterBody2D" type="CharacterBody2D" unique_id=2018056203]
+[node name="CharacterBody2D" type="CharacterBody2D" unique_id=2018056203 groups=["Player"]]
 collision_mask = 3
 script = ExtResource("1_7p0v6")
 

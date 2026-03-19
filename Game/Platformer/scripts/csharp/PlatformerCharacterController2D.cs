@@ -156,6 +156,8 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
 
     #endregion
 
+    public partial void InteractWith(Node node);
+
     public override void _Ready()
     {
         // Auto-find nodes by relative path if not assigned via export
@@ -213,7 +215,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
             return;
 
         // Handle state-specific logic
-        GD.Print($"Current State: {_currentState}");
+        // GD.Print($"Current State: {_currentState}");
         switch (_currentState)
         {
             case State.Idle:
@@ -962,7 +964,7 @@ public partial class PlatformerCharacterController2D : CharacterBody2D
         return true;
     }
 
-    public void Kill()
+    public void Die()
     {
         if (_isDead || _currentState == State.Respawn)
             return;

@@ -55,12 +55,9 @@ public partial class LaserBeam : Node2D
         if (!_isEnabled || !_damageArea.Monitoring)
             return;
 
-        foreach (Node body in _damageArea.GetOverlappingBodies())  
-        {  
-            if (body is PlatformerCharacterController2D character)
-                if (!character.IsDead && !character.IsInvulnerable)  
-                    character.Kill();  
-        }
+        foreach (Node body in _damageArea.GetOverlappingBodies())
+            if (body is CharacterBody2D character)
+                (character as dynamic).InteractWith(this);
     }
 
     public override void _Draw()
@@ -129,15 +126,18 @@ public partial class LaserBeam : Node2D
             query.CollideWithAreas = collideWithAreas;
             query.CollideWithBodies = collideWithBodies;
 
-            Godot.Collections.Dictionary result = state.IntersectRay(query);
+            var result = state.IntersectRay(query);
             if (result.Count == 0)
                 return maxLength;
             
             Variant colliderVariant = result["collider"];
-            if (colliderVariant.Obj is PlatformerCharacterController2D player)
+            if (colliderVariant.Obj is CollisionObject2D collider)
             {
-                excludes.Add(player.GetRid());
-                continue;
+                if (collider.IsInGroup("Player"))
+                {
+                    excludes.Add(collider.GetRid());
+                    continue;
+                }
             }
             
             Vector2 hitPoint = result["position"].AsVector2();

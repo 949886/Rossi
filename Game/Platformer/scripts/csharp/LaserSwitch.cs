@@ -69,7 +69,7 @@ public partial class LaserSwitch : Node2D
     {
         foreach (Node body in _interactionArea.GetOverlappingBodies())
         {
-            if (body is PlatformerCharacterController2D)
+            if (body.IsInGroup("Player"))
                 return true;
         }
 
