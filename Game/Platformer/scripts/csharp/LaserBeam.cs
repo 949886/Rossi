@@ -2,21 +2,16 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
+[Tool]
 [GlobalClass]
 public partial class LaserBeam : Node2D
 {
     [ExportGroup("Beam")]
-    [Export] private Vector2 direction = Vector2.Right;
     [Export(PropertyHint.Range, "1,4000,1")] private float maxLength = 320f;
     [Export(PropertyHint.Range, "1,64,0.5")] private float beamWidth = 8f;
     [Export(PropertyHint.Range, "0.01,1,0.01")] private float hitPadding = 2f;
     [Export] private bool startsEnabled = true;
-
-    [ExportGroup("Collision")]
-    [Export(PropertyHint.Layers2DPhysics)] private uint blockerCollisionMask = 1;
-    [Export(PropertyHint.Layers2DPhysics)] private uint damageCollisionMask = 1;
-    [Export] private bool collideWithAreas = false;
-    [Export] private bool collideWithBodies = true;
+    
 
     [ExportGroup("Visuals")]
     [Export] private Color[] activeColors =
@@ -27,10 +22,17 @@ public partial class LaserBeam : Node2D
         new Color(0.45f, 0.65f, 1f, 0.96f)
     };
     [Export] private Color disabledColor = new(1f, 0.15f, 0.15f, 0.95f);
+    [Export] private bool showRoundedCaps = true;
     [Export(PropertyHint.Range, "0.1,20,0.1")] private float colorCycleSpeed = 4f;
     [Export(PropertyHint.Range, "2,64,1")] private float dashLength = 18f;
     [Export(PropertyHint.Range, "2,64,1")] private float dashGap = 10f;
 
+    [ExportGroup("Collision")]
+    [Export(PropertyHint.Layers2DPhysics)] private uint blockerCollisionMask = 1;
+    [Export(PropertyHint.Layers2DPhysics)] private uint damageCollisionMask = 1;
+    [Export] private bool collideWithAreas = false;
+    [Export] private bool collideWithBodies = true;
+    
     private Area2D _damageArea = null!;
     private CollisionShape2D _damageShape = null!;
     private float _currentLength;
@@ -44,15 +46,24 @@ public partial class LaserBeam : Node2D
         _damageShape = GetNode<CollisionShape2D>("DamageArea/CollisionShape2D");
         
         _isEnabled = startsEnabled;
+        SetProcess(Engine.IsEditorHint());
         SetPhysicsProcess(true);
         UpdateBeam();
+    }
+
+    public override void _Process(double delta)
+    {
+        if (Engine.IsEditorHint())
+        {
+            UpdateBeam();
+        }
     }
 
     public override void _PhysicsProcess(double delta)
     {
         UpdateBeam();
 
-        if (!_isEnabled || !_damageArea.Monitoring)
+        if (Engine.IsEditorHint() || !_isEnabled || !_damageArea.Monitoring)
             return;
 
         foreach (Node body in _damageArea.GetOverlappingBodies())
@@ -65,18 +76,21 @@ public partial class LaserBeam : Node2D
         if (_currentLength <= 0.1f)
             return;
 
-        Vector2 beamVector = GetNormalizedDirection() * _currentLength;
+        Vector2 beamVector = GetLocalDirection() * _currentLength;
         Color beamColor = _isEnabled ? GetAnimatedActiveColor() : disabledColor;
 
         if (_isEnabled)
         {
             DrawLine(Vector2.Zero, beamVector, beamColor, beamWidth, true);
-            DrawCircle(Vector2.Zero, beamWidth * 0.45f, beamColor);
-            DrawCircle(beamVector, beamWidth * 0.35f, beamColor);
+            if (showRoundedCaps)
+            {
+                DrawCircle(Vector2.Zero, beamWidth * 0.5f, beamColor);
+                DrawCircle(beamVector, beamWidth * 0.5f, beamColor);
+            }
             return;
         }
 
-        Vector2 beamDir = GetNormalizedDirection();
+        Vector2 beamDir = GetLocalDirection();
         float distance = 0f;
         while (distance < _currentLength)
         {
@@ -114,7 +128,7 @@ public partial class LaserBeam : Node2D
 
     private float ComputeVisibleLength()
     {
-        Vector2 normalizedDirection = GetNormalizedDirection();
+        Vector2 normalizedDirection = GetWorldDirection();
         Vector2 start = GlobalPosition;
         Vector2 end = start + normalizedDirection * maxLength;
         PhysicsDirectSpaceState2D state = GetWorld2D().DirectSpaceState;
@@ -162,18 +176,20 @@ public partial class LaserBeam : Node2D
                 return;
             }
 
-            _damageArea.Rotation = GetNormalizedDirection().Angle();
+            _damageArea.Rotation = 0f;
             rectangleShape.Size = new Vector2(_currentLength, beamWidth + 6f);
             _damageShape.Position = new Vector2(_currentLength * 0.5f, 0f);
         }
     }
 
-    private Vector2 GetNormalizedDirection()
+    private static Vector2 GetLocalDirection()
     {
-        if (direction == Vector2.Zero)
-            return Vector2.Right;
+        return Vector2.Right;
+    }
 
-        return direction.Normalized();
+    private Vector2 GetWorldDirection()
+    {
+        return GlobalTransform.X.Normalized();
     }
 
     private Color GetAnimatedActiveColor()

@@ -6,16 +6,16 @@
 [ext_resource type="PackedScene" path="res://Game/Platformer/scenes/MovingLaserBlocker.tscn" id="4_blocker"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ywakd"]
-size = Vector2(32, 10)
+size = Vector2(454, 9)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_msrri"]
-size = Vector2(32, 10)
+size = Vector2(174, 14)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_wtqe5"]
-size = Vector2(32, 10)
+size = Vector2(194, 14)
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_beam"]
-size = Vector2(32, 10)
+size = Vector2(229, 9)
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_range"]
 radius = 24.0
@@ -27,57 +27,49 @@ radius = 24.0
 [node name="LaserTests" type="Node2D" parent="." unique_id=1549936465]
 
 [node name="AlwaysOnShort" type="Node2D" parent="LaserTests" unique_id=487581525]
-position = Vector2(1618, 409)
+position = Vector2(1256, 216)
 script = ExtResource("2_ktk02")
-maxLength = 2933.0
+maxLength = 1000.0
 beamWidth = 3.0
 
 [node name="DamageArea" type="Area2D" parent="LaserTests/AlwaysOnShort" unique_id=835615188]
-monitoring = false
-monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="LaserTests/AlwaysOnShort/DamageArea" unique_id=1415187205]
+position = Vector2(227, 0)
 shape = SubResource("RectangleShape2D_ywakd")
 
 [node name="DashGapLaser" type="Node2D" parent="LaserTests" unique_id=803968075]
 position = Vector2(700, 320)
+rotation = 1.5707964
 script = ExtResource("2_ktk02")
-direction = Vector2(0, 1)
-maxLength = 200.0
-beamWidth = 10.0
 
 [node name="DamageArea" type="Area2D" parent="LaserTests/DashGapLaser" unique_id=926141348]
-monitoring = false
-monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="LaserTests/DashGapLaser/DamageArea" unique_id=276274052]
+position = Vector2(87, 0)
 shape = SubResource("RectangleShape2D_msrri")
 
 [node name="ToggleLaser" type="Node2D" parent="LaserTests" unique_id=1077736141]
 position = Vector2(1140, 300)
+rotation = 1.5707964
 script = ExtResource("2_ktk02")
-direction = Vector2(0, 1)
-maxLength = 190.0
-beamWidth = 10.0
 
 [node name="DamageArea" type="Area2D" parent="LaserTests/ToggleLaser" unique_id=1447647828]
-monitoring = false
-monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="LaserTests/ToggleLaser/DamageArea" unique_id=1437276482]
+position = Vector2(97, 0)
 shape = SubResource("RectangleShape2D_wtqe5")
 
 [node name="DynamicBlockedLaser" type="Node2D" parent="LaserTests" unique_id=1033265871]
-position = Vector2(1891, 240)
+position = Vector2(1646, 420)
 script = ExtResource("2_ktk02")
-direction = Vector2(0, 1)
-maxLength = 250.0
+maxLength = 1000.0
+beamWidth = 3.0
 
 [node name="DamageArea" type="Area2D" parent="LaserTests/DynamicBlockedLaser" unique_id=1037798036]
-monitoring = false
-monitorable = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="LaserTests/DynamicBlockedLaser/DamageArea" unique_id=1417345747]
+position = Vector2(114.5, 0)
 shape = SubResource("RectangleShape2D_beam")
 
 [node name="ToggleSwitch" type="Node2D" parent="LaserTests" unique_id=446991197]
