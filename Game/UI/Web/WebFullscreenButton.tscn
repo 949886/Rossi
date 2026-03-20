@@ -1,17 +1,10 @@
 [gd_scene format=3 uid="uid://r6u2rs6k33ro"]
 
-[ext_resource type="Script" uid="uid://67llirhwcusj" path="res://Game/UI/WebFullscreenButton.gd" id="1_8y5qd"]
+[ext_resource type="Script" uid="uid://67llirhwcusj" path="res://Game/UI/Web/WebFullscreenButton.gd" id="1_8y5qd"]
 
 [node name="FullscreenButton" type="Button" unique_id=1941952837]
-custom_minimum_size = Vector2(132, 40)
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -148.0
-offset_top = 12.0
-offset_right = -12.0
+custom_minimum_size = Vector2(52, 52)
+offset_right = 52.0
 offset_bottom = 52.0
-grow_horizontal = 0
-text = "Fullscreen"
 script = ExtResource("1_8y5qd")
 metadata/_edit_use_anchors_ = true

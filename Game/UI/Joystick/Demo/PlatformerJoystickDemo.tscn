@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" path="res://Game/UI/Joystick/Demo/PlatformerJoystickDemo.gd" id="1_f2ujt"]
 [ext_resource type="PackedScene" uid="uid://bbtwuq4eu5wdn" path="res://Game/Demos/Playground.tscn" id="1_playground"]
-[ext_resource type="Script" path="res://Game/UI/Web/WebFullscreenButton.gd" id="2_webfs"]
+[ext_resource type="PackedScene" path="res://Game/UI/Web/WebFullscreenButton.tscn" id="2_webfs"]
 [ext_resource type="Script" path="res://Game/UI/Joystick/VirtualJoystick.gd" id="3_rjs0a"]
 [ext_resource type="Script" path="res://Game/UI/Joystick/VirtualButton.gd" id="4_r6lw6"]
 [ext_resource type="Script" path="res://Game/UI/Joystick/VirtualDirectionButton.gd" id="5_newcs"]
@@ -19,20 +19,16 @@ layer = 10
 [node name="WebUI" type="CanvasLayer" parent="." unique_id=1842201001]
 layer = 20
 
-[node name="FullscreenButton" type="Button" parent="WebUI" unique_id=738104233]
-custom_minimum_size = Vector2(132, 40)
+[node name="FullscreenButton" parent="WebUI" instance=ExtResource("2_webfs")]
 layout_mode = 1
 anchors_preset = 1
 anchor_left = 1.0
 anchor_right = 1.0
-offset_left = -148.0
+offset_left = -64.0
 offset_top = 12.0
 offset_right = -12.0
-offset_bottom = 52.0
+offset_bottom = 64.0
 grow_horizontal = 0
-script = ExtResource("2_webfs")
-text = "Fullscreen"
-metadata/_edit_use_anchors_ = true
 
 [node name="TouchControls" type="Control" parent="TouchUI" unique_id=1125147890]
 layout_mode = 3
