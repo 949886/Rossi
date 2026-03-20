@@ -22,6 +22,7 @@ config/icon="res://icon.svg"
 [display]
 
 window/handheld/orientation=4
+mouse_cursor/custom_image="uid://cvsxhiaotg04e"
 
 [editor_plugins]
 
