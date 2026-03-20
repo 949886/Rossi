@@ -1,6 +1,13 @@
 extends CharacterBody2D
 class_name PlatformerCharacter2D
 
+signal attack_started(direction: Vector2)
+signal died
+signal respawned(spawn_position: Vector2)
+signal checkpoint_set(checkpoint_position: Vector2)
+signal shuriken_spawned(shuriken: Shuriken)
+signal teleported(from_position: Vector2, to_position: Vector2)
+
 @export var animated_sprite: AnimatedSprite2D
 @export var animation_player: AnimationPlayer
 @export var animation_tree: AnimationTree
@@ -506,6 +513,7 @@ func _instantiate_shuriken(override_angle = null) -> void:
 		shuriken.direction = (mouse_pos - shuriken.global_position).normalized()
 	shuriken.rotation = shuriken.direction.angle()
 	_active_shuriken = shuriken
+	shuriken_spawned.emit(shuriken)
 	shuriken.tree_exiting.connect(func() -> void:
 		if _active_shuriken == shuriken:
 			_active_shuriken = null
@@ -568,6 +576,7 @@ func _change_state(new_state: State) -> void:
 				_air_attack_count += 1
 			_update_facing(_attack_direction.x)
 			spawn_afterimage()
+			attack_started.emit(_attack_direction)
 			play_animation(_get_slash_animation_name())
 		State.DASH:
 			_dash_charges -= 1
@@ -626,6 +635,7 @@ func die() -> void:
 	_attack_cooldown_timer = 0.0
 	_attack_afterimage_timer = 0.0
 	_change_state(State.DIE)
+	died.emit()
 	_respawn_timer = get_tree().create_timer(respawn_delay)
 	_respawn_timer.timeout.connect(_on_respawn_timer_timeout)
 
@@ -647,9 +657,11 @@ func respawn(spawn_position: Vector2) -> void:
 	global_position = spawn_position
 	set_checkpoint(spawn_position)
 	_change_state(State.RESPAWN)
+	respawned.emit(spawn_position)
 
 func set_checkpoint(checkpoint_position: Vector2) -> void:
 	_current_respawn_position = checkpoint_position
+	checkpoint_set.emit(checkpoint_position)
 
 func _on_respawn_timer_timeout() -> void:
 	if is_instance_valid(self):
@@ -671,8 +683,12 @@ func _try_flying_thunder_god_teleport() -> bool:
 		_update_facing(delta_x)
 	if is_instance_valid(_active_shuriken):
 		_active_shuriken.queue_free()
+	teleported.emit(start_pos, target_pos)
 	_change_state(State.IDLE if is_on_floor() else State.FALL)
 	return true
+
+func is_attack_active() -> bool:
+	return _current_state == State.ATTACK and _attack_timer > 0.0
 
 func _spawn_teleport_trail(from: Vector2, to: Vector2) -> void:
 	if animated_sprite == null or animated_sprite.sprite_frames == null:

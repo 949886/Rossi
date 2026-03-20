@@ -24,7 +24,7 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	if _joystick:
-		var input := _joystick.output
+		var input: Vector2 = _joystick.output
 		_player_velocity = _player_velocity.lerp(input * MOVE_SPEED, FRICTION * delta)
 		_player.position += _player_velocity * delta
 

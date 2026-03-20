@@ -1,3 +1,7 @@
 [gd_scene format=3 uid="uid://cqn4icys44pn4"]
 
-[node name="Node2D" type="Node2D"]
+[ext_resource type="PackedScene" path="res://Game/Tutorial/TutorialIntro.tscn" id="1_tutorial"]
+
+[node name="Main" type="Node2D"]
+
+[node name="TutorialIntro" parent="." instance=ExtResource("1_tutorial")]

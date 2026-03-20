@@ -1,0 +1,252 @@
+[gd_scene format=3 uid="uid://djn76c2v1pr0a"]
+
+[ext_resource type="Script" uid="uid://dbbcmnm18t1lx" path="res://Game/Tutorial/TutorialPromptLayer.gd" id="1_4bsh7"]
+[ext_resource type="Script" uid="uid://c67f4r8yop3tj" path="res://Game/Tutorial/TutorialProgressController.gd" id="2_h7g52"]
+[ext_resource type="Script" uid="uid://dwdl4xcb1jog3" path="res://Game/Tutorial/SimpleSolid.gd" id="3_qn3ij"]
+[ext_resource type="PackedScene" uid="uid://cp7soa40msiek" path="res://Game/Characters/Shiro/Shiro.tscn" id="4_a0d6y"]
+[ext_resource type="PackedScene" uid="uid://c7t8p6v5taq2x" path="res://Game/Characters/Shiro/Items/Shuriken/Shuriken.tscn" id="5_4xhwu"]
+[ext_resource type="Script" uid="uid://bsxm83ggw1m5i" path="res://Game/Tutorial/PromptTrigger.gd" id="6_prompt"]
+[ext_resource type="Script" uid="uid://rtq637fh6wls" path="res://Game/Tutorial/TutorialEventTrigger.gd" id="7_event"]
+[ext_resource type="Script" uid="uid://cpehx60dbmxj6" path="res://Game/Tutorial/TutorialGate.gd" id="7_y5ctq"]
+[ext_resource type="Script" uid="uid://crlaucp0rkgoe" path="res://Game/Tutorial/MeleeTutorialDoor.gd" id="8_g6gbl"]
+[ext_resource type="Script" uid="uid://bbjciv6prsbqq" path="res://Game/Tutorial/TutorialDummyEnemy.gd" id="9_hfd7m"]
+[ext_resource type="Script" uid="uid://0ur503tdypjw" path="res://Game/Tutorial/TeleportPlatformTarget.gd" id="10_25q88"]
+[ext_resource type="Script" uid="uid://c3nwql5b0lq35" path="res://Game/Tutorial/Killzone.gd" id="11_t7s14"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_move_start"]
+size = Vector2(185, 160)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_move_end"]
+size = Vector2(120, 160)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jump_start"]
+size = Vector2(96, 160)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_double_start"]
+size = Vector2(193, 180)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dash_start"]
+size = Vector2(176, 180)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_dash_end"]
+size = Vector2(140, 180)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_melee_start"]
+size = Vector2(120, 180)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_teleport_start"]
+size = Vector2(214, 180)
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_vqf4r"]
+
+[node name="TutorialIntro" type="Node2D" unique_id=173722116]
+
+[node name="PromptLayer" type="CanvasLayer" parent="." unique_id=1602688732]
+script = ExtResource("1_4bsh7")
+
+[node name="World" type="Node2D" parent="." unique_id=1244857932]
+
+[node name="Background" type="ColorRect" parent="World" unique_id=1549436998]
+offset_right = 3800.0
+offset_bottom = 900.0
+color = Color(0.6, 0.7033333, 0.8, 1)
+
+[node name="GroundStart" type="StaticBody2D" parent="World" unique_id=1425245949]
+position = Vector2(180, 440)
+script = ExtResource("3_qn3ij")
+size = Vector2(420, 48)
+fill_color = Color(0.1, 0.13, 0.19, 1)
+edge_color = Color(0.48, 0.7, 1, 1)
+
+[node name="GroundJump" type="StaticBody2D" parent="World" unique_id=618699545]
+position = Vector2(781.15625, 440)
+script = ExtResource("3_qn3ij")
+size = Vector2(482.31253, 48)
+
+[node name="GroundDash" type="StaticBody2D" parent="World" unique_id=1865377359]
+position = Vector2(1359.9579, 360)
+script = ExtResource("3_qn3ij")
+size = Vector2(420.08432, 48)
+
+[node name="GroundAttack" type="StaticBody2D" parent="World" unique_id=1939635535]
+position = Vector2(2089.8745, 360)
+script = ExtResource("3_qn3ij")
+size = Vector2(600.2512, 48)
+
+[node name="GroundTeleport" type="StaticBody2D" parent="World" unique_id=1932211362]
+position = Vector2(2630, 360)
+script = ExtResource("3_qn3ij")
+size = Vector2(220, 48)
+
+[node name="GroundEnd" type="StaticBody2D" parent="World" unique_id=525671472]
+position = Vector2(3240, 320)
+script = ExtResource("3_qn3ij")
+size = Vector2(240, 48)
+
+[node name="MoveGate" type="StaticBody2D" parent="World" unique_id=2113486240]
+position = Vector2(410, 350)
+script = ExtResource("7_y5ctq")
+open_on_step_id = "move"
+
+[node name="Visual" type="Polygon2D" parent="World/MoveGate" unique_id=154455036]
+color = Color(0.45, 0.88, 1, 0.95)
+polygon = PackedVector2Array(-14, -66, 14, -66, 14, 66, -14, 66)
+
+[node name="DashGate" type="StaticBody2D" parent="World" unique_id=39619304]
+position = Vector2(2035, 245)
+script = ExtResource("7_y5ctq")
+open_on_step_id = "dash"
+size = Vector2(32, 180)
+
+[node name="Visual" type="Polygon2D" parent="World/DashGate" unique_id=358353688]
+color = Color(0.45, 0.88, 1, 0.95)
+polygon = PackedVector2Array(-16, -90, 16, -90, 16, 90, -16, 90)
+
+[node name="MeleeDoor" type="StaticBody2D" parent="World" unique_id=1048418546]
+position = Vector2(2253, 284)
+script = ExtResource("8_g6gbl")
+controller_path = NodePath("../../ProgressController")
+linked_enemy_path = NodePath("../DoorEnemy")
+checkpoint_marker_path = NodePath("../MeleeCheckpoint")
+
+[node name="Visual" type="Polygon2D" parent="World/MeleeDoor" unique_id=269435848]
+color = Color(0.66, 0.87, 1, 0.95)
+polygon = PackedVector2Array(-20, -52, 20, -52, 20, 52, -20, 52)
+
+[node name="DoorEnemy" type="Node2D" parent="World" unique_id=1919815137]
+position = Vector2(2341, 336)
+script = ExtResource("9_hfd7m")
+
+[node name="Visual" type="Polygon2D" parent="World/DoorEnemy" unique_id=1132369945]
+color = Color(1, 0.36, 0.36, 1)
+polygon = PackedVector2Array(-14, -56, 14, -56, 14, 0, -14, 0)
+
+[node name="MovingPlatform" type="AnimatableBody2D" parent="World" unique_id=952608087]
+position = Vector2(2860, 520)
+script = ExtResource("10_25q88")
+size = Vector2(120, 20)
+travel_offset = Vector2(250, -140)
+travel_duration = 2.8
+
+[node name="CharacterBody2D" parent="World" unique_id=485804767 instance=ExtResource("4_a0d6y")]
+position = Vector2(40, 340)
+shuriken_scene = ExtResource("5_4xhwu")
+
+[node name="Camera2D" type="Camera2D" parent="World/CharacterBody2D" unique_id=703966695]
+zoom = Vector2(1.6, 1.6)
+
+[node name="MoveHint" type="Area2D" parent="World" unique_id=1963885261]
+position = Vector2(86, 350)
+script = ExtResource("6_prompt")
+step_id = "move"
+prompt_text = "Move"
+key_labels = Array[String](["A", "D"])
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/MoveHint" unique_id=1518185548]
+position = Vector2(-20.5, -18)
+shape = SubResource("RectangleShape2D_move_start")
+
+[node name="MoveEnd" type="Area2D" parent="World" unique_id=374950129]
+position = Vector2(328, 350)
+script = ExtResource("7_event")
+step_id = "move"
+gate_to_remove_path = NodePath("../MoveGate")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/MoveEnd" unique_id=141787288]
+position = Vector2(-5, -15)
+shape = SubResource("RectangleShape2D_move_end")
+
+[node name="MoveCheckpoint" type="Node2D" parent="World" unique_id=1185182511]
+position = Vector2(326, 340)
+
+[node name="JumpStart" type="Area2D" parent="World" unique_id=1972598069]
+position = Vector2(470, 350)
+script = ExtResource("6_prompt")
+step_id = "jump"
+prompt_text = "Jump"
+key_labels = Array[String](["SPACE"])
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/JumpStart" unique_id=235972242]
+position = Vector2(-127, -15)
+shape = SubResource("RectangleShape2D_jump_start")
+
+[node name="JumpCheckpoint" type="Node2D" parent="World" unique_id=834005706]
+position = Vector2(678, 340)
+
+[node name="DoubleJumpStart" type="Area2D" parent="World" unique_id=1428981419]
+position = Vector2(830, 350)
+script = ExtResource("6_prompt")
+step_id = "double_jump"
+prompt_text = "Jump Again"
+key_labels = Array[String](["SPACE", "SPACE"])
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/DoubleJumpStart" unique_id=1030752316]
+position = Vector2(94, -29)
+shape = SubResource("RectangleShape2D_double_start")
+
+[node name="DoubleJumpCheckpoint" type="Node2D" parent="World" unique_id=722775623]
+position = Vector2(1214, 260)
+
+[node name="DashHint" type="Area2D" parent="World" unique_id=430947914]
+position = Vector2(1386, 270)
+script = ExtResource("6_prompt")
+step_id = "dash"
+prompt_text = "Dash"
+key_labels = Array[String](["SHIFT"])
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/DashHint" unique_id=350117427]
+position = Vector2(94, -27)
+shape = SubResource("RectangleShape2D_dash_start")
+
+[node name="DashEnd" type="Area2D" parent="World" unique_id=651306432]
+position = Vector2(1860, 243)
+script = ExtResource("7_event")
+step_id = "dash"
+gate_to_remove_path = NodePath("../DashGate")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/DashEnd" unique_id=1778923197]
+shape = SubResource("RectangleShape2D_dash_end")
+
+[node name="DashCheckpoint" type="Node2D" parent="World" unique_id=1170232017]
+position = Vector2(1920, 260)
+
+[node name="MeleeStart" type="Area2D" parent="World" unique_id=1468542076]
+position = Vector2(2100, 270)
+script = ExtResource("6_prompt")
+step_id = "melee"
+prompt_text = "Slash"
+key_labels = Array[String](["LMB"])
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/MeleeStart" unique_id=361662829]
+position = Vector2(-5, -25)
+shape = SubResource("RectangleShape2D_melee_start")
+
+[node name="MeleeCheckpoint" type="Node2D" parent="World" unique_id=1105843632]
+position = Vector2(2380, 260)
+
+[node name="TeleportStart" type="Area2D" parent="World" unique_id=1215093705]
+position = Vector2(2548, 270)
+script = ExtResource("6_prompt")
+step_id = "teleport"
+prompt_text = "Mark & Blink"
+key_labels = Array[String](["Q", "Q"])
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/TeleportStart" unique_id=1018449524]
+position = Vector2(82, -33)
+shape = SubResource("RectangleShape2D_teleport_start")
+
+[node name="TeleportCheckpoint" type="Node2D" parent="World" unique_id=1114131063]
+position = Vector2(3240, 220)
+
+[node name="Killzone" type="Area2D" parent="World" unique_id=197753642]
+position = Vector2(0, 800)
+script = ExtResource("11_t7s14")
+reset_target_path = NodePath("../MovingPlatform")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="World/Killzone" unique_id=1055913166]
+shape = SubResource("WorldBoundaryShape2D_vqf4r")
+
+[node name="ProgressController" type="Node" parent="." unique_id=343341849]
+script = ExtResource("2_h7g52")
+prompt_layer_path = NodePath("../PromptLayer")
+player_path = NodePath("../World/CharacterBody2D")

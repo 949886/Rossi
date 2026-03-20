@@ -21,6 +21,8 @@ var _stuck := false
 var _stick_normal := Vector2.ZERO
 var _afterimage_timer := 0.0
 var _sprite: Sprite2D
+var _attached_target: Node2D
+var _attached_local_position := Vector2.ZERO
 
 func _ready() -> void:
 	_sprite = get_node("Sprite2D")
@@ -30,6 +32,10 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	if _stuck:
+		if is_instance_valid(_attached_target):
+			global_position = _attached_target.to_global(_attached_local_position)
+		elif _attached_target != null:
+			queue_free()
 		return
 
 	var movement := direction * speed * delta
@@ -44,6 +50,14 @@ func _physics_process(delta: float) -> void:
 
 	if not result.is_empty():
 		var collider = result.get("collider")
+		if collider is Node and collider.has_method("can_accept_shuriken") and collider.can_accept_shuriken():
+			global_position = collider.get_shuriken_attach_position(result["position"], result["normal"])
+			_stick_normal = collider.get_shuriken_attach_normal(result["normal"])
+			if collider is Node2D:
+				_attached_target = collider
+				_attached_local_position = collider.to_local(global_position)
+			_stick_to_surface()
+			return
 		if collider is StaticBody2D or collider is TileMapLayer or collider is TileMap:
 			# Move exactly to the hit point and stick
 			global_position = result["position"]
