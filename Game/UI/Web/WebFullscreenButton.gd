@@ -7,6 +7,7 @@ func _ready() -> void:
 	text = button_text
 	_apply_default_style()
 	visible = not web_only or OS.has_feature("web")
+	focus_mode = Control.FOCUS_NONE
 
 	if not pressed.is_connected(_request_browser_fullscreen):
 		pressed.connect(_request_browser_fullscreen)
@@ -31,6 +32,8 @@ func _apply_default_style() -> void:
 func _request_browser_fullscreen() -> void:
 	if web_only and not OS.has_feature("web"):
 		return
+
+	release_focus()
 
 	JavaScriptBridge.eval("""
 		(() => {
