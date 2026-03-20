@@ -1,6 +1,6 @@
 [gd_scene format=3]
 
-[ext_resource type="Script" uid="uid://5s8cd57e5onl" path="res://Game/Props/Laser/MovingLaserBlocker.cs" id="1_blocker"]
+[ext_resource type="Script" path="res://Game/Props/Laser/MovingLaserBlocker.gd" id="1_blocker"]
 
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_blocker"]

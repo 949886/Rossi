@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cp7soa40msiek"]
 
-[ext_resource type="Script" uid="uid://ct8wm06adiigu" path="res://Game/Core/Player/PlatformerCharacter2D.cs" id="1_7p0v6"]
+[ext_resource type="Script" path="res://Game/Core/Player/PlatformerCharacter2D.gd" id="1_7p0v6"]
 [ext_resource type="SpriteFrames" uid="uid://ctqnpmn1mmwee" path="res://Game/Characters/Shiro/Animations/shiro_sprite_frames.tres" id="1_i25jw"]
 [ext_resource type="AnimationNodeStateMachine" uid="uid://c2ea07gspat02" path="res://Game/Characters/Shiro/Animations/shiro_animation_controller.tres" id="2_7p0v6"]
 

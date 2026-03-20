@@ -1,21 +1,21 @@
-[gd_scene format=3 uid="uid://b7nqj4v7wapvp"]
+[gd_scene format=3 uid="uid://cvfrasle4qjfo"]
 
-[ext_resource type="Script" path="res://Game/UI/Joystick/Demo/PlatformerJoystickDemo.gd" id="1_f2ujt"]
-[ext_resource type="PackedScene" uid="uid://bbtwuq4eu5wdn" path="res://Game/Demos/Playground.tscn" id="1_playground"]
-[ext_resource type="Script" path="res://Game/UI/Joystick/VirtualJoystick.gd" id="3_rjs0a"]
-[ext_resource type="Script" path="res://Game/UI/Joystick/VirtualButton.gd" id="4_r6lw6"]
-[ext_resource type="Script" path="res://Game/UI/Joystick/VirtualDirectionButton.gd" id="5_newcs"]
-[ext_resource type="Script" path="res://Game/UI/Joystick/VirtualProgressButton.gd" id="6_vsbtn"]
+[ext_resource type="Script" uid="uid://dw1xc7bm7yux4" path="res://Game/UI/Joystick/Demo/PlatformerJoystickDemoGD.gd" id="1_qp64m"]
+[ext_resource type="PackedScene" uid="uid://bbtwuq4eu5wdn" path="res://Game/Demos/Playground.tscn" id="2_kb4u1"]
+[ext_resource type="Script" uid="uid://d2ugvpjmi7kcp" path="res://Game/UI/Joystick/VirtualJoystick.gd" id="3_1h60o"]
+[ext_resource type="Script" uid="uid://nokxa4oj4hfo" path="res://Game/UI/Joystick/VirtualButton.gd" id="4_l1xil"]
+[ext_resource type="Script" uid="uid://dpy6ou57luu5y" path="res://Game/UI/Joystick/VirtualProgressButton.gd" id="5_lk7v5"]
+[ext_resource type="Script" uid="uid://ck32leiwbrngy" path="res://Game/UI/Joystick/VirtualDirectionButton.gd" id="6_pqwsb"]
 
-[node name="PlatformerTouchDemo" type="Node2D" unique_id=764427758]
-script = ExtResource("1_f2ujt")
+[node name="PlatformerJoystickDemo2" type="Node2D" unique_id=498897183]
+script = ExtResource("1_qp64m")
 
-[node name="Playground" parent="." unique_id=801394830 instance=ExtResource("1_playground")]
+[node name="Playground" parent="." unique_id=1065023089 instance=ExtResource("2_kb4u1")]
 
-[node name="TouchUI" type="CanvasLayer" parent="." unique_id=1515874166]
+[node name="TouchUI" type="CanvasLayer" parent="." unique_id=1010846380]
 layer = 10
 
-[node name="TouchControls" type="Control" parent="TouchUI" unique_id=1125147890]
+[node name="TouchControls" type="Control" parent="TouchUI" unique_id=303919520]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -24,7 +24,7 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="JoystickArea" type="Control" parent="TouchUI/TouchControls" unique_id=1204227989]
+[node name="JoystickArea" type="Control" parent="TouchUI/TouchControls" unique_id=1065852258]
 layout_mode = 1
 anchor_left = -0.0034722222
 anchor_top = 0.537037
@@ -37,7 +37,7 @@ grow_vertical = 0
 mouse_filter = 2
 metadata/_edit_use_anchors_ = true
 
-[node name="Joystick" type="Control" parent="TouchUI/TouchControls/JoystickArea" unique_id=1763586321]
+[node name="Joystick" type="Control" parent="TouchUI/TouchControls/JoystickArea" unique_id=1263039194]
 modulate = Color(1, 1, 1, 0.5)
 custom_minimum_size = Vector2(150, 150)
 layout_mode = 1
@@ -45,7 +45,7 @@ anchor_left = 0.25
 anchor_top = 0.25
 anchor_right = 0.75
 anchor_bottom = 0.75
-script = ExtResource("3_rjs0a")
+script = ExtResource("3_1h60o")
 mode = 1
 visibility_mode = 2
 dead_zone = 0.15
@@ -54,7 +54,7 @@ action_right = "move_right"
 action_down = "move_down"
 metadata/_edit_use_anchors_ = true
 
-[node name="ButtonArea" type="Control" parent="TouchUI/TouchControls" unique_id=1560119597]
+[node name="ButtonArea" type="Control" parent="TouchUI/TouchControls" unique_id=516286825]
 layout_mode = 1
 anchor_left = 0.7135417
 anchor_top = 0.49074075
@@ -65,13 +65,13 @@ grow_vertical = 0
 mouse_filter = 2
 metadata/_edit_use_anchors_ = true
 
-[node name="JumpBtn" type="Control" parent="TouchUI/TouchControls/ButtonArea" unique_id=509817671]
+[node name="JumpBtn" type="Control" parent="TouchUI/TouchControls/ButtonArea" unique_id=596088751]
 custom_minimum_size = Vector2(80, 80)
 layout_mode = 1
 anchor_left = 0.25
 anchor_right = 0.65
 anchor_bottom = 0.42
-script = ExtResource("4_r6lw6")
+script = ExtResource("4_l1xil")
 action = "jump"
 normal_color = Color(0.15, 0.3, 0.5, 0.65)
 pressed_color = Color(0.3, 0.6, 0.8, 0.9)
@@ -79,27 +79,28 @@ label = "B"
 label_font_size = 18
 metadata/_edit_use_anchors_ = true
 
-[node name="AttackBtn" type="Control" parent="TouchUI/TouchControls/ButtonArea" unique_id=1933680595]
+[node name="AttackBtn" type="Control" parent="TouchUI/TouchControls/ButtonArea" unique_id=1249229804]
 custom_minimum_size = Vector2(80, 80)
 anchors_preset = 0
 anchor_left = 0.55
 anchor_top = 0.52
 anchor_right = 0.95
 anchor_bottom = 0.94
-script = ExtResource("5_newcs")
+script = ExtResource("4_l1xil")
+action = "attack"
 normal_color = Color(0.5, 0.15, 0.15, 0.65)
 pressed_color = Color(0.8, 0.3, 0.3, 0.9)
 label = "A"
 label_font_size = 18
 metadata/_edit_use_anchors_ = true
 
-[node name="DashBtn" type="Control" parent="TouchUI/TouchControls/ButtonArea" unique_id=1668504884]
+[node name="DashBtn" type="Control" parent="TouchUI/TouchControls/ButtonArea" unique_id=1320475166]
 custom_minimum_size = Vector2(80, 80)
 anchors_preset = 0
 anchor_top = 0.52
 anchor_right = 0.4
 anchor_bottom = 0.94
-script = ExtResource("6_vsbtn")
+script = ExtResource("5_lk7v5")
 action = "dash"
 normal_color = Color(0.15, 0.4, 0.15, 0.65)
 pressed_color = Color(0.3, 0.8, 0.3, 0.9)
@@ -108,26 +109,26 @@ label_font_size = 18
 charge_dot_color = Color(0.7647059, 0.9490196, 0.1882353, 1)
 metadata/_edit_use_anchors_ = true
 
-[node name="ThrowBtn" type="Control" parent="TouchUI/TouchControls/ButtonArea" unique_id=-1905818964]
+[node name="ThrowBtn" type="Control" parent="TouchUI/TouchControls/ButtonArea" unique_id=945695378]
 custom_minimum_size = Vector2(80, 80)
 layout_mode = 1
 anchor_left = -0.27
 anchor_right = 0.13
 anchor_bottom = 0.42
-script = ExtResource("5_newcs")
+script = ExtResource("6_pqwsb")
 normal_color = Color(0.5, 0.3, 0.1, 0.65)
 pressed_color = Color(0.8, 0.5, 0.2, 0.9)
 label = "Y"
 label_font_size = 18
 metadata/_edit_use_anchors_ = true
 
-[node name="InfoPanel" type="PanelContainer" parent="TouchUI" unique_id=1595490430]
+[node name="InfoPanel" type="PanelContainer" parent="TouchUI" unique_id=1637071765]
 offset_left = 10.0
 offset_top = 10.0
 offset_right = 310.0
 offset_bottom = 60.0
 
-[node name="InfoLabel" type="Label" parent="TouchUI/InfoPanel" unique_id=695043439]
+[node name="InfoLabel" type="Label" parent="TouchUI/InfoPanel" unique_id=861921981]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 13

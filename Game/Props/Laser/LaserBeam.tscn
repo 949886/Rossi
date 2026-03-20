@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://hthi1t4oeq54"]
 
-[ext_resource type="Script" uid="uid://dksekmj0xp70s" path="res://Game/Props/Laser/LaserBeam.cs" id="1_laser"]
+[ext_resource type="Script" path="res://Game/Props/Laser/LaserBeam.gd" id="1_laser"]
 
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_beam"]

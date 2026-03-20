@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://c7t8p6v5taq2x"]
 
-[ext_resource type="Script" uid="uid://bg0bth2fm6c8q" path="res://Game/Characters/Shiro/Items/Shuriken/Shuriken.cs" id="1_qj2lw"]
+[ext_resource type="Script" path="res://Game/Characters/Shiro/Items/Shuriken/Shuriken.gd" id="1_qj2lw"]
 [ext_resource type="Texture2D" uid="uid://cpeg1l83qls3d" path="res://Game/Characters/Shiro/Sprites/Sprite_Player_Shuriken.png" id="2_xk8p1"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_7b2p1"]

@@ -1,8 +1,8 @@
 [gd_scene format=3 uid="uid://bfxp8i6yhjdoc"]
 
 [ext_resource type="PackedScene" uid="uid://bbtwuq4eu5wdn" path="res://Game/Demos/Playground.tscn" id="1_cnvfw"]
-[ext_resource type="Script" uid="uid://dksekmj0xp70s" path="res://Game/Props/Laser/LaserBeam.cs" id="2_ictog"]
-[ext_resource type="Script" uid="uid://bsx3oi47iw6b7" path="res://Game/Props/Laser/LaserSwitch.cs" id="3_m6df7"]
+[ext_resource type="Script" path="res://Game/Props/Laser/LaserBeam.gd" id="2_ictog"]
+[ext_resource type="Script" path="res://Game/Props/Laser/LaserSwitch.gd" id="3_m6df7"]
 [ext_resource type="PackedScene" path="res://Game/Props/Laser/MovingLaserBlocker.tscn" id="4_0h31y"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ywakd"]
