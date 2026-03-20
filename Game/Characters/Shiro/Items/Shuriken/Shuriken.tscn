@@ -1,0 +1,18 @@
+[gd_scene format=3 uid="uid://c7t8p6v5taq2x"]
+
+[ext_resource type="Script" uid="uid://bg0bth2fm6c8q" path="res://Game/Characters/Shiro/Items/Shuriken/Shuriken.cs" id="1_qj2lw"]
+[ext_resource type="Texture2D" uid="uid://cpeg1l83qls3d" path="res://Game/Characters/Shiro/Sprites/Sprite_Player_Shuriken.png" id="2_xk8p1"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_7b2p1"]
+radius = 6.0
+
+[node name="Shuriken" type="Area2D" unique_id=1130639091]
+collision_mask = 3
+script = ExtResource("1_qj2lw")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1884811987]
+texture_filter = 1
+texture = ExtResource("2_xk8p1")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=477586342]
+shape = SubResource("CircleShape2D_7b2p1")
