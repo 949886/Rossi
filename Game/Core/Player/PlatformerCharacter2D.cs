@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class PlatformerCharacterController2D : CharacterBody2D
+public partial class PlatformerCharacter2D : CharacterBody2D
 {
     #region Exports
 

@@ -17,7 +17,7 @@ public partial class PlatformerJoystickDemo : Node2D
     private Control _touchControls;
     
     // Player reference for querying state
-    private PlatformerCharacterController2D _player;
+    private PlatformerCharacter2D _player;
 
     private bool _showInfo = true;
 
@@ -43,7 +43,7 @@ public partial class PlatformerJoystickDemo : Node2D
             infoPanel.AddThemeStyleboxOverride("panel", styleBox);
         }
 
-        _player = GetNodeOrNull<PlatformerCharacterController2D>("Playground/CharacterBody2D");
+        _player = GetNodeOrNull<PlatformerCharacter2D>("Playground/CharacterBody2D");
 
         if (_attackButton != null && _player != null)
         {

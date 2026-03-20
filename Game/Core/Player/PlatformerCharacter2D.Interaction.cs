@@ -2,7 +2,7 @@
 
 using Godot;
 
-public partial class PlatformerCharacterController2D
+public partial class PlatformerCharacter2D
 {
     public partial void InteractWith(Node node)
     {
