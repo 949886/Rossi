@@ -17,6 +17,8 @@ public partial class PlatformerJoystickDemo : Node2D
     private Label _infoLabel;
     private Control _touchControls;
     private CanvasLayer _touchUi;
+    private CanvasLayer _webUi;
+    private Button _fullscreenButton;
     
     // Player reference for querying state
     private PlatformerCharacter2D _player;
@@ -34,11 +36,19 @@ public partial class PlatformerJoystickDemo : Node2D
         _infoLabel = GetNodeOrNull<Label>("TouchUI/InfoPanel/InfoLabel");
         _touchControls = GetNodeOrNull<Control>("TouchUI/TouchControls");
         _touchUi = GetNodeOrNull<CanvasLayer>("TouchUI");
+        _webUi = GetNodeOrNull<CanvasLayer>("WebUI");
 
+        var showTouchControls = ShouldShowTouchUi();
+        if (_touchControls != null)
+        {
+            _touchControls.Visible = showTouchControls;
+        }
         if (_touchUi != null)
         {
-            _touchUi.Visible = ShouldShowTouchUi();
+            _touchUi.Visible = showTouchControls;
         }
+
+        EnsureWebUi();
 
         // Apply a semi-transparent panel style to InfoPanel
         var infoPanel = GetNodeOrNull<PanelContainer>("TouchUI/InfoPanel");
@@ -96,6 +106,92 @@ public partial class PlatformerJoystickDemo : Node2D
         );
 
         return result.VariantType == Variant.Type.Bool && result.AsBool();
+    }
+
+    private void CreateFullscreenButton()
+    {
+        if (_webUi == null || _fullscreenButton != null)
+        {
+            return;
+        }
+
+        _fullscreenButton = new Button();
+        _fullscreenButton.Name = "FullscreenButton";
+        _fullscreenButton.Text = "Fullscreen";
+        _fullscreenButton.CustomMinimumSize = new Vector2(132, 40);
+        _fullscreenButton.SetAnchorsPreset(Control.LayoutPreset.TopRight);
+        _fullscreenButton.OffsetLeft = -148;
+        _fullscreenButton.OffsetTop = 12;
+        _fullscreenButton.OffsetRight = -12;
+        _fullscreenButton.OffsetBottom = 52;
+
+        var normalStyle = new StyleBoxFlat();
+        normalStyle.BgColor = new Color(0, 0, 0, 0.55f);
+        normalStyle.SetCornerRadiusAll(8);
+        normalStyle.SetContentMarginAll(10);
+
+        var hoverStyle = (StyleBoxFlat)normalStyle.Duplicate();
+        hoverStyle.BgColor = new Color(0.12f, 0.12f, 0.12f, 0.7f);
+
+        var pressedStyle = (StyleBoxFlat)normalStyle.Duplicate();
+        pressedStyle.BgColor = new Color(0.2f, 0.2f, 0.2f, 0.8f);
+
+        _fullscreenButton.AddThemeStyleboxOverride("normal", normalStyle);
+        _fullscreenButton.AddThemeStyleboxOverride("hover", hoverStyle);
+        _fullscreenButton.AddThemeStyleboxOverride("pressed", pressedStyle);
+        _fullscreenButton.AddThemeColorOverride("font_color", Colors.White);
+        _fullscreenButton.Pressed += RequestBrowserFullscreen;
+        _webUi.AddChild(_fullscreenButton);
+    }
+
+    private void EnsureWebUi()
+    {
+        if (!OS.HasFeature("web"))
+        {
+            if (_webUi != null)
+            {
+                _webUi.Visible = false;
+            }
+            return;
+        }
+
+        if (_webUi == null)
+        {
+            _webUi = new CanvasLayer();
+            _webUi.Name = "WebUI";
+            _webUi.Layer = 20;
+            AddChild(_webUi);
+        }
+
+        CreateFullscreenButton();
+        _webUi.Visible = true;
+    }
+
+    private static void RequestBrowserFullscreen()
+    {
+        if (!OS.HasFeature("web"))
+        {
+            return;
+        }
+
+        JavaScriptBridge.Eval(
+            """
+            (() => {
+                const root = document.documentElement;
+                if (!document.fullscreenElement) {
+                    if (root.requestFullscreen) {
+                        root.requestFullscreen();
+                    }
+                    return true;
+                }
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                }
+                return false;
+            })()
+            """,
+            true
+        );
     }
 
     public override void _Process(double delta)

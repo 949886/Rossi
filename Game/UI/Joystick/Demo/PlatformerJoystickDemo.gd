@@ -30,8 +30,11 @@ func _ready() -> void:
 	_touch_controls = get_node_or_null("TouchUI/TouchControls")
 	_touch_ui = get_node_or_null("TouchUI")
 
+	var show_touch_controls := _should_show_touch_ui()
+	if _touch_controls != null:
+		_touch_controls.visible = show_touch_controls
 	if _touch_ui != null:
-		_touch_ui.visible = _should_show_touch_ui()
+		_touch_ui.visible = show_touch_controls
 
 	# Apply a semi-transparent panel style to InfoPanel
 	var info_panel := get_node_or_null("TouchUI/InfoPanel") as PanelContainer
