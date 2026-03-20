@@ -1,12 +1,12 @@
 [gd_scene format=3 uid="uid://b7nqj4v7wapvp"]
 
-[ext_resource type="Script" path="res://Game/UI/Joystick/Demo/PlatformerJoystickDemo.gd" id="1_f2ujt"]
-[ext_resource type="PackedScene" uid="uid://bbtwuq4eu5wdn" path="res://Game/Demos/Playground.tscn" id="1_playground"]
-[ext_resource type="PackedScene" path="res://Game/UI/Web/WebFullscreenButton.tscn" id="2_webfs"]
-[ext_resource type="Script" path="res://Game/UI/Joystick/VirtualJoystick.gd" id="3_rjs0a"]
-[ext_resource type="Script" path="res://Game/UI/Joystick/VirtualButton.gd" id="4_r6lw6"]
-[ext_resource type="Script" path="res://Game/UI/Joystick/VirtualDirectionButton.gd" id="5_newcs"]
-[ext_resource type="Script" path="res://Game/UI/Joystick/VirtualProgressButton.gd" id="6_vsbtn"]
+[ext_resource type="Script" uid="uid://dhj35nx7ygr7b" path="res://Game/UI/Joystick/Demo/PlatformerJoystickDemo.gd" id="1_f2ujt"]
+[ext_resource type="PackedScene" uid="uid://x40fqq46030p" path="res://Game/Demos/Playground.tscn" id="1_playground"]
+[ext_resource type="PackedScene" uid="uid://r6u2rs6k33ro" path="res://Game/UI/Web/WebFullscreenButton.tscn" id="2_webfs"]
+[ext_resource type="Script" uid="uid://d2ugvpjmi7kcp" path="res://Game/UI/Joystick/VirtualJoystick.gd" id="3_rjs0a"]
+[ext_resource type="Script" uid="uid://nokxa4oj4hfo" path="res://Game/UI/Joystick/VirtualButton.gd" id="4_r6lw6"]
+[ext_resource type="Script" uid="uid://ck32leiwbrngy" path="res://Game/UI/Joystick/VirtualDirectionButton.gd" id="5_newcs"]
+[ext_resource type="Script" uid="uid://dpy6ou57luu5y" path="res://Game/UI/Joystick/VirtualProgressButton.gd" id="6_vsbtn"]
 
 [node name="PlatformerTouchDemo" type="Node2D" unique_id=764427758]
 script = ExtResource("1_f2ujt")
@@ -15,20 +15,6 @@ script = ExtResource("1_f2ujt")
 
 [node name="TouchUI" type="CanvasLayer" parent="." unique_id=1515874166]
 layer = 10
-
-[node name="WebUI" type="CanvasLayer" parent="." unique_id=1842201001]
-layer = 20
-
-[node name="FullscreenButton" parent="WebUI" instance=ExtResource("2_webfs")]
-layout_mode = 1
-anchors_preset = 1
-anchor_left = 1.0
-anchor_right = 1.0
-offset_left = -64.0
-offset_top = 12.0
-offset_right = -12.0
-offset_bottom = 64.0
-grow_horizontal = 0
 
 [node name="TouchControls" type="Control" parent="TouchUI" unique_id=1125147890]
 layout_mode = 3
@@ -148,3 +134,8 @@ theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 13
 text = "Joystick: (0.00, 0.00)
 Jump: off  Attack: off  Dash: off"
+
+[node name="WebUI" type="CanvasLayer" parent="." unique_id=1098771853]
+
+[node name="WebFullscreenButtonHost" parent="WebUI" unique_id=235909537 instance=ExtResource("2_webfs")]
+visible = false

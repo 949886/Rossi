@@ -1,113 +1,179 @@
-extends Button
+extends Control
 
 @export var web_only := true
-@export var icon_color := Color(1, 1, 1, 1)
-@export var icon_margin := 11.0
-@export var icon_stroke_width := 3.0
-@export var arrow_head_size := 10.0
-
-var _is_browser_fullscreen := false
+var _supports_browser_fullscreen := false
 
 func _ready() -> void:
-	text = ""
-	_apply_default_style()
-	visible = not web_only or OS.has_feature("web")
-	focus_mode = Control.FOCUS_NONE
-	_update_fullscreen_state()
-	set_process(OS.has_feature("web"))
+	_supports_browser_fullscreen = _check_fullscreen_support()
 
-	if not pressed.is_connected(_request_browser_fullscreen):
-		pressed.connect(_request_browser_fullscreen)
-	if not mouse_entered.is_connected(queue_redraw):
-		mouse_entered.connect(queue_redraw)
-	if not mouse_exited.is_connected(queue_redraw):
-		mouse_exited.connect(queue_redraw)
-	if not button_down.is_connected(queue_redraw):
-		button_down.connect(queue_redraw)
-	if not button_up.is_connected(queue_redraw):
-		button_up.connect(queue_redraw)
-
-func _apply_default_style() -> void:
-	var normal_style := StyleBoxFlat.new()
-	normal_style.bg_color = Color(0, 0, 0, 0.55)
-	normal_style.set_corner_radius_all(8)
-	normal_style.set_content_margin_all(10)
-
-	var hover_style := normal_style.duplicate()
-	hover_style.bg_color = Color(0.12, 0.12, 0.12, 0.7)
-
-	var pressed_style := normal_style.duplicate()
-	pressed_style.bg_color = Color(0.2, 0.2, 0.2, 0.8)
-
-	add_theme_stylebox_override("normal", normal_style)
-	add_theme_stylebox_override("hover", hover_style)
-	add_theme_stylebox_override("pressed", pressed_style)
-	add_theme_color_override("font_color", Color(1, 1, 1, 1))
-
-func _draw() -> void:
-	var rect := get_rect()
-	var center := rect.size / 2.0
-	var left := icon_margin
-	var right := rect.size.x - icon_margin
-	var top := icon_margin
-	var bottom := rect.size.y - icon_margin
-
-	if _is_browser_fullscreen:
-		_draw_arrow(Vector2(left, top), Vector2(center.x - 4.0, center.y - 4.0), Vector2.LEFT, Vector2.UP)
-		_draw_arrow(Vector2(right, top), Vector2(center.x + 4.0, center.y - 4.0), Vector2.RIGHT, Vector2.UP)
-		_draw_arrow(Vector2(left, bottom), Vector2(center.x - 4.0, center.y + 4.0), Vector2.LEFT, Vector2.DOWN)
-		_draw_arrow(Vector2(right, bottom), Vector2(center.x + 4.0, center.y + 4.0), Vector2.RIGHT, Vector2.DOWN)
+	if OS.has_feature("web") and web_only:
+		visible = false
+		_ensure_dom_fullscreen_button()
 	else:
-		_draw_arrow(Vector2(center.x - 4.0, center.y - 4.0), Vector2(left, top), Vector2.RIGHT, Vector2.DOWN)
-		_draw_arrow(Vector2(center.x + 4.0, center.y - 4.0), Vector2(right, top), Vector2.LEFT, Vector2.DOWN)
-		_draw_arrow(Vector2(center.x - 4.0, center.y + 4.0), Vector2(left, bottom), Vector2.RIGHT, Vector2.UP)
-		_draw_arrow(Vector2(center.x + 4.0, center.y + 4.0), Vector2(right, bottom), Vector2.LEFT, Vector2.UP)
+		visible = not web_only or _supports_browser_fullscreen
 
-func _draw_arrow(start: Vector2, corner: Vector2, head_dir_a: Vector2, head_dir_b: Vector2) -> void:
-	draw_line(start, corner, icon_color, icon_stroke_width, true)
-	draw_line(corner, corner + head_dir_a * arrow_head_size, icon_color, icon_stroke_width, true)
-	draw_line(corner, corner + head_dir_b * arrow_head_size, icon_color, icon_stroke_width, true)
+func _exit_tree() -> void:
+	if OS.has_feature("web") and web_only:
+		_remove_dom_fullscreen_button()
 
-func _process(_delta: float) -> void:
+func _check_fullscreen_support() -> bool:
 	if not OS.has_feature("web"):
+		return not web_only
+
+	var result = JavaScriptBridge.eval("""
+		(() => {
+			const doc = document;
+			const elem = doc.querySelector('canvas') || doc.documentElement;
+			const request = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.msRequestFullscreen;
+			const exit = doc.exitFullscreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+			const enabled = doc.fullscreenEnabled ?? doc.webkitFullscreenEnabled ?? true;
+			const ua = navigator.userAgent || "";
+			const platform = navigator.platform || "";
+			const maxTouchPoints = navigator.maxTouchPoints || 0;
+			const isIOS = /iPhone|iPad|iPod/i.test(ua);
+			const isIPad = /iPad/i.test(ua) || (platform === "MacIntel" && maxTouchPoints > 1);
+			if (isIOS && !isIPad) {
+				return false;
+			}
+			return Boolean(request && exit && enabled);
+		})()
+	""", true)
+	return bool(result)
+
+func _ensure_dom_fullscreen_button() -> void:
+	if not _supports_browser_fullscreen:
 		return
-
-	if Engine.get_process_frames() % 15 == 0:
-		_update_fullscreen_state()
-
-func _update_fullscreen_state() -> void:
-	if not OS.has_feature("web"):
-		if _is_browser_fullscreen:
-			_is_browser_fullscreen = false
-			queue_redraw()
-		return
-
-	var result = JavaScriptBridge.eval("Boolean(document.fullscreenElement)", true)
-	var is_fullscreen := bool(result)
-	if is_fullscreen != _is_browser_fullscreen:
-		_is_browser_fullscreen = is_fullscreen
-		queue_redraw()
-
-func _request_browser_fullscreen() -> void:
-	if web_only and not OS.has_feature("web"):
-		return
-
-	release_focus()
 
 	JavaScriptBridge.eval("""
 		(() => {
-			const root = document.documentElement;
-			if (!document.fullscreenElement) {
-				if (root.requestFullscreen) {
-					root.requestFullscreen();
+			if (window.__rossiFullscreenButton) {
+				window.__rossiFullscreenButton.ensure();
+				return;
+			}
+
+			const BUTTON_ID = "rossi-fullscreen-button";
+
+			const isSupported = () => {
+				const doc = document;
+				const ua = navigator.userAgent || "";
+				const platform = navigator.platform || "";
+				const maxTouchPoints = navigator.maxTouchPoints || 0;
+				const isIOS = /iPhone|iPad|iPod/i.test(ua);
+				const isIPad = /iPad/i.test(ua) || (platform === "MacIntel" && maxTouchPoints > 1);
+				if (isIOS && !isIPad) {
+					return false;
 				}
-				return true;
-			}
-			if (document.exitFullscreen) {
-				document.exitFullscreen();
-			}
-			return false;
+				const elem = doc.querySelector("canvas") || doc.documentElement;
+				const request = elem.requestFullscreen || elem.webkitRequestFullscreen || elem.msRequestFullscreen;
+				const exit = doc.exitFullscreen || doc.webkitExitFullscreen || doc.msExitFullscreen;
+				const enabled = doc.fullscreenEnabled ?? doc.webkitFullscreenEnabled ?? true;
+				return Boolean(request && exit && enabled);
+			};
+
+			const iconSvg = () => {
+				return `
+				<svg viewBox="0 0 52 52" aria-hidden="true">
+					<g stroke="white" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round">
+						<path d="M22 22 L11 11 M11 11 L19 11 M11 11 L11 19" />
+						<path d="M30 22 L41 11 M41 11 L33 11 M41 11 L41 19" />
+						<path d="M22 30 L11 41 M11 41 L19 41 M11 41 L11 33" />
+						<path d="M30 30 L41 41 M41 41 L33 41 M41 41 L41 33" />
+					</g>
+				</svg>`;
+			};
+
+			const updateVisibility = () => {
+				const button = document.getElementById(BUTTON_ID);
+				if (!button) {
+					return;
+				}
+				const isFullscreen = Boolean(document.fullscreenElement || document.webkitFullscreenElement || null);
+				button.style.display = isFullscreen ? "none" : "flex";
+			};
+
+			const ensure = () => {
+				let button = document.getElementById(BUTTON_ID);
+				if (!isSupported()) {
+					if (button) {
+						button.remove();
+					}
+					return;
+				}
+				if (!button) {
+					button = document.createElement("button");
+					button.id = BUTTON_ID;
+					button.type = "button";
+					button.setAttribute("aria-label", "Toggle fullscreen");
+					Object.assign(button.style, {
+						position: "fixed",
+						top: "12px",
+						right: "12px",
+						width: "52px",
+						height: "52px",
+						border: "none",
+						borderRadius: "8px",
+						background: "rgba(0, 0, 0, 0.55)",
+						padding: "0",
+						display: "flex",
+						alignItems: "center",
+						justifyContent: "center",
+						zIndex: "9999",
+						cursor: "pointer",
+						WebkitTapHighlightColor: "transparent"
+					});
+					button.onpointerdown = () => {
+						button.style.background = "rgba(51, 51, 51, 0.8)";
+					};
+					button.onpointerup = () => {
+						button.style.background = "rgba(0, 0, 0, 0.55)";
+					};
+					button.onpointercancel = () => {
+						button.style.background = "rgba(0, 0, 0, 0.55)";
+					};
+					button.onmouseenter = () => {
+						button.style.background = "rgba(31, 31, 31, 0.7)";
+					};
+					button.onmouseleave = () => {
+						button.style.background = "rgba(0, 0, 0, 0.55)";
+					};
+					button.onclick = () => {
+						const doc = document;
+						const target = doc.querySelector("canvas") || doc.documentElement;
+						const fullscreenElement = doc.fullscreenElement || doc.webkitFullscreenElement || null;
+						const request = target.requestFullscreen || target.webkitRequestFullscreen || target.msRequestFullscreen;
+						if (!fullscreenElement) {
+							if (request) {
+								request.call(target);
+							}
+						}
+						setTimeout(updateVisibility, 50);
+					};
+					button.innerHTML = iconSvg();
+					document.body.appendChild(button);
+				}
+				updateVisibility();
+			};
+
+			const remove = () => {
+				const button = document.getElementById(BUTTON_ID);
+				if (button) {
+					button.remove();
+				}
+			};
+
+			document.addEventListener("fullscreenchange", updateVisibility);
+			document.addEventListener("webkitfullscreenchange", updateVisibility);
+
+			window.__rossiFullscreenButton = { ensure, remove, updateVisibility };
+			ensure();
 		})()
 	""", true)
-	await get_tree().process_frame
-	_update_fullscreen_state()
+
+func _remove_dom_fullscreen_button() -> void:
+	JavaScriptBridge.eval("""
+		(() => {
+			if (window.__rossiFullscreenButton) {
+				window.__rossiFullscreenButton.remove();
+			}
+		})()
+	""", true)
