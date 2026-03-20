@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://bbtwuq4eu5wdn"]
+[gd_scene format=3 uid="uid://x40fqq46030p"]
 
 [ext_resource type="TileSet" uid="uid://0nen7hmysiut" path="res://Game/Maps/Tiles/playground.tres" id="1_ft65l"]
 [ext_resource type="PackedScene" uid="uid://cp7soa40msiek" path="res://Game/Characters/Shiro/Shiro.tscn" id="3_2jew8"]

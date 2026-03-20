@@ -3,6 +3,7 @@
 // All touch controls (joystick, buttons, info panel) are defined in PlatformerTouchDemo.tscn.
 
 using Godot;
+using System;
 using VirtualJoystickPlugin;
 
 public partial class PlatformerJoystickDemo : Node2D
@@ -15,6 +16,7 @@ public partial class PlatformerJoystickDemo : Node2D
     private VirtualDirectionButton _throwButton;
     private Label _infoLabel;
     private Control _touchControls;
+    private CanvasLayer _touchUi;
     
     // Player reference for querying state
     private PlatformerCharacter2D _player;
@@ -31,6 +33,12 @@ public partial class PlatformerJoystickDemo : Node2D
         _throwButton = GetNodeOrNull<VirtualDirectionButton>("TouchUI/TouchControls/ButtonArea/ThrowBtn");
         _infoLabel = GetNodeOrNull<Label>("TouchUI/InfoPanel/InfoLabel");
         _touchControls = GetNodeOrNull<Control>("TouchUI/TouchControls");
+        _touchUi = GetNodeOrNull<CanvasLayer>("TouchUI");
+
+        if (_touchUi != null)
+        {
+            _touchUi.Visible = ShouldShowTouchUi();
+        }
 
         // Apply a semi-transparent panel style to InfoPanel
         var infoPanel = GetNodeOrNull<PanelContainer>("TouchUI/InfoPanel");
@@ -55,6 +63,39 @@ public partial class PlatformerJoystickDemo : Node2D
         {
             _throwButton.DirectionActivated += _player.OnVirtualThrowActivated;
         }
+    }
+
+    private static bool ShouldShowTouchUi()
+    {
+        if (OS.HasFeature("mobile") || OS.HasFeature("android") || OS.HasFeature("ios"))
+        {
+            return true;
+        }
+
+        if (OS.HasFeature("web"))
+        {
+            return IsMobileWebBrowser();
+        }
+
+        return false;
+    }
+
+    private static bool IsMobileWebBrowser()
+    {
+        var result = JavaScriptBridge.Eval(
+            """
+            (() => {
+                const ua = navigator.userAgent || "";
+                const mobileUa = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
+                const touchPoints = navigator.maxTouchPoints || 0;
+                const shortSide = Math.min(window.screen.width || 0, window.screen.height || 0);
+                return mobileUa || (touchPoints > 1 && shortSide > 0 && shortSide <= 1024);
+            })()
+            """,
+            true
+        );
+
+        return result.VariantType == Variant.Type.Bool && result.AsBool();
     }
 
     public override void _Process(double delta)
