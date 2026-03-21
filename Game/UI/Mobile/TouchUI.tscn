@@ -1,0 +1,130 @@
+[gd_scene format=3 uid="uid://cieg12mva0pyu"]
+
+[ext_resource type="Script" uid="uid://ewq7eiwif7b1" path="res://Game/UI/Mobile/TouchUI.gd" id="1_it0ud"]
+[ext_resource type="Script" uid="uid://d2ugvpjmi7kcp" path="res://Game/UI/Joystick/VirtualJoystick.gd" id="2_8uuep"]
+[ext_resource type="Script" uid="uid://nokxa4oj4hfo" path="res://Game/UI/Joystick/VirtualButton.gd" id="3_qe6ek"]
+[ext_resource type="Script" uid="uid://ck32leiwbrngy" path="res://Game/UI/Joystick/VirtualDirectionButton.gd" id="4_q1mej"]
+[ext_resource type="Script" uid="uid://dpy6ou57luu5y" path="res://Game/UI/Joystick/VirtualProgressButton.gd" id="5_871gn"]
+
+[node name="TouchUI" type="CanvasLayer" unique_id=1369658112]
+layer = 10
+script = ExtResource("1_it0ud")
+
+[node name="TouchControls" type="Control" parent="." unique_id=1779940687]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="JoystickArea" type="Control" parent="TouchControls" unique_id=570132851]
+layout_mode = 1
+anchor_left = -0.0034722222
+anchor_top = 0.537037
+anchor_right = 0.25694445
+anchor_bottom = 1.0
+offset_left = 4.0
+offset_top = -3.0517578e-05
+offset_right = 4.0
+grow_vertical = 0
+mouse_filter = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="Joystick" type="Control" parent="TouchControls/JoystickArea" unique_id=1519204725]
+modulate = Color(1, 1, 1, 0.5)
+custom_minimum_size = Vector2(150, 150)
+layout_mode = 1
+anchor_left = 0.25
+anchor_top = 0.25
+anchor_right = 0.75
+anchor_bottom = 0.75
+script = ExtResource("2_8uuep")
+mode = 1
+visibility_mode = 2
+dead_zone = 0.15
+action_left = "move_left"
+action_right = "move_right"
+action_down = "move_down"
+metadata/_edit_use_anchors_ = true
+
+[node name="ButtonArea" type="Control" parent="TouchControls" unique_id=169677460]
+layout_mode = 1
+anchor_left = 0.7135417
+anchor_top = 0.49074075
+anchor_right = 0.9739583
+anchor_bottom = 0.9537037
+grow_horizontal = 0
+grow_vertical = 0
+mouse_filter = 2
+metadata/_edit_use_anchors_ = true
+
+[node name="JumpBtn" type="Control" parent="TouchControls/ButtonArea" unique_id=550102539]
+custom_minimum_size = Vector2(80, 80)
+layout_mode = 1
+anchor_left = 0.25
+anchor_right = 0.65
+anchor_bottom = 0.42
+script = ExtResource("3_qe6ek")
+action = "jump"
+normal_color = Color(0.15, 0.3, 0.5, 0.65)
+pressed_color = Color(0.3, 0.6, 0.8, 0.9)
+label = "B"
+label_font_size = 18
+metadata/_edit_use_anchors_ = true
+
+[node name="AttackBtn" type="Control" parent="TouchControls/ButtonArea" unique_id=1191803019]
+custom_minimum_size = Vector2(80, 80)
+anchors_preset = 0
+anchor_left = 0.55
+anchor_top = 0.52
+anchor_right = 0.95
+anchor_bottom = 0.94
+script = ExtResource("4_q1mej")
+normal_color = Color(0.5, 0.15, 0.15, 0.65)
+pressed_color = Color(0.8, 0.3, 0.3, 0.9)
+label = "A"
+label_font_size = 18
+metadata/_edit_use_anchors_ = true
+
+[node name="DashBtn" type="Control" parent="TouchControls/ButtonArea" unique_id=1133206047]
+custom_minimum_size = Vector2(80, 80)
+anchors_preset = 0
+anchor_top = 0.52
+anchor_right = 0.4
+anchor_bottom = 0.94
+script = ExtResource("5_871gn")
+action = "dash"
+normal_color = Color(0.15, 0.4, 0.15, 0.65)
+pressed_color = Color(0.3, 0.8, 0.3, 0.9)
+label = "X"
+label_font_size = 18
+charge_dot_color = Color(0.7647059, 0.9490196, 0.1882353, 1)
+metadata/_edit_use_anchors_ = true
+
+[node name="ThrowBtn" type="Control" parent="TouchControls/ButtonArea" unique_id=1699761491]
+custom_minimum_size = Vector2(80, 80)
+layout_mode = 1
+anchor_left = -0.27
+anchor_right = 0.13
+anchor_bottom = 0.42
+script = ExtResource("4_q1mej")
+normal_color = Color(0.5, 0.3, 0.1, 0.65)
+pressed_color = Color(0.8, 0.5, 0.2, 0.9)
+label = "Y"
+label_font_size = 18
+metadata/_edit_use_anchors_ = true
+
+[node name="InfoPanel" type="PanelContainer" parent="." unique_id=1645266867]
+offset_left = 10.0
+offset_top = 10.0
+offset_right = 310.0
+offset_bottom = 60.0
+
+[node name="InfoLabel" type="Label" parent="InfoPanel" unique_id=1451341191]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 13
+text = "Joystick: (0.00, 0.00)
+Jump: off  Attack: off  Dash: off"

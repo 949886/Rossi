@@ -11,8 +11,7 @@ var _attack_button
 var _dash_button
 var _throw_button
 var _info_label: Label
-var _touch_controls: Control
-var _touch_ui: CanvasLayer
+var _touch_ui: TouchUI
 
 # Player reference for querying state
 var _player
@@ -27,14 +26,7 @@ func _ready() -> void:
 	_dash_button = get_node_or_null("TouchUI/TouchControls/ButtonArea/DashBtn")
 	_throw_button = get_node_or_null("TouchUI/TouchControls/ButtonArea/ThrowBtn")
 	_info_label = get_node_or_null("TouchUI/InfoPanel/InfoLabel")
-	_touch_controls = get_node_or_null("TouchUI/TouchControls")
 	_touch_ui = get_node_or_null("TouchUI")
-
-	var show_touch_controls := _should_show_touch_ui()
-	if _touch_controls != null:
-		_touch_controls.visible = show_touch_controls
-	if _touch_ui != null:
-		_touch_ui.visible = show_touch_controls
 
 	# Apply a semi-transparent panel style to InfoPanel
 	var info_panel := get_node_or_null("TouchUI/InfoPanel") as PanelContainer
@@ -53,27 +45,6 @@ func _ready() -> void:
 	# Connect the directional throw button directly to the Player controller.
 	if _throw_button != null and _player != null and _player.has_method("on_virtual_throw_activated"):
 		_throw_button.direction_activated.connect(Callable(_player, "on_virtual_throw_activated"))
-
-func _should_show_touch_ui() -> bool:
-	if OS.has_feature("mobile") or OS.has_feature("android") or OS.has_feature("ios"):
-		return true
-
-	if OS.has_feature("web"):
-		return _is_mobile_web_browser()
-
-	return false
-
-func _is_mobile_web_browser() -> bool:
-	var result = JavaScriptBridge.eval("""
-		(() => {
-			const ua = navigator.userAgent || "";
-			const mobileUa = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
-			const touchPoints = navigator.maxTouchPoints || 0;
-			const shortSide = Math.min(window.screen.width || 0, window.screen.height || 0);
-			return mobileUa || (touchPoints > 1 && shortSide > 0 && shortSide <= 1024);
-		})()
-	""", true)
-	return bool(result)
 
 func _process(_delta: float) -> void:
 	# Update Skill Button UI
@@ -105,5 +76,5 @@ func _unhandled_input(event: InputEvent) -> void:
 
 	# Toggle touch controls with F2
 	if event is InputEventKey and event.pressed and event.keycode == KEY_F2:
-		if _touch_controls != null:
-			_touch_controls.visible = not _touch_controls.visible
+		if _touch_ui != null and _touch_ui.has_method("toggle_touch_ui"):
+			_touch_ui.toggle_touch_ui()
