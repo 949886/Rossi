@@ -1,11 +1,22 @@
 [gd_scene format=3 uid="uid://l1fj7qvub0mh"]
 
-[ext_resource type="Script" uid="uid://cqocrep0u5mu3" path="res://Game/Core/Player/PlatformerCharacter2D.gd" id="1_23t7y"]
+[ext_resource type="Script" path="res://Game/Enemies/EnemyBase.gd" id="1_enemy"]
 [ext_resource type="SpriteFrames" uid="uid://n1rudh1at43k" path="res://Game/Enemies/Gangsters/gangsters_animations.tres" id="2_uxs4r"]
+[ext_resource type="Script" path="res://Game/Core/Combat/CombatHurtbox2D.gd" id="3_hurtbox"]
+[ext_resource type="Script" path="res://Game/Core/Combat/CombatHitbox2D.gd" id="4_hitbox"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_xjagb"]
 radius = 7.0
 height = 70.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_vision"]
+radius = 180.0
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_hurtbox"]
+size = Vector2(18, 64)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_attack"]
+size = Vector2(26, 18)
 
 [sub_resource type="Animation" id="Animation_uxs4r"]
 loop_mode = 1
@@ -299,9 +310,22 @@ _data = {
 &"walk": SubResource("Animation_d3c8f")
 }
 
-[node name="CharacterBody2D" type="CharacterBody2D" unique_id=2018056203 groups=["Player"]]
+[node name="CharacterBody2D" type="CharacterBody2D" unique_id=2018056203 groups=["Enemy"]]
 collision_mask = 3
-script = ExtResource("1_23t7y")
+script = ExtResource("1_enemy")
+move_speed = 88.0
+patrol_distance = 84.0
+vision_range = 180.0
+lose_target_range = 280.0
+attack_range = 28.0
+attack_cooldown = 0.8
+windup_duration = 0.24
+attack_active_duration = 0.12
+recover_duration = 0.2
+hitstun_duration = 0.16
+invuln_duration = 0.0
+contact_damage = 1
+contact_knockback = Vector2(150, -15)
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=290157219]
 texture_filter = 1
@@ -317,3 +341,37 @@ shape = SubResource("CapsuleShape2D_xjagb")
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=2091975394]
 root_node = NodePath("../..")
 libraries/ = SubResource("AnimationLibrary_aiehk")
+
+[node name="VisionArea" type="Area2D" parent="." unique_id=1891001001]
+monitoring = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="VisionArea" unique_id=1891001002]
+position = Vector2(0, -35)
+shape = SubResource("CircleShape2D_vision")
+
+[node name="Hurtbox" type="Area2D" parent="." unique_id=1891001003]
+script = ExtResource("3_hurtbox")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Hurtbox" unique_id=1891001004]
+position = Vector2(0, -35)
+shape = SubResource("RectangleShape2D_hurtbox")
+
+[node name="AttackHitbox" type="Area2D" parent="." unique_id=1891001005]
+position = Vector2(18, -32)
+script = ExtResource("4_hitbox")
+target_group = "Player"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AttackHitbox" unique_id=1891001006]
+shape = SubResource("RectangleShape2D_attack")
+
+[node name="FrontWallRayCast2D" type="RayCast2D" parent="." unique_id=1891001007]
+position = Vector2(6, -22)
+target_position = Vector2(14, 0)
+
+[node name="FrontGroundRayCast2D" type="RayCast2D" parent="." unique_id=1891001008]
+position = Vector2(10, 0)
+target_position = Vector2(0, 28)
+
+[node name="PlayerCheckRayCast2D" type="RayCast2D" parent="." unique_id=1891001009]
+position = Vector2(0, -35)
+target_position = Vector2(180, -10)

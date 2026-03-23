@@ -1,6 +1,8 @@
 extends Node2D
 class_name LaserSwitch
 
+const LASER_BEAM_SCRIPT := preload("res://Game/Props/Laser/LaserBeam.gd")
+
 @export var interaction_area_path: NodePath = NodePath("InteractionArea")
 @export var target_laser_paths: Array[NodePath] = []
 @export var interact_action := "interact"
@@ -10,7 +12,7 @@ class_name LaserSwitch
 @export var active_color := Color(0.3, 1.0, 0.5, 1.0)
 @export var inactive_color := Color(0.9, 0.25, 0.25, 1.0)
 
-var _target_lasers: Array[LaserBeam] = []
+var _target_lasers: Array[Node2D] = []
 var _interaction_area: Area2D
 var _prompt_label: Label
 var _player_in_range := false
@@ -30,7 +32,8 @@ func _process(_delta: float) -> void:
 
 	if _player_in_range and Input.is_action_just_pressed(interact_action):
 		for laser in _target_lasers:
-			laser.toggle()
+			if laser != null and laser.has_method("toggle"):
+				laser.toggle()
 
 		queue_redraw()
 
@@ -47,8 +50,8 @@ func _resolve_targets() -> void:
 		if target_path.is_empty():
 			continue
 
-		var laser := get_node_or_null(target_path) as LaserBeam
-		if laser != null:
+		var laser := get_node_or_null(target_path) as Node2D
+		if laser != null and laser.get_script() == LASER_BEAM_SCRIPT:
 			_target_lasers.append(laser)
 
 func _has_player_in_range() -> bool:
@@ -66,7 +69,7 @@ func _has_any_laser_enabled() -> bool:
 		return false
 
 	for laser in _target_lasers:
-		if laser.is_enabled:
+		if bool(laser.get("is_enabled")):
 			return true
 
 	return false

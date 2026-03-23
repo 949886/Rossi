@@ -1,6 +1,5 @@
 @tool
 extends Node2D
-class_name LaserBeam
 
 @export_group("Beam")
 @export_range(1.0, 4000.0, 1.0) var max_length := 320.0

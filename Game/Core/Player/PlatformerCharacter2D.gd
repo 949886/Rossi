@@ -1,6 +1,8 @@
 extends CharacterBody2D
 class_name PlatformerCharacter2D
 
+const LASER_BEAM_SCRIPT := preload("res://Game/Props/Laser/LaserBeam.gd")
+
 signal attack_started(direction: Vector2)
 signal died
 signal respawned(spawn_position: Vector2)
@@ -11,6 +13,8 @@ signal teleported(from_position: Vector2, to_position: Vector2)
 @export var animated_sprite: AnimatedSprite2D
 @export var animation_player: AnimationPlayer
 @export var animation_tree: AnimationTree
+@export var hurtbox: CombatHurtbox2D
+@export var attack_hitbox: CombatHitbox2D
 
 @export_group("Movement")
 @export var move_speed := 200.0
@@ -50,6 +54,15 @@ signal teleported(from_position: Vector2, to_position: Vector2)
 @export var attack_exit_momentum_scale := 0.28
 @export var attack_afterimage_interval := 0.035
 @export var air_attack_lift_decay := 0.4 # Decreases lift by this ratio per air attack
+@export var attack_hitbox_origin_offset := Vector2(0.0, -18.0)
+@export var attack_hitbox_distance := 18.0
+@export var attack_hitbox_size := Vector2(32.0, 18.0)
+@export var attack_hitbox_delay := 0.02
+@export var attack_hitbox_active_duration := 0.08
+@export var attack_damage := 1
+@export var attack_knockback := Vector2(220.0, -35.0)
+@export var attack_hitstun := 0.12
+@export var attack_invuln_time := 0.0
 
 @export_group("Shuriken")
 @export var shuriken_scene: PackedScene
@@ -69,6 +82,7 @@ signal teleported(from_position: Vector2, to_position: Vector2)
 @export_group("Survival")
 @export var respawn_delay := 0.6
 @export var default_respawn_position := Vector2.ZERO
+@export var max_health := 1
 
 enum State {
 	IDLE,
@@ -107,8 +121,11 @@ var _respawn_timer: SceneTreeTimer
 var _attack_timer := 0.0
 var _attack_cooldown_timer := 0.0
 var _attack_afterimage_timer := 0.0
+var _attack_hitbox_delay_timer := 0.0
+var _attack_hitbox_remaining_timer := 0.0
 var _attack_direction := Vector2.RIGHT
 var _air_attack_count := 0
+var current_health := 1
 
 # Wall slide tracking
 var _wall_direction := 0 # -1 = wall on left, 1 = wall on right
@@ -138,6 +155,12 @@ var is_invulnerable: bool:
 	get:
 		return not _is_dead and _invulnerability_timer > 0.0
 
+var invulnerable_timer: float:
+	get:
+		return _invulnerability_timer
+	set(value):
+		_invulnerability_timer = maxf(0.0, value)
+
 var current_respawn_position: Vector2:
 	get:
 		return _current_respawn_position
@@ -155,6 +178,9 @@ func _ready() -> void:
 	if animation_player == null:
 		animation_player = get_node("AnimationPlayer")
 	animation_tree = get_node_or_null("AnimationTree")
+	hurtbox = hurtbox if hurtbox != null else get_node_or_null("Hurtbox")
+	attack_hitbox = attack_hitbox if attack_hitbox != null else get_node_or_null("PlayerAttackHitbox")
+	_ensure_combat_nodes()
 
 	# Disable AnimationTree - it overrides AnimationPlayer.play() calls.
 	# We drive animations entirely from code via AnimationPlayer.
@@ -166,6 +192,7 @@ func _ready() -> void:
 	_dash_charges = max_dash_charges
 	_dash_recharge_timer = dash_cooldown
 	_current_respawn_position = global_position if default_respawn_position == Vector2.ZERO else default_respawn_position
+	current_health = max_health
 	_rng.randomize()
 
 	# Start in idle
@@ -446,6 +473,7 @@ func _process_landing(delta: float) -> void:
 func _process_attack(delta: float) -> void:
 	_apply_gravity(delta)
 	_apply_friction(delta, is_on_floor())
+	_update_attack_hitbox(delta)
 	if _attack_timer > 0.0:
 		_attack_timer -= delta
 		_attack_afterimage_timer -= delta
@@ -539,6 +567,8 @@ func _process_respawn(delta: float) -> void:
 
 func _change_state(new_state: State) -> void:
 	var previous_state := _current_state
+	if new_state != State.ATTACK:
+		_deactivate_attack_hitbox()
 	_current_state = new_state
 	match new_state:
 		State.IDLE:
@@ -572,6 +602,9 @@ func _change_state(new_state: State) -> void:
 			_attack_direction = _get_slash_direction()
 			_attack_timer = attack_duration
 			_attack_afterimage_timer = 0.0
+			_attack_hitbox_delay_timer = attack_hitbox_delay
+			_attack_hitbox_remaining_timer = attack_hitbox_active_duration
+			_configure_attack_hitbox()
 			if not is_on_floor():
 				_air_attack_count += 1
 			_update_facing(_attack_direction.x)
@@ -634,6 +667,8 @@ func die() -> void:
 	_attack_timer = 0.0
 	_attack_cooldown_timer = 0.0
 	_attack_afterimage_timer = 0.0
+	_deactivate_attack_hitbox()
+	current_health = 0
 	_change_state(State.DIE)
 	died.emit()
 	_respawn_timer = get_tree().create_timer(respawn_delay)
@@ -646,6 +681,7 @@ func respawn(spawn_position: Vector2) -> void:
 	_attack_timer = 0.0
 	_attack_cooldown_timer = 0.0
 	_attack_afterimage_timer = 0.0
+	_deactivate_attack_hitbox()
 	_dash_timer = 0.0
 	_dash_charges = max_dash_charges
 	_dash_recharge_timer = dash_cooldown
@@ -653,6 +689,7 @@ func respawn(spawn_position: Vector2) -> void:
 	_air_attack_count = 0
 	_pending_attack_angle = null
 	_pending_throw_angle = null
+	current_health = max_health
 	velocity = Vector2.ZERO
 	global_position = spawn_position
 	set_checkpoint(spawn_position)
@@ -689,6 +726,18 @@ func _try_flying_thunder_god_teleport() -> bool:
 
 func is_attack_active() -> bool:
 	return _current_state == State.ATTACK and _attack_timer > 0.0
+
+func receive_attack(hit_data: Dictionary) -> void:
+	if _is_dead or _current_state == State.RESPAWN or is_invulnerable:
+		return
+
+	var damage := int(hit_data.get("damage", 1))
+	current_health = max(0, current_health - damage)
+	_invulnerability_timer = maxf(_invulnerability_timer, float(hit_data.get("invuln_time", 0.0)))
+	velocity += hit_data.get("knockback", Vector2.ZERO)
+
+	if current_health <= 0:
+		die()
 
 func _spawn_teleport_trail(from: Vector2, to: Vector2) -> void:
 	if animated_sprite == null or animated_sprite.sprite_frames == null:
@@ -858,6 +907,7 @@ func _on_animation_finished(anim_name: StringName) -> void:
 				_change_state(State.FALL)
 		"attack1", "jump_attack":
 			if _current_state == State.ATTACK:
+				_deactivate_attack_hitbox()
 				_change_state(State.IDLE if is_on_floor() else State.FALL)
 		"shuriken":
 			if _current_state == State.THROW:
@@ -919,6 +969,78 @@ func _get_slash_animation_name() -> String:
 	if animation_player.has_animation("attack1"):
 		return "attack1"
 	return "dash"
+
+func _ensure_combat_nodes() -> void:
+	if hurtbox == null:
+		hurtbox = CombatHurtbox2D.new()
+		hurtbox.name = "Hurtbox"
+		hurtbox.position = Vector2(6.0, -20.0)
+		var hurtbox_shape := CollisionShape2D.new()
+		var hurtbox_rect := RectangleShape2D.new()
+		hurtbox_rect.size = Vector2(18.0, 40.0)
+		hurtbox_shape.shape = hurtbox_rect
+		hurtbox.add_child(hurtbox_shape)
+		add_child(hurtbox)
+
+	if attack_hitbox == null:
+		attack_hitbox = CombatHitbox2D.new()
+		attack_hitbox.name = "PlayerAttackHitbox"
+		var attack_shape := CollisionShape2D.new()
+		var attack_rect := RectangleShape2D.new()
+		attack_rect.size = attack_hitbox_size
+		attack_shape.shape = attack_rect
+		attack_hitbox.add_child(attack_shape)
+		add_child(attack_hitbox)
+
+	attack_hitbox.target_group = "Enemy"
+	attack_hitbox.damage = attack_damage
+	attack_hitbox.knockback = attack_knockback
+	attack_hitbox.hitstun = attack_hitstun
+	attack_hitbox.invuln_time = attack_invuln_time
+	attack_hitbox.set_active(false)
+	_configure_attack_hitbox()
+
+func _configure_attack_hitbox() -> void:
+	if attack_hitbox == null:
+		return
+
+	var direction := _attack_direction if _attack_direction.length_squared() >= 0.001 else Vector2(_facing_direction, 0.0)
+	var normalized_direction := direction.normalized()
+	attack_hitbox.position = attack_hitbox_origin_offset + normalized_direction * attack_hitbox_distance
+	attack_hitbox.rotation = normalized_direction.angle()
+	var collision := attack_hitbox.get_node_or_null("CollisionShape2D")
+	if collision != null and collision.shape is RectangleShape2D:
+		(collision.shape as RectangleShape2D).size = attack_hitbox_size
+
+func _update_attack_hitbox(delta: float) -> void:
+	if attack_hitbox == null:
+		return
+
+	if _attack_hitbox_delay_timer > 0.0:
+		_attack_hitbox_delay_timer -= delta
+		if _attack_hitbox_delay_timer <= 0.0 and _attack_hitbox_remaining_timer > 0.0:
+			attack_hitbox.damage = attack_damage
+			attack_hitbox.knockback = attack_knockback
+			attack_hitbox.hitstun = attack_hitstun
+			attack_hitbox.invuln_time = attack_invuln_time
+			attack_hitbox.set_active(true)
+	elif not attack_hitbox.active and _attack_hitbox_remaining_timer > 0.0:
+		attack_hitbox.damage = attack_damage
+		attack_hitbox.knockback = attack_knockback
+		attack_hitbox.hitstun = attack_hitstun
+		attack_hitbox.invuln_time = attack_invuln_time
+		attack_hitbox.set_active(true)
+
+	if attack_hitbox.active:
+		_attack_hitbox_remaining_timer -= delta
+		if _attack_hitbox_remaining_timer <= 0.0:
+			_deactivate_attack_hitbox()
+
+func _deactivate_attack_hitbox() -> void:
+	_attack_hitbox_delay_timer = 0.0
+	_attack_hitbox_remaining_timer = 0.0
+	if attack_hitbox != null:
+		attack_hitbox.set_active(false)
 
 func _detect_wall_slide() -> void:
 	if enable_wall_jump and is_on_wall() and not is_on_floor():
@@ -1003,7 +1125,7 @@ func can_start_attack_from_current_state() -> bool:
 
 # Created by LunarEclipse on 2026-03-19 17:03.
 func interact_with(node: Node) -> void:
-	if node is LaserBeam:
+	if _is_laser_beam(node):
 		die()
 
 func InteractWith(node: Node) -> void:
@@ -1023,3 +1145,6 @@ func Respawn(spawn_position: Vector2) -> void:
 
 func SetCheckpoint(checkpoint_position: Vector2) -> void:
 	set_checkpoint(checkpoint_position)
+
+func _is_laser_beam(node: Node) -> bool:
+	return node != null and node.get_script() == LASER_BEAM_SCRIPT

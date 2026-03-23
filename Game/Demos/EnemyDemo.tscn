@@ -1,0 +1,96 @@
+[gd_scene format=3 uid="uid://55f2f2cbe773"]
+
+[ext_resource type="Script" path="res://Game/Enemies/EncounterController.gd" id="1_encounter"]
+[ext_resource type="PackedScene" uid="uid://cp7soa40msiek" path="res://Game/Characters/Shiro/Shiro.tscn" id="2_shiro"]
+[ext_resource type="PackedScene" uid="uid://c7t8p6v5taq2x" path="res://Game/Characters/Shiro/Items/Shuriken/Shuriken.tscn" id="3_shuriken"]
+[ext_resource type="PackedScene" path="res://Game/Enemies/Gangsters/EnemyGangster.tscn" id="4_enemy"]
+[ext_resource type="Script" path="res://Game/Enemies/EnemySpawner2D.gd" id="5_spawner"]
+[ext_resource type="PackedScene" uid="uid://hthi1t4oeq54" path="res://Game/Props/Laser/LaserBeam.tscn" id="6_laser"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
+size = Vector2(960, 48)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform"]
+size = Vector2(224, 24)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_block"]
+size = Vector2(40, 120)
+
+[node name="EnemyDemo" type="Node2D"]
+
+[node name="EncounterController" type="Node" parent="." unique_id=1001]
+script = ExtResource("1_encounter")
+
+[node name="Environment" type="Node2D" parent="." unique_id=1002]
+
+[node name="Floor" type="StaticBody2D" parent="Environment" unique_id=1003]
+position = Vector2(512, 388)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/Floor" unique_id=1004]
+shape = SubResource("RectangleShape2D_floor")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/Floor" unique_id=1005]
+color = Color(0.14, 0.18, 0.24, 1)
+polygon = PackedVector2Array(-480, -24, 480, -24, 480, 24, -480, 24)
+
+[node name="Platform" type="StaticBody2D" parent="Environment" unique_id=1006]
+position = Vector2(642, 272)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/Platform" unique_id=1007]
+shape = SubResource("RectangleShape2D_platform")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/Platform" unique_id=1008]
+color = Color(0.19, 0.25, 0.34, 1)
+polygon = PackedVector2Array(-112, -12, 112, -12, 112, 12, -112, 12)
+
+[node name="Pillar" type="StaticBody2D" parent="Environment" unique_id=1009]
+position = Vector2(760, 328)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/Pillar" unique_id=1010]
+shape = SubResource("RectangleShape2D_block")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/Pillar" unique_id=1011]
+color = Color(0.17, 0.21, 0.27, 1)
+polygon = PackedVector2Array(-20, -60, 20, -60, 20, 60, -20, 60)
+
+[node name="CharacterBody2D" parent="." unique_id=1012 instance=ExtResource("2_shiro")]
+position = Vector2(188, 344)
+shuriken_scene = ExtResource("3_shuriken")
+
+[node name="Camera2D" type="Camera2D" parent="CharacterBody2D" unique_id=1013]
+zoom = Vector2(1.35, 1.35)
+position = Vector2(140, -64)
+limit_left = 0
+limit_top = 0
+limit_right = 1024
+limit_bottom = 512
+
+[node name="GroundSpawner" type="Node2D" parent="." unique_id=1014]
+position = Vector2(470, 344)
+script = ExtResource("5_spawner")
+enemy_scene = ExtResource("4_enemy")
+spawn_on_ready = true
+respawn_on_reset = true
+facing_direction = -1
+
+[node name="PlatformSpawner" type="Node2D" parent="." unique_id=1015]
+position = Vector2(688, 228)
+script = ExtResource("5_spawner")
+enemy_scene = ExtResource("4_enemy")
+spawn_on_ready = true
+respawn_on_reset = true
+facing_direction = -1
+
+[node name="LaserBeam" parent="." unique_id=1016 instance=ExtResource("6_laser")]
+position = Vector2(844, 136)
+rotation = 1.5707964
+max_length = 264.0
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1017]
+
+[node name="Label" type="Label" parent="CanvasLayer" unique_id=1018]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 368.0
+offset_bottom = 84.0
+text = "Enemy Demo\nLMB attack, Q throw/teleport, R reset encounter"
