@@ -114,7 +114,7 @@ func _ready() -> void:
 	if vision_area != null:
 		vision_area.monitoring = true
 		vision_area.monitorable = true
-		var vision_shape := vision_area.get_node_or_null("CollisionShape2D")
+		#var vision_shape := vision_area.get_node_or_null("CollisionShape2D")
 		if vision_shape != null and vision_shape.shape is CircleShape2D:
 			(vision_shape.shape as CircleShape2D).radius = vision_range
 

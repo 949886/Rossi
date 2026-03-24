@@ -46,10 +46,8 @@ func _update_labels() -> void:
 
 	if _enemy_count_label != null:
 		var alive := 0
-		var total := 0
 		var dead := 0
 		for enemy in get_tree().get_nodes_in_group("Enemy"):
-			total += 1
 			var dead_state = enemy.get("is_dead")
 			if dead_state == true:
 				dead += 1

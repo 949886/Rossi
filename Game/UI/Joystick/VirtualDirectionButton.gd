@@ -110,9 +110,9 @@ func _release_and_activate() -> void:
 
 func _draw_texture(texture_2d: Texture2D, center: Vector2, radius: float, tint: Color) -> void:
 	var tex_size := texture_2d.get_size()
-	var scale := (radius * 2.0) / maxf(tex_size.x, tex_size.y)
-	var draw_pos := center - tex_size * scale / 2.0
-	draw_texture_rect(texture_2d, Rect2(draw_pos, tex_size * scale), false, tint)
+	var texture_scale := (radius * 2.0) / maxf(tex_size.x, tex_size.y)
+	var draw_pos := center - tex_size * texture_scale / 2.0
+	draw_texture_rect(texture_2d, Rect2(draw_pos, tex_size * texture_scale), false, tint)
 
 func _draw_label(center: Vector2) -> void:
 	var font := ThemeDB.fallback_font

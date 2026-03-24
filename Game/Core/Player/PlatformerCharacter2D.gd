@@ -869,8 +869,7 @@ func play_animation(anim_name: String) -> void:
 	animation_player.play(anim_name)
 
 func _on_animation_finished(anim_name: StringName) -> void:
-	var name := String(anim_name)
-	match name:
+	match String(anim_name):
 		# Transition animations - advance to next state
 		"idle_to_run":
 			if _current_state == State.IDLE_TO_RUN:

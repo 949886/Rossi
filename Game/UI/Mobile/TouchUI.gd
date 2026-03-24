@@ -19,11 +19,11 @@ func _ready() -> void:
 func apply_visibility_mode() -> void:
 	set_touch_ui_visible(_should_show_touch_ui())
 
-func set_touch_ui_visible(is_visible: bool) -> void:
+func set_touch_ui_visible(should_show: bool) -> void:
 	if _touch_controls != null:
-		_touch_controls.visible = is_visible
+		_touch_controls.visible = should_show
 
-	visible = is_visible
+	visible = should_show
 
 func toggle_touch_ui() -> void:
 	set_touch_ui_visible(not is_touch_ui_visible())

@@ -37,9 +37,9 @@ var joystick_output: Vector2:
 func _ready() -> void:
 	_create_layout()
 
-func set_controls_visible(is_visible: bool) -> void:
+func set_controls_visible(should_show: bool) -> void:
 	if _container:
-		_container.visible = is_visible
+		_container.visible = should_show
 
 func _create_layout() -> void:
 	_container = Control.new()

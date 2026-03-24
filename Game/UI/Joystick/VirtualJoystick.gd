@@ -219,9 +219,9 @@ func _draw_base() -> void:
 	var radius := effective_base_radius
 	if base_texture:
 		var tex_size := base_texture.get_size()
-		var scale := (radius * 2.0) / maxf(tex_size.x, tex_size.y)
-		var draw_pos := _base_center - tex_size * scale / 2.0
-		draw_texture_rect(base_texture, Rect2(draw_pos, tex_size * scale), false, base_color)
+		var texture_scale := (radius * 2.0) / maxf(tex_size.x, tex_size.y)
+		var draw_pos := _base_center - tex_size * texture_scale / 2.0
+		draw_texture_rect(base_texture, Rect2(draw_pos, tex_size * texture_scale), false, base_color)
 		return
 
 	draw_circle(_base_center, radius, base_color, true)
@@ -236,9 +236,9 @@ func _draw_handle() -> void:
 	var radius := effective_handle_radius
 	if handle_texture:
 		var tex_size := handle_texture.get_size()
-		var scale := (radius * 2.0) / maxf(tex_size.x, tex_size.y)
-		var draw_pos := _handle_position - tex_size * scale / 2.0
-		draw_texture_rect(handle_texture, Rect2(draw_pos, tex_size * scale), false, color)
+		var texture_scale := (radius * 2.0) / maxf(tex_size.x, tex_size.y)
+		var draw_pos := _handle_position - tex_size * texture_scale / 2.0
+		draw_texture_rect(handle_texture, Rect2(draw_pos, tex_size * texture_scale), false, color)
 		return
 
 	draw_circle(_handle_position, radius, color, true)
