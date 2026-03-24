@@ -18,6 +18,7 @@ var _prompt_label: Label
 var _player_in_range := false
 
 func _ready() -> void:
+	add_to_group("EncounterResettable")
 	_interaction_area = get_node(interaction_area_path)
 	_prompt_label = get_node("PromptLabel")
 	_prompt_label.text = prompt_text
@@ -73,3 +74,9 @@ func _has_any_laser_enabled() -> bool:
 			return true
 
 	return false
+
+func reset_for_encounter() -> void:
+	_resolve_targets()
+	_player_in_range = _has_player_in_range()
+	_update_prompt()
+	queue_redraw()

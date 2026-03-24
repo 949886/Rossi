@@ -8,8 +8,11 @@ signal enemy_despawned
 @export var spawn_on_ready := true
 @export var respawn_on_reset := true
 @export_range(-1, 1, 2) var facing_direction := 1
+@export var spawn_delay := 0.0
 
 var _current_enemy: Node
+var _spawn_request_id := 0
+var _spawn_scheduled := false
 
 func _ready() -> void:
 	add_to_group("EnemySpawner")
@@ -20,6 +23,23 @@ func get_spawned_enemy() -> Node:
 	return _current_enemy
 
 func spawn_enemy() -> Node:
+	if enemy_scene == null:
+		return null
+	if is_instance_valid(_current_enemy):
+		return _current_enemy
+	if _spawn_scheduled:
+		return null
+	if spawn_delay > 0.0:
+		_spawn_scheduled = true
+		_spawn_request_id += 1
+		var request_id := _spawn_request_id
+		get_tree().create_timer(spawn_delay).timeout.connect(_on_spawn_delay_timeout.bind(request_id))
+		return null
+
+	return _spawn_enemy_now()
+
+func _spawn_enemy_now() -> Node:
+	_spawn_scheduled = false
 	if enemy_scene == null:
 		return null
 	if is_instance_valid(_current_enemy):
@@ -38,6 +58,8 @@ func spawn_enemy() -> Node:
 	return enemy
 
 func despawn_enemy() -> void:
+	_spawn_request_id += 1
+	_spawn_scheduled = false
 	if is_instance_valid(_current_enemy):
 		var enemy := _current_enemy
 		_current_enemy = null
@@ -59,3 +81,8 @@ func reset_spawn() -> void:
 func _on_enemy_tree_exiting() -> void:
 	_current_enemy = null
 	enemy_despawned.emit()
+
+func _on_spawn_delay_timeout(request_id: int) -> void:
+	if request_id != _spawn_request_id:
+		return
+	_spawn_enemy_now()

@@ -36,6 +36,7 @@ var is_enabled: bool:
 		return _is_enabled
 
 func _ready() -> void:
+	add_to_group("EncounterResettable")
 	_damage_area = get_node("DamageArea")
 	_damage_shape = get_node("DamageArea/CollisionShape2D")
 
@@ -94,6 +95,9 @@ func set_enabled(enabled: bool) -> void:
 
 func toggle() -> void:
 	set_enabled(not _is_enabled)
+
+func reset_for_encounter() -> void:
+	set_enabled(starts_enabled)
 
 func _update_beam() -> void:
 	_current_length = _compute_visible_length()

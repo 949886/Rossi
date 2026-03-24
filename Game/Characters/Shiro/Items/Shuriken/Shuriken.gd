@@ -25,10 +25,14 @@ var _attached_target: Node2D
 var _attached_local_position := Vector2.ZERO
 
 func _ready() -> void:
+	add_to_group("ResettableProjectile")
 	_sprite = get_node("Sprite2D")
 
 	# Face the correct direction based on throw direction
 	rotation = direction.angle()
+
+func reset_for_encounter() -> void:
+	queue_free()
 
 func _physics_process(delta: float) -> void:
 	if _stuck:

@@ -7,6 +7,8 @@ signal hit_taken(hit_data: Dictionary)
 signal died
 signal respawned
 signal target_acquired(target: Node)
+signal health_changed(current_health: int, max_health: int)
+signal state_changed(state_name: String)
 
 @export var animated_sprite: AnimatedSprite2D
 @export var animation_player: AnimationPlayer
@@ -44,6 +46,15 @@ signal target_acquired(target: Node)
 @export var attack_hitbox_offset := Vector2(18.0, -32.0)
 @export var attack_hitbox_size := Vector2(26.0, 18.0)
 
+@export_group("Feedback")
+@export var hit_flash_color := Color(1.0, 0.55, 0.55, 1.0)	## Visual feedback when hit
+@export var hit_flash_duration := 0.07
+@export var dead_tint := Color(0.45, 0.45, 0.45, 0.9)
+
+@export_group("Debug")
+@export var show_debug_label := true
+@export var debug_label_offset := Vector2(0.0, -118.0)
+
 enum State {
 	IDLE,
 	PATROL,
@@ -68,6 +79,20 @@ var _attack_cooldown_timer := 0.0
 var _invulnerable_timer := 0.0
 var _patrol_origin_x := 0.0
 var _patrol_direction := 1
+var _debug_label: Label
+var _base_sprite_modulate := Color.WHITE
+
+var current_health: int:
+	get:
+		return _current_health
+
+var is_dead: bool:
+	get:
+		return _state == State.DEAD
+
+var state_name: String:
+	get:
+		return String(State.keys()[_state]).to_lower()
 
 func _ready() -> void:
 	add_to_group("Enemy")
@@ -85,6 +110,8 @@ func _ready() -> void:
 	_patrol_origin_x = global_position.x
 	_current_health = max_health
 	_patrol_direction = _spawn_facing_direction
+	if animated_sprite != null:
+		_base_sprite_modulate = animated_sprite.modulate
 
 	if attack_hitbox != null:
 		attack_hitbox.target_group = "Player"
@@ -100,6 +127,7 @@ func _ready() -> void:
 
 	if vision_area != null:
 		vision_area.monitoring = true
+		vision_area.monitorable = true
 		var vision_shape := vision_area.get_node_or_null("CollisionShape2D")
 		if vision_shape != null and vision_shape.shape is CircleShape2D:
 			(vision_shape.shape as CircleShape2D).radius = vision_range
@@ -114,6 +142,8 @@ func _ready() -> void:
 		player_check_ray_cast.enabled = true
 		player_check_ray_cast.exclude_parent = true
 
+	_ensure_debug_label()
+	_emit_health_changed()
 	_update_facing(_spawn_facing_direction)
 	_change_state(State.PATROL if patrol_distance > 0.0 else State.IDLE)
 
@@ -160,15 +190,18 @@ func _physics_process(delta: float) -> void:
 
 	_apply_gravity(delta)
 	move_and_slide()
+	_update_debug_label()
 
 func receive_attack(hit_data: Dictionary) -> void:
 	if _state == State.DEAD or _invulnerable_timer > 0.0:
 		return
 
 	var damage := int(hit_data.get("damage", 1))
-	_current_health -= damage
+	_current_health = max(0, _current_health - damage)
 	_invulnerable_timer = maxf(invuln_duration, float(hit_data.get("invuln_time", invuln_duration)))
 	velocity = hit_data.get("knockback", Vector2.ZERO)
+	_emit_health_changed()
+	_play_hit_feedback()
 	hit_taken.emit(hit_data)
 
 	if _current_health <= 0:
@@ -193,6 +226,7 @@ func die() -> void:
 	_disable_combat_nodes()
 	if collision_shape != null:
 		collision_shape.disabled = true
+	_apply_dead_visuals()
 	_change_state(State.DEAD)
 	died.emit()
 
@@ -204,6 +238,8 @@ func reset_for_encounter() -> void:
 	velocity = Vector2.ZERO
 	global_position = _spawn_position
 	_patrol_direction = _spawn_facing_direction
+	if animated_sprite != null:
+		animated_sprite.modulate = _base_sprite_modulate
 	if collision_shape != null:
 		collision_shape.disabled = false
 	if vision_area != null:
@@ -213,6 +249,7 @@ func reset_for_encounter() -> void:
 		hurtbox.monitorable = true
 	if attack_hitbox != null:
 		attack_hitbox.set_active(false)
+	_emit_health_changed()
 	_configure_attack_hitbox()
 	_update_facing(_spawn_facing_direction)
 	_change_state(State.RESPAWN)
@@ -329,6 +366,7 @@ func _apply_gravity(delta: float) -> void:
 
 func _change_state(new_state: State) -> void:
 	_state = new_state
+	state_changed.emit(state_name)
 	match new_state:
 		State.IDLE:
 			_play_animation("idle")
@@ -367,6 +405,7 @@ func _change_state(new_state: State) -> void:
 			_play_animation("idle")
 		State.RETURN_HOME:
 			_play_animation(_get_move_animation())
+	_update_debug_label()
 
 func _play_animation(animation_name: String) -> void:
 	if animated_sprite != null and animated_sprite.sprite_frames != null and animated_sprite.sprite_frames.has_animation(animation_name):
@@ -500,5 +539,42 @@ func _disable_combat_nodes() -> void:
 	if hurtbox != null:
 		hurtbox.monitorable = false
 
-func _is_laser_beam(node: Node) -> bool:
-	return node != null and node.get_script() == LASER_BEAM_SCRIPT
+func _play_hit_feedback() -> void:
+	if animated_sprite == null:
+		return
+
+	animated_sprite.modulate = hit_flash_color
+	var tween := create_tween()
+	tween.tween_property(animated_sprite, "modulate", _base_sprite_modulate, hit_flash_duration)
+
+func _apply_dead_visuals() -> void:
+	if animated_sprite == null:
+		return
+	var tween := create_tween()
+	tween.tween_property(animated_sprite, "modulate", dead_tint, 0.12)
+
+func _ensure_debug_label() -> void:
+	if not show_debug_label or _debug_label != null:
+		return
+
+	_debug_label = Label.new()
+	_debug_label.name = "DebugLabel"
+	_debug_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_debug_label.position = debug_label_offset
+	_debug_label.size = Vector2(180.0, 42.0)
+	add_child(_debug_label)
+	_update_debug_label()
+
+func _update_debug_label() -> void:
+	if _debug_label == null:
+		return
+
+	_debug_label.position = debug_label_offset
+	var target_text := "none"
+	if is_instance_valid(_target):
+		target_text = _target.name
+	_debug_label.text = "%s  HP %d/%d\nTarget: %s" % [state_name, _current_health, max_health, target_text]
+
+func _emit_health_changed() -> void:
+	health_changed.emit(_current_health, max_health)
+	_update_debug_label()

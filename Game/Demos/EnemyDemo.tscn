@@ -1,11 +1,13 @@
 [gd_scene format=3 uid="uid://55f2f2cbe773"]
 
-[ext_resource type="Script" path="res://Game/Enemies/EncounterController.gd" id="1_encounter"]
+[ext_resource type="Script" uid="uid://b8uxbkqqcn12" path="res://Game/Enemies/EncounterController.gd" id="1_encounter"]
 [ext_resource type="PackedScene" uid="uid://cp7soa40msiek" path="res://Game/Characters/Shiro/Shiro.tscn" id="2_shiro"]
 [ext_resource type="PackedScene" uid="uid://c7t8p6v5taq2x" path="res://Game/Characters/Shiro/Items/Shuriken/Shuriken.tscn" id="3_shuriken"]
-[ext_resource type="PackedScene" path="res://Game/Enemies/Gangsters/EnemyGangster.tscn" id="4_enemy"]
-[ext_resource type="Script" path="res://Game/Enemies/EnemySpawner2D.gd" id="5_spawner"]
+[ext_resource type="PackedScene" uid="uid://l1fj7qvub0mh" path="res://Game/Enemies/Gangsters/EnemyGangster.tscn" id="4_enemy"]
+[ext_resource type="Script" uid="uid://be3o6nwd2gsbg" path="res://Game/Enemies/EnemySpawner2D.gd" id="5_spawner"]
 [ext_resource type="PackedScene" uid="uid://hthi1t4oeq54" path="res://Game/Props/Laser/LaserBeam.tscn" id="6_laser"]
+[ext_resource type="Script" uid="uid://hcjjd1p8ikdo" path="res://Game/Demos/EnemyDemoHud.gd" id="7_hud"]
+[ext_resource type="PackedScene" uid="uid://bk3o3fpuk1ery" path="res://Game/Props/Laser/LaserSwitch.tscn" id="8_switch"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(960, 48)
@@ -16,10 +18,11 @@ size = Vector2(224, 24)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_block"]
 size = Vector2(40, 120)
 
-[node name="EnemyDemo" type="Node2D"]
+[node name="EnemyDemo" type="Node2D" unique_id=461829554]
 
 [node name="EncounterController" type="Node" parent="." unique_id=1001]
 script = ExtResource("1_encounter")
+player_path = NodePath("../CharacterBody2D")
 
 [node name="Environment" type="Node2D" parent="." unique_id=1002]
 
@@ -34,7 +37,7 @@ color = Color(0.14, 0.18, 0.24, 1)
 polygon = PackedVector2Array(-480, -24, 480, -24, 480, 24, -480, 24)
 
 [node name="Platform" type="StaticBody2D" parent="Environment" unique_id=1006]
-position = Vector2(642, 272)
+position = Vector2(647, 281)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/Platform" unique_id=1007]
 shape = SubResource("RectangleShape2D_platform")
@@ -58,8 +61,8 @@ position = Vector2(188, 344)
 shuriken_scene = ExtResource("3_shuriken")
 
 [node name="Camera2D" type="Camera2D" parent="CharacterBody2D" unique_id=1013]
-zoom = Vector2(1.35, 1.35)
 position = Vector2(140, -64)
+zoom = Vector2(1.35, 1.35)
 limit_left = 0
 limit_top = 0
 limit_right = 1024
@@ -69,28 +72,59 @@ limit_bottom = 512
 position = Vector2(470, 344)
 script = ExtResource("5_spawner")
 enemy_scene = ExtResource("4_enemy")
-spawn_on_ready = true
-respawn_on_reset = true
 facing_direction = -1
 
 [node name="PlatformSpawner" type="Node2D" parent="." unique_id=1015]
 position = Vector2(688, 228)
 script = ExtResource("5_spawner")
 enemy_scene = ExtResource("4_enemy")
-spawn_on_ready = true
-respawn_on_reset = true
 facing_direction = -1
 
+[node name="RightSpawner" type="Node2D" parent="." unique_id=1019]
+position = Vector2(866, 344)
+script = ExtResource("5_spawner")
+enemy_scene = ExtResource("4_enemy")
+facing_direction = -1
+spawn_delay = 0.35
+
 [node name="LaserBeam" parent="." unique_id=1016 instance=ExtResource("6_laser")]
-position = Vector2(844, 136)
+position = Vector2(437, 136)
 rotation = 1.5707964
 max_length = 264.0
 
-[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1017]
+[node name="LaserSwitch" parent="." unique_id=2090280682 instance=ExtResource("8_switch")]
+position = Vector2(778, 344)
+target_laser_paths = Array[NodePath]([NodePath("../LaserBeam")])
 
-[node name="Label" type="Label" parent="CanvasLayer" unique_id=1018]
-offset_left = 16.0
-offset_top = 16.0
-offset_right = 368.0
-offset_bottom = 84.0
-text = "Enemy Demo\nLMB attack, Q throw/teleport, R reset encounter"
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1017]
+script = ExtResource("7_hud")
+player_path = NodePath("../CharacterBody2D")
+
+[node name="Panel" type="Panel" parent="CanvasLayer" unique_id=1018]
+offset_left = 14.0
+offset_top = 14.0
+offset_right = 378.0
+offset_bottom = 128.0
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Panel" unique_id=1020]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = 350.0
+offset_bottom = 108.0
+
+[node name="Title" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=1021]
+layout_mode = 2
+text = "Enemy Demo"
+
+[node name="EnemyCount" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=1022]
+layout_mode = 2
+text = "Enemies: ..."
+
+[node name="Player" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=1023]
+layout_mode = 2
+text = "Player: ..."
+
+[node name="Controls" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=1024]
+layout_mode = 2
+text = "LMB attack | Q throw/teleport | F switch laser | R reset encounter"
