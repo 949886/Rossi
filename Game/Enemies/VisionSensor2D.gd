@@ -21,6 +21,14 @@ signal visual_debug_toggled(enabled: bool)
 ## Master switch for overlap sensing and line-of-sight evaluation.
 @export var sensor_enabled := true
 
+@export_group("Visual Persistence")
+## Keeps the last seen target position for a short time after visual contact is lost.
+@export var enable_visual_persistence := false
+## How long the last seen position remains available after the target is lost.
+@export_range(0.0, 10.0, 0.1) var visual_persistence_duration := 1.2
+## Distance threshold used by AI when it reaches the remembered position.
+@export_range(0.0, 64.0, 1.0) var visual_persistence_arrival_tolerance := 12.0
+
 @export_group("Vertical Sweep")
 ## Enables an up/down sweeping motion for directional vision checks and debug rendering.
 @export var enable_vertical_sweep := false
@@ -65,6 +73,9 @@ var _facing_direction := 1
 var _debug_target: Node2D
 var _sweep_time := 0.0
 var _current_sweep_angle_radians := 0.0
+var _visual_persistence_position := Vector2.ZERO
+var _visual_persistence_timer := 0.0
+var _has_visual_persistence_position := false
 
 func _ready() -> void:
 	add_to_group("VisionSensor")
@@ -86,6 +97,7 @@ func _process(_delta: float) -> void:
 		return
 
 	_update_sweep(_delta)
+	_update_visual_persistence(_delta)
 	if show_visual_debug or enable_vertical_sweep:
 		queue_redraw()
 
@@ -108,6 +120,8 @@ func find_best_target(validate_target: Callable = Callable()) -> Node2D:
 			nearest_target = body_2d
 
 	var previous_target = _debug_target
+	if nearest_target != null:
+		track_visible_target(nearest_target)
 	set_debug_target(nearest_target)
 	if previous_target != _debug_target:
 		detected_target_changed.emit(_debug_target)
@@ -144,6 +158,10 @@ func set_sensor_enabled(enabled: bool) -> void:
 	sensor_enabled = enabled
 	monitoring = enabled
 	monitorable = enabled
+	if not enabled:
+		clear_visual_persistence()
+	else:
+		_refresh_process_state()
 	queue_redraw()
 
 func set_visual_state(state_name: String) -> void:
@@ -168,6 +186,34 @@ func set_debug_target(target: Node2D) -> void:
 		return
 	_debug_target = target
 	queue_redraw()
+
+func track_visible_target(target: Node2D) -> void:
+	if target == null or not is_instance_valid(target):
+		return
+	_visual_persistence_position = target.global_position
+	if not _uses_visual_persistence():
+		return
+	_has_visual_persistence_position = true
+	_visual_persistence_timer = visual_persistence_duration
+	_refresh_process_state()
+	queue_redraw()
+
+func has_visual_persistence_target() -> bool:
+	return _uses_visual_persistence() and _has_visual_persistence_position and _visual_persistence_timer > 0.0
+
+func get_visual_persistence_position() -> Vector2:
+	return _visual_persistence_position
+
+func get_visual_persistence_arrival_tolerance() -> float:
+	return maxf(visual_persistence_arrival_tolerance, 0.0)
+
+func clear_visual_persistence() -> void:
+	var was_active := _has_visual_persistence_position or _visual_persistence_timer > 0.0
+	_has_visual_persistence_position = false
+	_visual_persistence_timer = 0.0
+	if was_active:
+		_refresh_process_state()
+		queue_redraw()
 
 func set_visual_debug_enabled(enabled: bool) -> void:
 	show_visual_debug = enabled
@@ -208,8 +254,17 @@ func _draw() -> void:
 		draw_rect(rect, outline_color, false, outline_width)
 		_draw_direction_indicator(center, minf(rect_shape.size.x, rect_shape.size.y) * 0.5, outline_color)
 
-	if show_target_line and is_instance_valid(_debug_target):
-		draw_line(center, to_local(_debug_target.global_position), outline_color.lightened(0.2), target_line_width, true)
+	var has_target_line := false
+	var target_line_position := Vector2.ZERO
+	if is_instance_valid(_debug_target):
+		has_target_line = true
+		target_line_position = _debug_target.global_position
+	elif has_visual_persistence_target():
+		has_target_line = true
+		target_line_position = _visual_persistence_position
+
+	if show_target_line and has_target_line:
+		draw_line(center, to_local(target_line_position), outline_color.lightened(0.2), target_line_width, true)
 
 func _is_candidate_valid(candidate: Variant, validate_target: Callable) -> bool:
 	if not sensor_enabled:
@@ -350,7 +405,7 @@ func _is_outline_antialiased() -> bool:
 	return not use_crisp_outline
 
 func _refresh_process_state() -> void:
-	set_process(show_visual_debug or enable_vertical_sweep or Engine.is_editor_hint())
+	set_process(show_visual_debug or enable_vertical_sweep or has_visual_persistence_target() or Engine.is_editor_hint())
 
 func _update_sweep(delta: float) -> void:
 	if not enable_vertical_sweep or sweep_max_angle_degrees <= 0.0 or sweep_frequency <= 0.0:
@@ -364,3 +419,20 @@ func _update_sweep(delta: float) -> void:
 func _get_current_forward_angle() -> float:
 	var base_angle := 0.0 if _facing_direction >= 0 else PI
 	return base_angle + _current_sweep_angle_radians
+
+func _uses_visual_persistence() -> bool:
+	return sensor_enabled and enable_visual_persistence and visual_persistence_duration > 0.0
+
+func _update_visual_persistence(delta: float) -> void:
+	if not _has_visual_persistence_position:
+		return
+	if not _uses_visual_persistence():
+		clear_visual_persistence()
+		return
+	if _visual_persistence_timer <= 0.0:
+		clear_visual_persistence()
+		return
+
+	_visual_persistence_timer = maxf(0.0, _visual_persistence_timer - maxf(delta, 0.0))
+	if _visual_persistence_timer <= 0.0:
+		clear_visual_persistence()

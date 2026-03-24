@@ -339,6 +339,7 @@ libraries/ = SubResource("AnimationLibrary_aiehk")
 [node name="VisionArea" type="Area2D" parent="." unique_id=1891001001]
 position = Vector2(0, -61)
 script = ExtResource("5_vision")
+enable_visual_persistence = true
 fov_angle_degrees = 30.0
 use_crisp_outline = false
 

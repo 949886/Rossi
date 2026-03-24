@@ -223,6 +223,7 @@ func reset_for_encounter() -> void:
 		collision_shape.disabled = false
 	if vision_sensor != null:
 		vision_sensor.set_sensor_enabled(true)
+		vision_sensor.clear_visual_persistence()
 		vision_sensor.set_debug_target(null)
 	if hurtbox != null:
 		hurtbox.monitorable = true
@@ -261,23 +262,42 @@ func _process_patrol(_delta: float) -> void:
 	velocity.x = _patrol_direction * move_speed * 0.55
 
 func _process_chase(_delta: float) -> void:
-	if not _is_target_valid(_target):
-		_change_state(State.RETURN_HOME)
-		return
-
 	var distance_to_home := global_position.distance_to(_spawn_position)
 	if distance_to_home > lose_target_range:
 		_target = null
+		_clear_visual_persistence_target()
 		_change_state(State.RETURN_HOME)
 		return
 
-	var to_target := _target.global_position - global_position
-	if absf(to_target.x) > 1.0:
-		_update_facing(sign(to_target.x))
+	if _is_target_valid(_target):
+		var to_target := _target.global_position - global_position
+		if absf(to_target.x) > 1.0:
+			_update_facing(sign(to_target.x))
 
-	if _can_attack_target():
-		_change_state(State.WINDUP)
+		if _can_attack_target():
+			_change_state(State.WINDUP)
+			return
+
+		if _is_blocked_forward():
+			velocity.x = 0.0
+			return
+
+		velocity.x = _facing_direction * move_speed
 		return
+
+	if not _has_visual_persistence_target():
+		_change_state(State.RETURN_HOME)
+		return
+
+	var to_last_seen := _get_visual_persistence_position() - global_position
+	if absf(to_last_seen.x) <= _get_visual_persistence_arrival_tolerance():
+		velocity.x = 0.0
+		_clear_visual_persistence_target()
+		_change_state(State.RETURN_HOME)
+		return
+
+	if absf(to_last_seen.x) > 1.0:
+		_update_facing(sign(to_last_seen.x))
 
 	if _is_blocked_forward():
 		velocity.x = 0.0
@@ -288,7 +308,7 @@ func _process_chase(_delta: float) -> void:
 func _process_windup() -> void:
 	velocity.x = 0.0
 	if not _is_target_valid(_target):
-		_change_state(State.RETURN_HOME)
+		_change_state(State.CHASE if _has_visual_persistence_target() else State.RETURN_HOME)
 		return
 	if _state_timer <= 0.0:
 		_change_state(State.ATTACK)
@@ -303,7 +323,7 @@ func _process_attack() -> void:
 func _process_recover() -> void:
 	velocity.x = 0.0
 	if _state_timer <= 0.0:
-		_change_state(State.IDLE if not _is_target_valid(_target) else State.CHASE)
+		_change_state(State.CHASE if _can_chase_target() else State.IDLE)
 
 func _process_hit(_delta: float) -> void:
 	velocity.x = move_toward(velocity.x, 0.0, move_speed * 3.0)
@@ -405,6 +425,7 @@ func _get_move_animation() -> String:
 func _update_target() -> void:
 	if _state == State.DEAD:
 		if vision_sensor != null:
+			vision_sensor.clear_visual_persistence()
 			vision_sensor.set_debug_target(null)
 		return
 
@@ -412,6 +433,7 @@ func _update_target() -> void:
 		var distance_to_target := global_position.distance_to(_target.global_position)
 		if distance_to_target <= lose_target_range and _has_line_of_sight(_target):
 			if vision_sensor != null:
+				vision_sensor.track_visible_target(_target)
 				vision_sensor.set_debug_target(_target)
 			return
 
@@ -442,7 +464,7 @@ func _has_line_of_sight(target: Node2D) -> bool:
 	return vision_sensor.has_line_of_sight(target)
 
 func _can_chase_target() -> bool:
-	return _is_target_valid(_target)
+	return _is_target_valid(_target) or _has_visual_persistence_target()
 
 func _can_attack_target() -> bool:
 	if not _is_target_valid(_target):
@@ -506,6 +528,7 @@ func _disable_combat_nodes() -> void:
 	if attack_hitbox != null:
 		attack_hitbox.set_active(false)
 	if vision_sensor != null:
+		vision_sensor.clear_visual_persistence()
 		vision_sensor.set_sensor_enabled(false)
 		vision_sensor.set_debug_target(null)
 	if hurtbox != null:
@@ -545,8 +568,29 @@ func _update_debug_label() -> void:
 	var target_text := "none"
 	if is_instance_valid(_target):
 		target_text = _target.name
+	elif _has_visual_persistence_target():
+		target_text = "last seen"
 	_debug_label.text = "%s  HP %d/%d\nTarget: %s" % [state_name, _current_health, max_health, target_text]
 
 func _emit_health_changed() -> void:
 	health_changed.emit(_current_health, max_health)
 	_update_debug_label()
+
+func _has_visual_persistence_target() -> bool:
+	return vision_sensor != null and vision_sensor.has_visual_persistence_target()
+
+func _get_visual_persistence_position() -> Vector2:
+	if vision_sensor == null:
+		return Vector2.ZERO
+	return vision_sensor.get_visual_persistence_position()
+
+func _get_visual_persistence_arrival_tolerance() -> float:
+	if vision_sensor == null:
+		return return_tolerance
+	return vision_sensor.get_visual_persistence_arrival_tolerance()
+
+func _clear_visual_persistence_target() -> void:
+	if vision_sensor == null:
+		return
+	vision_sensor.clear_visual_persistence()
+	vision_sensor.set_debug_target(null)
