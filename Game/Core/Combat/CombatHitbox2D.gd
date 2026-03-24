@@ -13,10 +13,8 @@ var _active := false
 var _already_hit: Dictionary = {}
 
 var active: bool:
-	get:
-		return _active
-	set(value):
-		set_active(value)
+	get: return _active
+	set(value): set_active(value)
 
 func _ready() -> void:
 	collision_layer = 1

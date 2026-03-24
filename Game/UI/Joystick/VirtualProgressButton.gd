@@ -20,8 +20,7 @@ var _max_charge_count := 1
 		_button_radius = maxf(value, 10.0)
 		_update_minimum_size()
 		queue_redraw()
-	get:
-		return _button_radius
+	get: return _button_radius
 
 @export var normal_color := Color(0.2, 0.2, 0.2, 0.6)
 @export var pressed_color := Color(0.5, 0.5, 0.5, 0.9)
@@ -35,8 +34,7 @@ var _max_charge_count := 1
 	set(value):
 		_cooldown_progress = clampf(value, 0.0, 1.0)
 		queue_redraw()
-	get:
-		return _cooldown_progress
+	get: return _cooldown_progress
 
 @export var cooldown_color := Color(0.1, 0.1, 0.1, 0.8)
 @export var cooldown_ring_width := 6.0
@@ -45,15 +43,13 @@ var _max_charge_count := 1
 	set(value):
 		_charge_count = maxi(value, 0)
 		queue_redraw()
-	get:
-		return _charge_count
+	get: return _charge_count
 
 @export var max_charge_count := 1:
 	set(value):
 		_max_charge_count = maxi(value, 1)
 		queue_redraw()
-	get:
-		return _max_charge_count
+	get: return _max_charge_count
 
 @export var charge_dot_color := Color(0.9, 0.9, 0.2, 1.0)
 @export var charge_dot_radius := 4.0
@@ -64,12 +60,10 @@ var _is_pressed := false
 var _touch_index := -1
 
 var is_pressed: bool:
-	get:
-		return _is_pressed
+	get: return _is_pressed
 
 var effective_radius: float:
-	get:
-		return minf(size.x, size.y) / 2.0
+	get: return minf(size.x, size.y) / 2.0
 
 func _ready() -> void:
 	_update_minimum_size()

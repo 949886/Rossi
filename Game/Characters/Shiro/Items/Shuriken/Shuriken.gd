@@ -7,26 +7,24 @@ class_name Shuriken
 @export var afterimage_duration := 0.25
 @export var afterimage_color := Color(0.1, 0.5, 1.0, 0.6)
 
+@onready var _sprite: Sprite2D = $"Sprite2D"
+
 var direction := Vector2.RIGHT
 
 var is_stuck: bool:
-	get:
-		return _stuck
+	get: return _stuck
 
 var stick_normal: Vector2:
-	get:
-		return _stick_normal
+	get: return _stick_normal
 
 var _stuck := false
 var _stick_normal := Vector2.ZERO
 var _afterimage_timer := 0.0
-var _sprite: Sprite2D
 var _attached_target: Node2D
 var _attached_local_position := Vector2.ZERO
 
 func _ready() -> void:
 	add_to_group("ResettableProjectile")
-	_sprite = get_node("Sprite2D")
 
 	# Face the correct direction based on throw direction
 	rotation = direction.angle()

@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 
 [Tool]
-[GlobalClass]
 public partial class LaserBeam : Node2D
 {
     [ExportGroup("Beam")]

@@ -1,24 +1,12 @@
 extends CharacterBody2D
 class_name EnemyBase
 
-const LASER_BEAM_SCRIPT := preload("res://Game/Props/Laser/LaserBeam.gd")
-
 signal hit_taken(hit_data: Dictionary)
 signal died
 signal respawned
 signal target_acquired(target: Node)
 signal health_changed(current_health: int, max_health: int)
 signal state_changed(state_name: String)
-
-@export var animated_sprite: AnimatedSprite2D
-@export var animation_player: AnimationPlayer
-@export var collision_shape: CollisionShape2D
-@export var vision_area: Area2D
-@export var hurtbox: CombatHurtbox2D
-@export var attack_hitbox: CombatHitbox2D
-@export var front_wall_ray_cast: RayCast2D
-@export var front_ground_ray_cast: RayCast2D
-@export var player_check_ray_cast: RayCast2D
 
 @export_group("Stats")
 @export var max_health := 1
@@ -55,6 +43,17 @@ signal state_changed(state_name: String)
 @export var show_debug_label := true
 @export var debug_label_offset := Vector2(0.0, -118.0)
 
+@onready var animated_sprite: AnimatedSprite2D = $"AnimatedSprite2D"
+@onready var animation_player: AnimationPlayer = $"AnimationPlayer"
+@onready var collision_shape: CollisionShape2D = $"CollisionShape2D"
+@onready var vision_area: Area2D = $"VisionArea"
+@onready var hurtbox: CombatHurtbox2D = $"Hurtbox"
+@onready var attack_hitbox: CombatHitbox2D = $"AttackHitbox"
+@onready var vision_shape: CollisionShape2D = $"VisionArea/CollisionShape2D"
+@onready var front_wall_ray_cast: RayCast2D = $"FrontWallRayCast2D"
+@onready var front_ground_ray_cast: RayCast2D = $"FrontGroundRayCast2D"
+@onready var player_check_ray_cast: RayCast2D = $"PlayerCheckRayCast2D"
+
 enum State {
 	IDLE,
 	PATROL,
@@ -83,29 +82,16 @@ var _debug_label: Label
 var _base_sprite_modulate := Color.WHITE
 
 var current_health: int:
-	get:
-		return _current_health
+	get: return _current_health
 
 var is_dead: bool:
-	get:
-		return _state == State.DEAD
+	get: return _state == State.DEAD
 
 var state_name: String:
-	get:
-		return String(State.keys()[_state]).to_lower()
+	get: return String(State.keys()[_state]).to_lower()
 
 func _ready() -> void:
 	add_to_group("Enemy")
-	animated_sprite = animated_sprite if animated_sprite != null else get_node_or_null("AnimatedSprite2D")
-	animation_player = animation_player if animation_player != null else get_node_or_null("AnimationPlayer")
-	collision_shape = collision_shape if collision_shape != null else get_node_or_null("CollisionShape2D")
-	vision_area = vision_area if vision_area != null else get_node_or_null("VisionArea")
-	hurtbox = hurtbox if hurtbox != null else get_node_or_null("Hurtbox")
-	attack_hitbox = attack_hitbox if attack_hitbox != null else get_node_or_null("AttackHitbox")
-	front_wall_ray_cast = front_wall_ray_cast if front_wall_ray_cast != null else get_node_or_null("FrontWallRayCast2D")
-	front_ground_ray_cast = front_ground_ray_cast if front_ground_ray_cast != null else get_node_or_null("FrontGroundRayCast2D")
-	player_check_ray_cast = player_check_ray_cast if player_check_ray_cast != null else get_node_or_null("PlayerCheckRayCast2D")
-
 	_spawn_position = global_position
 	_patrol_origin_x = global_position.x
 	_current_health = max_health
@@ -211,7 +197,7 @@ func receive_attack(hit_data: Dictionary) -> void:
 	_change_state(State.HIT)
 
 func interact_with(node: Node) -> void:
-	if _is_laser_beam(node):
+	if node is LaserBeam:
 		die()
 
 func InteractWith(node: Node) -> void:

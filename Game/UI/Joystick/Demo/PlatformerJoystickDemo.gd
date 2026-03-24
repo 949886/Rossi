@@ -5,39 +5,28 @@
 extends Node2D
 
 # Node references - resolved from the scene tree
-var _joystick
-var _jump_button
-var _attack_button
-var _dash_button
-var _throw_button
-var _info_label: Label
-var _touch_ui: TouchUI
+@onready var _joystick = $"TouchUI/TouchControls/JoystickArea/Joystick"
+@onready var _jump_button = $"TouchUI/TouchControls/ButtonArea/JumpBtn"
+@onready var _attack_button = $"TouchUI/TouchControls/ButtonArea/AttackBtn"
+@onready var _dash_button = $"TouchUI/TouchControls/ButtonArea/DashBtn"
+@onready var _throw_button = $"TouchUI/TouchControls/ButtonArea/ThrowBtn"
+@onready var _info_label: Label = $"TouchUI/InfoPanel/InfoLabel"
+@onready var _touch_ui: TouchUI = $"TouchUI"
+@onready var _info_panel: PanelContainer = $"TouchUI/InfoPanel"
 
 # Player reference for querying state
-var _player
+@onready var _player = $"Playground/CharacterBody2D"
 
 var _show_info := true
 
 func _ready() -> void:
-	# Resolve nodes placed in the .tscn scene
-	_joystick = get_node_or_null("TouchUI/TouchControls/JoystickArea/Joystick")
-	_jump_button = get_node_or_null("TouchUI/TouchControls/ButtonArea/JumpBtn")
-	_attack_button = get_node_or_null("TouchUI/TouchControls/ButtonArea/AttackBtn")
-	_dash_button = get_node_or_null("TouchUI/TouchControls/ButtonArea/DashBtn")
-	_throw_button = get_node_or_null("TouchUI/TouchControls/ButtonArea/ThrowBtn")
-	_info_label = get_node_or_null("TouchUI/InfoPanel/InfoLabel")
-	_touch_ui = get_node_or_null("TouchUI")
-
 	# Apply a semi-transparent panel style to InfoPanel
-	var info_panel := get_node_or_null("TouchUI/InfoPanel") as PanelContainer
-	if info_panel != null:
+	if _info_panel != null:
 		var style_box := StyleBoxFlat.new()
 		style_box.bg_color = Color(0, 0, 0, 0.5)
 		style_box.set_corner_radius_all(6)
 		style_box.set_content_margin_all(8)
-		info_panel.add_theme_stylebox_override("panel", style_box)
-
-	_player = get_node_or_null("Playground/CharacterBody2D")
+		_info_panel.add_theme_stylebox_override("panel", style_box)
 
 	if _attack_button != null and _player != null and _player.has_method("on_virtual_attack_activated"):
 		_attack_button.direction_activated.connect(Callable(_player, "on_virtual_attack_activated"))

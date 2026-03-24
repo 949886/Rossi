@@ -23,7 +23,7 @@ var _collision_shape: CollisionShape2D
 
 func _ready() -> void:
 	_start_position = global_position
-	_collision_shape = get_node_or_null("CollisionShape2D")
+	_collision_shape = ($"CollisionShape2D" as CollisionShape2D) if has_node(^"CollisionShape2D") else null
 	if _collision_shape == null:
 		_collision_shape = CollisionShape2D.new()
 		_collision_shape.name = "CollisionShape2D"

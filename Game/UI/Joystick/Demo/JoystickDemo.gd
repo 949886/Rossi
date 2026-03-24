@@ -1,8 +1,5 @@
 extends Node2D
 
-const VIRTUAL_JOYSTICK_SCRIPT = preload("res://Game/UI/Joystick/VirtualJoystick.gd")
-const VIRTUAL_BUTTON_SCRIPT = preload("res://Game/UI/Joystick/VirtualButton.gd")
-
 var _joystick
 var _jump_button
 var _attack_button
@@ -84,9 +81,9 @@ func _create_ui() -> void:
 	joystick_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui_layer.add_child(joystick_container)
 
-	_joystick = VIRTUAL_JOYSTICK_SCRIPT.new()
-	_joystick.mode = VIRTUAL_JOYSTICK_SCRIPT.JoystickMode.FIXED
-	_joystick.visibility_mode = VIRTUAL_JOYSTICK_SCRIPT.VisibilityMode.FADE_IN_OUT
+	_joystick = VirtualJoystick.new()
+	_joystick.mode = VirtualJoystick.JoystickMode.FIXED
+	_joystick.visibility_mode = VirtualJoystick.VisibilityMode.FADE_IN_OUT
 	_joystick.base_radius = 80.0
 	_joystick.handle_radius = 35.0
 	_joystick.dead_zone = 0.15
@@ -97,7 +94,7 @@ func _create_ui() -> void:
 	_joystick.size = Vector2(160, 160)
 	joystick_container.add_child(_joystick)
 
-	_jump_button = VIRTUAL_BUTTON_SCRIPT.new()
+	_jump_button = VirtualButton.new()
 	_jump_button.label = "B"
 	_jump_button.button_radius = 40.0
 	_jump_button.normal_color = Color(0.2, 0.35, 0.5, 0.7)
@@ -108,7 +105,7 @@ func _create_ui() -> void:
 	_jump_button.button_down.connect(_on_jump_pressed)
 	ui_layer.add_child(_jump_button)
 
-	_attack_button = VIRTUAL_BUTTON_SCRIPT.new()
+	_attack_button = VirtualButton.new()
 	_attack_button.label = "A"
 	_attack_button.button_radius = 40.0
 	_attack_button.normal_color = Color(0.5, 0.2, 0.2, 0.7)

@@ -1,8 +1,5 @@
 extends CanvasLayer
 
-const VIRTUAL_JOYSTICK_SCRIPT = preload("res://Game/UI/Joystick/VirtualJoystick.gd")
-const VIRTUAL_BUTTON_SCRIPT = preload("res://Game/UI/Joystick/VirtualButton.gd")
-
 signal joystick_input_changed(output: Vector2)
 
 @export_group("General")
@@ -10,8 +7,8 @@ signal joystick_input_changed(output: Vector2)
 @export_range(0.5, 3.0, 0.1) var control_scale := 1.0
 
 @export_group("Joystick Settings")
-@export var joystick_mode: int = VIRTUAL_JOYSTICK_SCRIPT.JoystickMode.FIXED
-@export var joystick_visibility: int = VIRTUAL_JOYSTICK_SCRIPT.VisibilityMode.ALWAYS
+@export var joystick_mode: int = VirtualJoystick.JoystickMode.FIXED
+@export var joystick_visibility: int = VirtualJoystick.VisibilityMode.ALWAYS
 @export var move_left_action := "move_left"
 @export var move_right_action := "move_right"
 @export var move_up_action := "jump"
@@ -32,12 +29,10 @@ var _dash_button
 var _container: Control
 
 var joystick:
-	get:
-		return _joystick
+	get: return _joystick
 
 var joystick_output: Vector2:
-	get:
-		return _joystick.output if _joystick else Vector2.ZERO
+	get: return _joystick.output if _joystick else Vector2.ZERO
 
 func _ready() -> void:
 	_create_layout()
@@ -71,7 +66,7 @@ func _create_joystick() -> void:
 	joystick_area.position = Vector2(30.0 * control_scale, -area_size - 30.0 * control_scale)
 	_container.add_child(joystick_area)
 
-	_joystick = VIRTUAL_JOYSTICK_SCRIPT.new()
+	_joystick = VirtualJoystick.new()
 	_joystick.name = "VirtualJoystick"
 	_joystick.mode = joystick_mode
 	_joystick.visibility_mode = joystick_visibility
@@ -127,7 +122,7 @@ func _create_action_buttons() -> void:
 		button_area.add_child(_dash_button)
 
 func _create_button(name: String, action_name: String, button_label: String, radius: float):
-	var button = VIRTUAL_BUTTON_SCRIPT.new()
+	var button = VirtualButton.new()
 	button.name = name
 	button.action = action_name
 	button.label = button_label

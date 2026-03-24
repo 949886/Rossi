@@ -1,5 +1,6 @@
 @tool
 extends Control
+class_name VirtualButton
 
 signal button_down
 signal button_up
@@ -18,8 +19,7 @@ var _button_radius := 40.0
 		_button_radius = maxf(value, 10.0)
 		_update_minimum_size()
 		queue_redraw()
-	get:
-		return _button_radius
+	get: return _button_radius
 
 @export var normal_color := Color(0.2, 0.2, 0.2, 0.6)
 @export var pressed_color := Color(0.5, 0.5, 0.5, 0.9)
@@ -32,12 +32,10 @@ var _is_pressed := false
 var _touch_index := -1
 
 var is_pressed: bool:
-	get:
-		return _is_pressed
+	get: return _is_pressed
 
 var effective_radius: float:
-	get:
-		return minf(size.x, size.y) / 2.0
+	get: return minf(size.x, size.y) / 2.0
 
 func _ready() -> void:
 	_update_minimum_size()

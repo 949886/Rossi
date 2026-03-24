@@ -1,5 +1,6 @@
 @tool
 extends Control
+class_name VirtualJoystick
 
 enum JoystickMode {
 	FIXED,
@@ -28,16 +29,14 @@ var _handle_radius := 35.0
 	set(value):
 		_mode = value
 		queue_redraw()
-	get:
-		return _mode
+	get: return _mode
 
 @export var visibility_mode: VisibilityMode = VisibilityMode.ALWAYS:
 	set(value):
 		_visibility_mode = value
 		_update_visibility()
 		queue_redraw()
-	get:
-		return _visibility_mode
+	get: return _visibility_mode
 
 @export_range(0.0, 1.0, 0.01) var dead_zone := 0.2
 @export_range(-1.0, 1.0, 0.01) var clamp_zone := 1.0
@@ -58,15 +57,13 @@ var _handle_radius := 35.0
 		_base_radius = maxf(value, 10.0)
 		_update_minimum_size()
 		queue_redraw()
-	get:
-		return _base_radius
+	get: return _base_radius
 
 @export var handle_radius := 35.0:
 	set(value):
 		_handle_radius = maxf(value, 5.0)
 		queue_redraw()
-	get:
-		return _handle_radius
+	get: return _handle_radius
 
 @export var base_color := Color(0.15, 0.15, 0.15, 0.6)
 @export var handle_color := Color(0.8, 0.8, 0.8, 0.8)
@@ -81,24 +78,19 @@ var _base_center := Vector2.ZERO
 var _handle_position := Vector2.ZERO
 
 var output: Vector2:
-	get:
-		return _output
+	get: return _output
 
 var is_pressed: bool:
-	get:
-		return _is_pressed
+	get: return _is_pressed
 
 var strength: float:
-	get:
-		return _output.length()
+	get: return _output.length()
 
 var angle: float:
-	get:
-		return _output.angle()
+	get: return _output.angle()
 
 var effective_base_radius: float:
-	get:
-		return minf(size.x, size.y) / 2.0
+	get: return minf(size.x, size.y) / 2.0
 
 var effective_handle_radius: float:
 	get:

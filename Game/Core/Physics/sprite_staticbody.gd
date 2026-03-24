@@ -15,8 +15,7 @@ class CollisionInfo:
 @export var sprite: Sprite2D
 
 @export var texture: Texture2D:
-	get:
-		return sprite.texture if sprite else null
+	get: return sprite.texture if sprite else null
 	set(value):
 		if sprite == null:
 			return

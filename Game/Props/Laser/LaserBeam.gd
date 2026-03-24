@@ -1,4 +1,5 @@
 @tool
+class_name LaserBeam
 extends Node2D
 
 @export_group("Beam")
@@ -26,19 +27,17 @@ extends Node2D
 @export var collide_with_areas := false
 @export var collide_with_bodies := true
 
-var _damage_area: Area2D
-var _damage_shape: CollisionShape2D
+@onready var _damage_area: Area2D = $"DamageArea"
+@onready var _damage_shape: CollisionShape2D = $"DamageArea/CollisionShape2D"
+
 var _current_length := 0.0
 var _is_enabled := false
 
 var is_enabled: bool:
-	get:
-		return _is_enabled
+	get: return _is_enabled
 
 func _ready() -> void:
 	add_to_group("EncounterResettable")
-	_damage_area = get_node("DamageArea")
-	_damage_shape = get_node("DamageArea/CollisionShape2D")
 
 	_is_enabled = starts_enabled
 	set_process(Engine.is_editor_hint())
@@ -59,8 +58,6 @@ func _physics_process(_delta: float) -> void:
 		if body is CharacterBody2D:
 			if body.has_method("interact_with"):
 				body.interact_with(self)
-			elif body.has_method("InteractWith"):
-				body.InteractWith(self)
 
 func _draw() -> void:
 	if _current_length <= 0.1:

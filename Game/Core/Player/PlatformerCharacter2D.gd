@@ -1,20 +1,12 @@
 extends CharacterBody2D
 class_name PlatformerCharacter2D
 
-const LASER_BEAM_SCRIPT := preload("res://Game/Props/Laser/LaserBeam.gd")
-
 signal attack_started(direction: Vector2)
 signal died
 signal respawned(spawn_position: Vector2)
 signal checkpoint_set(checkpoint_position: Vector2)
 signal shuriken_spawned(shuriken: Shuriken)
 signal teleported(from_position: Vector2, to_position: Vector2)
-
-@export var animated_sprite: AnimatedSprite2D
-@export var animation_player: AnimationPlayer
-@export var animation_tree: AnimationTree
-@export var hurtbox: CombatHurtbox2D
-@export var attack_hitbox: CombatHitbox2D
 
 @export_group("Movement")
 @export var move_speed := 200.0
@@ -84,6 +76,13 @@ signal teleported(from_position: Vector2, to_position: Vector2)
 @export var default_respawn_position := Vector2.ZERO
 @export var max_health := 1
 
+@onready var animated_sprite: AnimatedSprite2D = $"AnimatedSprite2D"
+@onready var animation_player: AnimationPlayer = $"AnimationPlayer"
+@onready var animation_tree: AnimationTree = $"AnimationTree"
+
+var hurtbox: CombatHurtbox2D
+var attack_hitbox: CombatHitbox2D
+
 enum State {
 	IDLE,
 	IDLE_TO_RUN,
@@ -140,30 +139,23 @@ var _rng := RandomNumberGenerator.new()
 
 # Public API for UI to display dash cooldown and charges
 var dash_charges: int:
-	get:
-		return _dash_charges
+	get: return _dash_charges
 
 var dash_recharge_progress: float:
-	get:
-		return (_dash_recharge_timer / dash_cooldown) if _dash_charges < max_dash_charges and dash_cooldown > 0.0 else 0.0
+	get: return (_dash_recharge_timer / dash_cooldown) if _dash_charges < max_dash_charges and dash_cooldown > 0.0 else 0.0
 
 var is_dead: bool:
-	get:
-		return _is_dead
+	get: return _is_dead
 
 var is_invulnerable: bool:
-	get:
-		return not _is_dead and _invulnerability_timer > 0.0
+	get: return not _is_dead and _invulnerability_timer > 0.0
 
 var invulnerable_timer: float:
-	get:
-		return _invulnerability_timer
-	set(value):
-		_invulnerability_timer = maxf(0.0, value)
+	get: return _invulnerability_timer
+	set(value): _invulnerability_timer = maxf(0.0, value)
 
 var current_respawn_position: Vector2:
-	get:
-		return _current_respawn_position
+	get: return _current_respawn_position
 
 func _get(property: StringName):
 	match String(property):
@@ -172,14 +164,9 @@ func _get(property: StringName):
 	return null
 
 func _ready() -> void:
-	# Auto-find nodes by relative path if not assigned via export
-	if animated_sprite == null:
-		animated_sprite = get_node("AnimatedSprite2D")
-	if animation_player == null:
-		animation_player = get_node("AnimationPlayer")
-	animation_tree = get_node_or_null("AnimationTree")
-	hurtbox = hurtbox if hurtbox != null else get_node_or_null("Hurtbox")
-	attack_hitbox = attack_hitbox if attack_hitbox != null else get_node_or_null("PlayerAttackHitbox")
+	hurtbox = get_node_or_null("Hurtbox")
+	attack_hitbox = get_node_or_null("PlayerAttackHitbox")
+	
 	_ensure_combat_nodes()
 
 	# Disable AnimationTree - it overrides AnimationPlayer.play() calls.
@@ -1123,7 +1110,6 @@ func can_start_attack_from_current_state() -> bool:
 		_:
 			return false
 
-# Created by LunarEclipse on 2026-03-19 17:03.
 func interact_with(node: Node) -> void:
 	if node is LaserBeam:
 		if not (is_dead or is_invulnerable):
