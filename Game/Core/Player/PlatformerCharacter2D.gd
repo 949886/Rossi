@@ -1125,26 +1125,6 @@ func can_start_attack_from_current_state() -> bool:
 
 # Created by LunarEclipse on 2026-03-19 17:03.
 func interact_with(node: Node) -> void:
-	if _is_laser_beam(node):
-		die()
-
-func InteractWith(node: Node) -> void:
-	interact_with(node)
-
-func OnVirtualAttackActivated(aim_angle: float) -> void:
-	on_virtual_attack_activated(aim_angle)
-
-func OnVirtualThrowActivated(aim_angle: float) -> void:
-	on_virtual_throw_activated(aim_angle)
-
-func Die() -> void:
-	die()
-
-func Respawn(spawn_position: Vector2) -> void:
-	respawn(spawn_position)
-
-func SetCheckpoint(checkpoint_position: Vector2) -> void:
-	set_checkpoint(checkpoint_position)
-
-func _is_laser_beam(node: Node) -> bool:
-	return node != null and node.get_script() == LASER_BEAM_SCRIPT
+	if node is LaserBeam:
+		if not (is_dead or is_invulnerable):
+			die()

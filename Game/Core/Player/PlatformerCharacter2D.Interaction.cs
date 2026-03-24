@@ -8,7 +8,8 @@ public partial class PlatformerCharacter2D
     {
         if (node is LaserBeam laser)
         {
-            Die();
+            if (!character.IsDead && !character.IsInvulnerable) 
+                Die();
         }
     }
 }
