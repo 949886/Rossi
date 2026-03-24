@@ -12,7 +12,6 @@ signal state_changed(state_name: String)
 @export var max_health := 1
 @export var move_speed := 90.0
 @export var patrol_distance := 96.0
-@export var vision_range := 180.0
 @export var lose_target_range := 260.0
 @export var attack_range := 26.0
 @export var attack_cooldown := 0.8
@@ -48,11 +47,9 @@ signal state_changed(state_name: String)
 @onready var collision_shape: CollisionShape2D = $"CollisionShape2D"
 @onready var hurtbox: Hurtbox2D = $"Hurtbox"
 @onready var attack_hitbox: Hitbox2D = $"AttackHitbox"
-@onready var vision_area: Area2D = $"VisionArea"
-@onready var vision_shape: CollisionShape2D = $"VisionArea/CollisionShape2D"
+@onready var vision_sensor: VisionSensor2D = $"VisionArea"
 @onready var front_wall_ray_cast: RayCast2D = $"FrontWallRayCast2D"
 @onready var front_ground_ray_cast: RayCast2D = $"FrontGroundRayCast2D"
-@onready var player_check_ray_cast: RayCast2D = $"PlayerCheckRayCast2D"
 
 enum State {
 	IDLE,
@@ -111,12 +108,11 @@ func _ready() -> void:
 	if hurtbox != null and hurtbox.receiver_path == NodePath():
 		hurtbox.receiver_path = NodePath("..")
 
-	if vision_area != null:
-		vision_area.monitoring = true
-		vision_area.monitorable = true
-		#var vision_shape := vision_area.get_node_or_null("CollisionShape2D")
-		if vision_shape != null and vision_shape.shape is CircleShape2D:
-			(vision_shape.shape as CircleShape2D).radius = vision_range
+	if vision_sensor != null:
+		vision_sensor.target_group = "Player"
+		vision_sensor.set_sensor_enabled(true)
+		vision_sensor.set_visual_state(state_name)
+		vision_sensor.set_facing_direction(_spawn_facing_direction)
 
 	if front_ground_ray_cast != null:
 		front_ground_ray_cast.enabled = true
@@ -124,9 +120,6 @@ func _ready() -> void:
 	if front_wall_ray_cast != null:
 		front_wall_ray_cast.enabled = true
 		front_wall_ray_cast.exclude_parent = true
-	if player_check_ray_cast != null:
-		player_check_ray_cast.enabled = true
-		player_check_ray_cast.exclude_parent = true
 
 	_ensure_debug_label()
 	_emit_health_changed()
@@ -228,9 +221,9 @@ func reset_for_encounter() -> void:
 		animated_sprite.modulate = _base_sprite_modulate
 	if collision_shape != null:
 		collision_shape.disabled = false
-	if vision_area != null:
-		vision_area.monitoring = true
-		vision_area.monitorable = true
+	if vision_sensor != null:
+		vision_sensor.set_sensor_enabled(true)
+		vision_sensor.set_debug_target(null)
 	if hurtbox != null:
 		hurtbox.monitorable = true
 	if attack_hitbox != null:
@@ -353,6 +346,8 @@ func _apply_gravity(delta: float) -> void:
 func _change_state(new_state: State) -> void:
 	_state = new_state
 	state_changed.emit(state_name)
+	if vision_sensor != null:
+		vision_sensor.set_visual_state(state_name)
 	match new_state:
 		State.IDLE:
 			_play_animation("idle")
@@ -409,11 +404,15 @@ func _get_move_animation() -> String:
 
 func _update_target() -> void:
 	if _state == State.DEAD:
+		if vision_sensor != null:
+			vision_sensor.set_debug_target(null)
 		return
 
 	if _is_target_valid(_target):
 		var distance_to_target := global_position.distance_to(_target.global_position)
 		if distance_to_target <= lose_target_range and _has_line_of_sight(_target):
+			if vision_sensor != null:
+				vision_sensor.set_debug_target(_target)
 			return
 
 	_target = null
@@ -421,23 +420,13 @@ func _update_target() -> void:
 	if new_target != null:
 		_target = new_target
 		target_acquired.emit(new_target)
+	if vision_sensor != null:
+		vision_sensor.set_debug_target(_target)
 
 func _find_visible_target() -> Node2D:
-	if vision_area == null:
+	if vision_sensor == null:
 		return null
-
-	var nearest_target: Node2D
-	var nearest_distance := INF
-	for body in vision_area.get_overlapping_bodies():
-		if not _is_target_valid(body):
-			continue
-		if not _has_line_of_sight(body):
-			continue
-		var distance_to_body := global_position.distance_to(body.global_position)
-		if distance_to_body < nearest_distance:
-			nearest_distance = distance_to_body
-			nearest_target = body
-	return nearest_target
+	return vision_sensor.find_best_target(Callable(self, "_is_target_valid"))
 
 func _is_target_valid(candidate: Variant) -> bool:
 	if not (candidate is Node2D) or not is_instance_valid(candidate):
@@ -448,14 +437,9 @@ func _is_target_valid(candidate: Variant) -> bool:
 	return dead_state == null or dead_state == false
 
 func _has_line_of_sight(target: Node2D) -> bool:
-	if player_check_ray_cast == null:
+	if vision_sensor == null:
 		return true
-
-	player_check_ray_cast.target_position = player_check_ray_cast.to_local(target.global_position)
-	player_check_ray_cast.force_raycast_update()
-	if not player_check_ray_cast.is_colliding():
-		return true
-	return player_check_ray_cast.get_collider() == target
+	return vision_sensor.has_line_of_sight(target)
 
 func _can_chase_target() -> bool:
 	return _is_target_valid(_target)
@@ -493,6 +477,8 @@ func _update_facing(direction: float) -> void:
 
 	if animated_sprite != null:
 		animated_sprite.flip_h = _facing_direction < 0
+	if vision_sensor != null:
+		vision_sensor.set_facing_direction(_facing_direction)
 	_configure_attack_hitbox()
 	_update_probe_positions()
 
@@ -519,9 +505,9 @@ func _update_probe_positions() -> void:
 func _disable_combat_nodes() -> void:
 	if attack_hitbox != null:
 		attack_hitbox.set_active(false)
-	if vision_area != null:
-		vision_area.monitoring = false
-		vision_area.monitorable = false
+	if vision_sensor != null:
+		vision_sensor.set_sensor_enabled(false)
+		vision_sensor.set_debug_target(null)
 	if hurtbox != null:
 		hurtbox.monitorable = false
 

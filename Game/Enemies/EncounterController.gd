@@ -2,21 +2,31 @@ extends Node
 class_name EncounterController
 
 @export var reset_keycode: Key = KEY_R
+@export var toggle_vision_debug_keycode: Key = KEY_V
 @export var player_path: NodePath
 @export var reset_player_on_reset := true
 @export var clear_projectiles_on_reset := true
+@export var vision_debug_enabled := true
 
 var _player: Node
 var _player_spawn_position := Vector2.ZERO
 
 func _ready() -> void:
+	add_to_group("EncounterController")
 	_player = _resolve_player()
 	if _player is Node2D:
 		_player_spawn_position = (_player as Node2D).global_position
+	_apply_vision_debug_state()
 
 func _unhandled_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and event.keycode == reset_keycode:
+	if not (event is InputEventKey) or not event.pressed or event.echo:
+		return
+
+	if event.keycode == reset_keycode:
 		reset_encounter()
+		return
+	if event.keycode == toggle_vision_debug_keycode:
+		set_vision_debug_enabled(not vision_debug_enabled)
 
 func reset_encounter() -> void:
 	var handled_enemies: Dictionary = {}
@@ -74,3 +84,12 @@ func _reset_player() -> void:
 		_player.respawn(target_position)
 	elif _player is Node2D:
 		(_player as Node2D).global_position = _player_spawn_position
+
+func set_vision_debug_enabled(enabled: bool) -> void:
+	vision_debug_enabled = enabled
+	_apply_vision_debug_state()
+
+func _apply_vision_debug_state() -> void:
+	for sensor in get_tree().get_nodes_in_group("VisionSensor"):
+		if sensor.has_method("set_visual_debug_enabled"):
+			sensor.set_visual_debug_enabled(vision_debug_enabled)

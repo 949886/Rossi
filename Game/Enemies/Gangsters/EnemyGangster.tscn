@@ -4,6 +4,7 @@
 [ext_resource type="SpriteFrames" uid="uid://n1rudh1at43k" path="res://Game/Enemies/Gangsters/gangsters_animations.tres" id="2_uxs4r"]
 [ext_resource type="Script" uid="uid://vvvc1tiw61sd" path="res://Game/Core/Combat/Hurtbox2D.gd" id="3_hurtbox"]
 [ext_resource type="Script" uid="uid://b0g085vl5dyxk" path="res://Game/Core/Combat/Hitbox2D.gd" id="4_hitbox"]
+[ext_resource type="Script" uid="uid://r1ixpk5r2m4x" path="res://Game/Enemies/VisionSensor2D.gd" id="5_vision"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_xjagb"]
 radius = 7.0
@@ -302,7 +303,7 @@ _data = {
 }
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_vision"]
-radius = 180.0
+radius = 300.0
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_hurtbox"]
 size = Vector2(18, 64)
@@ -325,8 +326,7 @@ contact_knockback = Vector2(150, -15)
 texture_filter = 1
 position = Vector2(0, -64)
 sprite_frames = ExtResource("2_uxs4r")
-animation = &"idle"
-frame_progress = 0.20004083
+animation = &"be_hit"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1884903422]
 position = Vector2(0, -35)
@@ -337,9 +337,13 @@ root_node = NodePath("../..")
 libraries/ = SubResource("AnimationLibrary_aiehk")
 
 [node name="VisionArea" type="Area2D" parent="." unique_id=1891001001]
+position = Vector2(0, -61)
+script = ExtResource("5_vision")
+fov_angle_degrees = 30.0
+use_crisp_outline = false
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="VisionArea" unique_id=1891001002]
-position = Vector2(0, -35)
+visible = false
 shape = SubResource("CircleShape2D_vision")
 
 [node name="Hurtbox" type="Area2D" parent="." unique_id=1891001003]
@@ -364,7 +368,3 @@ target_position = Vector2(14, 0)
 [node name="FrontGroundRayCast2D" type="RayCast2D" parent="." unique_id=1891001008]
 position = Vector2(10, 0)
 target_position = Vector2(0, 28)
-
-[node name="PlayerCheckRayCast2D" type="RayCast2D" parent="." unique_id=1891001009]
-position = Vector2(0, -35)
-target_position = Vector2(180, -10)

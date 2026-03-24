@@ -42,7 +42,7 @@ func _update_labels() -> void:
 		_title_label.text = "Enemy Demo"
 
 	if _controls_label != null:
-		_controls_label.text = "LMB attack | Q throw/teleport | F switch laser | R reset encounter"
+		_controls_label.text = "LMB attack | Q throw/teleport | F switch laser | V vision debug | R reset encounter"
 
 	if _enemy_count_label != null:
 		var alive := 0
