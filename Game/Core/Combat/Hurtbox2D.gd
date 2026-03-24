@@ -1,5 +1,5 @@
 extends Area2D
-class_name CombatHurtbox2D
+class_name Hurtbox2D
 
 @export var receiver_path: NodePath
 

@@ -80,8 +80,8 @@ signal teleported(from_position: Vector2, to_position: Vector2)
 @onready var animation_player: AnimationPlayer = $"AnimationPlayer"
 @onready var animation_tree: AnimationTree = $"AnimationTree"
 
-var hurtbox: CombatHurtbox2D
-var attack_hitbox: CombatHitbox2D
+var hurtbox: Hurtbox2D
+var attack_hitbox: Hitbox2D
 
 enum State {
 	IDLE,
@@ -958,7 +958,7 @@ func _get_slash_animation_name() -> String:
 
 func _ensure_combat_nodes() -> void:
 	if hurtbox == null:
-		hurtbox = CombatHurtbox2D.new()
+		hurtbox = Hurtbox2D.new()
 		hurtbox.name = "Hurtbox"
 		hurtbox.position = Vector2(6.0, -20.0)
 		var hurtbox_shape := CollisionShape2D.new()
@@ -969,7 +969,7 @@ func _ensure_combat_nodes() -> void:
 		add_child(hurtbox)
 
 	if attack_hitbox == null:
-		attack_hitbox = CombatHitbox2D.new()
+		attack_hitbox = Hitbox2D.new()
 		attack_hitbox.name = "PlayerAttackHitbox"
 		var attack_shape := CollisionShape2D.new()
 		var attack_rect := RectangleShape2D.new()

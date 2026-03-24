@@ -1,5 +1,5 @@
 extends Area2D
-class_name CombatHitbox2D
+class_name Hitbox2D
 
 @export var damage := 1
 @export var knockback := Vector2(180.0, -35.0)
@@ -28,10 +28,10 @@ func _physics_process(_delta: float) -> void:
 		return
 
 	for area in get_overlapping_areas():
-		if not (area is CombatHurtbox2D):
+		if not (area is Hurtbox2D):
 			continue
 
-		var hurtbox := area as CombatHurtbox2D
+		var hurtbox := area as Hurtbox2D
 		var receiver := hurtbox.get_damage_receiver()
 		if receiver == null:
 			continue
