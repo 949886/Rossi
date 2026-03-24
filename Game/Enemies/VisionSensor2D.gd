@@ -20,6 +20,10 @@ signal visual_debug_toggled(enabled: bool)
 @export var require_line_of_sight := true
 ## Master switch for overlap sensing and line-of-sight evaluation.
 @export var sensor_enabled := true
+## Uses the target collision bounds instead of only its origin for FOV and LOS checks.
+@export var use_target_bounds_sampling := true
+## Extra world-space padding added around sampled target bounds to trigger detection a bit earlier.
+@export_range(0.0, 32.0, 1.0) var target_bounds_padding := 4.0
 
 @export_group("Visual Persistence")
 ## Keeps the last seen target position for a short time after visual contact is lost.
@@ -133,7 +137,13 @@ func has_line_of_sight(target: Node2D) -> bool:
 	if not require_line_of_sight:
 		return true
 
-	var query := PhysicsRayQueryParameters2D.create(global_position, target.global_position, line_of_sight_collision_mask)
+	for sample_point in _get_target_visibility_points(target):
+		if _has_line_of_sight_to_point(target, sample_point):
+			return true
+	return false
+
+func _has_line_of_sight_to_point(target: Node2D, point: Vector2) -> bool:
+	var query := PhysicsRayQueryParameters2D.create(global_position, point, line_of_sight_collision_mask)
 	var excludes: Array[RID] = [get_rid()]
 	var parent_node := get_parent()
 	if parent_node is CollisionObject2D:
@@ -269,15 +279,16 @@ func _draw() -> void:
 func _is_candidate_valid(candidate: Variant, validate_target: Callable) -> bool:
 	if not sensor_enabled:
 		return false
-	if not (candidate is Node2D) or not is_instance_valid(candidate):
+	var candidate_2d := candidate as Node2D
+	if candidate_2d == null or not is_instance_valid(candidate_2d):
 		return false
-	if target_group != "" and not candidate.is_in_group(target_group):
+	if target_group != "" and not candidate_2d.is_in_group(target_group):
 		return false
-	if _uses_fov() and not _is_in_fov(candidate.global_position):
+	if _uses_fov() and not _is_target_in_fov(candidate_2d):
 		return false
-	if require_line_of_sight and not has_line_of_sight(candidate):
+	if require_line_of_sight and not has_line_of_sight(candidate_2d):
 		return false
-	if validate_target.is_valid() and not bool(validate_target.call(candidate)):
+	if validate_target.is_valid() and not bool(validate_target.call(candidate_2d)):
 		return false
 	return true
 
@@ -286,6 +297,12 @@ func _uses_fov() -> bool:
 
 func _uses_cone_visual() -> bool:
 	return _uses_fov() and _get_shape_resource() is CircleShape2D
+
+func _is_target_in_fov(target: Node2D) -> bool:
+	for sample_point in _get_target_visibility_points(target):
+		if _is_in_fov(sample_point):
+			return true
+	return false
 
 func _is_in_fov(world_position: Vector2) -> bool:
 	if not _uses_fov():
@@ -419,6 +436,67 @@ func _update_sweep(delta: float) -> void:
 func _get_current_forward_angle() -> float:
 	var base_angle := 0.0 if _facing_direction >= 0 else PI
 	return base_angle + _current_sweep_angle_radians
+
+func _get_target_visibility_points(target: Node2D) -> PackedVector2Array:
+	var points := PackedVector2Array()
+	if target == null or not is_instance_valid(target):
+		return points
+
+	points.append(target.global_position)
+	if not use_target_bounds_sampling:
+		return points
+
+	var collision := _find_primary_collision_shape(target)
+	if collision == null or collision.shape == null or collision.disabled:
+		return points
+
+	var offsets := _get_shape_sample_offsets(collision.shape)
+	if offsets.is_empty():
+		points.append(collision.global_position)
+		return points
+
+	for offset in offsets:
+		points.append(collision.global_transform * offset)
+	return points
+
+func _find_primary_collision_shape(target: Node2D) -> CollisionShape2D:
+	for child in target.find_children("*", "CollisionShape2D", true, false):
+		var collision := child as CollisionShape2D
+		if collision == null or collision.disabled or collision.shape == null:
+			continue
+		return collision
+	return null
+
+func _get_shape_sample_offsets(shape: Shape2D) -> PackedVector2Array:
+	var points := PackedVector2Array()
+	var padding := maxf(target_bounds_padding, 0.0)
+
+	if shape is CircleShape2D:
+		var radius := (shape as CircleShape2D).radius + padding
+		return _build_extents_sample_offsets(radius, radius)
+
+	if shape is RectangleShape2D:
+		var size := (shape as RectangleShape2D).size * 0.5
+		return _build_extents_sample_offsets(size.x + padding, size.y + padding)
+
+	if shape is CapsuleShape2D:
+		var capsule := shape as CapsuleShape2D
+		return _build_extents_sample_offsets(capsule.radius + padding, capsule.height * 0.5 + capsule.radius + padding)
+
+	return points
+
+func _build_extents_sample_offsets(extent_x: float, extent_y: float) -> PackedVector2Array:
+	var points := PackedVector2Array()
+	points.append(Vector2.ZERO)
+	points.append(Vector2(0.0, -extent_y))
+	points.append(Vector2(0.0, extent_y))
+	points.append(Vector2(-extent_x, 0.0))
+	points.append(Vector2(extent_x, 0.0))
+	points.append(Vector2(-extent_x, -extent_y))
+	points.append(Vector2(extent_x, -extent_y))
+	points.append(Vector2(-extent_x, extent_y))
+	points.append(Vector2(extent_x, extent_y))
+	return points
 
 func _uses_visual_persistence() -> bool:
 	return sensor_enabled and enable_visual_persistence and visual_persistence_duration > 0.0
