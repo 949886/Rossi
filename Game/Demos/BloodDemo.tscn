@@ -1,0 +1,231 @@
+[gd_scene format=3 uid="uid://dd7bvn5ukmav8"]
+
+[ext_resource type="Script" uid="uid://7450dj8niymh" path="res://Game/Demos/BloodDemo.gd" id="1_demo"]
+[ext_resource type="Script" uid="uid://b8uxbkqqcn12" path="res://Game/Enemies/EncounterController.gd" id="2_encounter"]
+[ext_resource type="PackedScene" uid="uid://cp7soa40msiek" path="res://Game/Characters/Shiro/Shiro.tscn" id="3_shiro"]
+[ext_resource type="PackedScene" uid="uid://c7t8p6v5taq2x" path="res://Game/Characters/Shiro/Items/Shuriken/Shuriken.tscn" id="4_shuriken"]
+[ext_resource type="PackedScene" uid="uid://l1fj7qvub0mh" path="res://Game/Enemies/Gangsters/EnemyGangster.tscn" id="5_enemy"]
+[ext_resource type="Script" uid="uid://be3o6nwd2gsbg" path="res://Game/Enemies/EnemySpawner2D.gd" id="6_spawner"]
+[ext_resource type="Script" uid="uid://18fwsmh8o0cc" path="res://Game/Effects/BloodFxLayer.gd" id="7_blood"]
+[ext_resource type="Script" uid="uid://c16g0pkl4t6il" path="res://Game/Demos/BloodDemoHud.gd" id="8_hud"]
+[ext_resource type="Shader" uid="uid://dejeiy537grca" path="res://Game/Shaders/Chromatic/circular_chormatic/circular_chormatic.gdshader" id="9_shader"]
+
+[sub_resource type="RectangleShape2D" id="2"]
+size = Vector2(1500, 56)
+
+[sub_resource type="RectangleShape2D" id="3"]
+size = Vector2(48, 288)
+
+[sub_resource type="RectangleShape2D" id="4"]
+size = Vector2(48, 176)
+
+[sub_resource type="RectangleShape2D" id="5"]
+size = Vector2(36, 188)
+
+[sub_resource type="RectangleShape2D" id="6"]
+size = Vector2(300, 24)
+
+[sub_resource type="RectangleShape2D" id="7"]
+size = Vector2(220, 24)
+
+[sub_resource type="RectangleShape2D" id="8"]
+size = Vector2(42, 156)
+
+[sub_resource type="ShaderMaterial" id="1"]
+shader = ExtResource("9_shader")
+shader_parameter/MAX_DIST_PX = 3.0
+shader_parameter/roundness = 0.0
+
+[node name="BloodDemo" type="Node2D" unique_id=1892483518]
+script = ExtResource("1_demo")
+enemy_max_health = 1
+
+[node name="Backdrop" type="Polygon2D" parent="." unique_id=862618343]
+z_index = -20
+color = Color(0.0705882, 0.0823529, 0.113725, 1)
+polygon = PackedVector2Array(0, 0, 1536, 0, 1536, 768, 0, 768)
+
+[node name="BackdropGlow" type="Polygon2D" parent="." unique_id=332201547]
+z_index = -18
+color = Color(0.192157, 0.0509804, 0.0588235, 0.22)
+polygon = PackedVector2Array(0, 420, 1536, 420, 1536, 768, 0, 768)
+
+[node name="EncounterController" type="Node" parent="." unique_id=375913183]
+script = ExtResource("2_encounter")
+player_path = NodePath("../CharacterBody2D")
+
+[node name="BloodFxLayer" type="Node" parent="." unique_id=326569063]
+script = ExtResource("7_blood")
+
+[node name="Environment" type="Node2D" parent="." unique_id=2004783552]
+
+[node name="Floor" type="StaticBody2D" parent="Environment" unique_id=1028317803]
+position = Vector2(768, 500)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/Floor" unique_id=1399910755]
+shape = SubResource("2")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/Floor" unique_id=1845614334]
+color = Color(0.117647, 0.121569, 0.156863, 1)
+polygon = PackedVector2Array(-750, -28, 750, -28, 750, 28, -750, 28)
+
+[node name="LeftWall" type="StaticBody2D" parent="Environment" unique_id=865280789]
+position = Vector2(72, 356)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/LeftWall" unique_id=1816123742]
+shape = SubResource("3")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/LeftWall" unique_id=1384236746]
+color = Color(0.101961, 0.105882, 0.137255, 1)
+polygon = PackedVector2Array(-24, -144, 24, -144, 24, 144, -24, 144)
+
+[node name="RightWall" type="StaticBody2D" parent="Environment" unique_id=989199711]
+position = Vector2(1464, 356)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/RightWall" unique_id=1729240477]
+shape = SubResource("3")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/RightWall" unique_id=604350346]
+color = Color(0.101961, 0.105882, 0.137255, 1)
+polygon = PackedVector2Array(-24, -144, 24, -144, 24, 144, -24, 144)
+
+[node name="CenterPillar" type="StaticBody2D" parent="Environment" unique_id=1571147407]
+position = Vector2(676, 412)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/CenterPillar" unique_id=55494645]
+shape = SubResource("4")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/CenterPillar" unique_id=1451538465]
+color = Color(0.14902, 0.156863, 0.196078, 1)
+polygon = PackedVector2Array(-24, -88, 24, -88, 24, 88, -24, 88)
+
+[node name="NarrowWall" type="StaticBody2D" parent="Environment" unique_id=180375097]
+position = Vector2(1090, 406)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/NarrowWall" unique_id=1743271790]
+shape = SubResource("5")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/NarrowWall" unique_id=2136509028]
+color = Color(0.133333, 0.14902, 0.188235, 1)
+polygon = PackedVector2Array(-18, -94, 18, -94, 18, 94, -18, 94)
+
+[node name="PlatformLow" type="StaticBody2D" parent="Environment" unique_id=420859343]
+position = Vector2(918, 330)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/PlatformLow" unique_id=1895814472]
+shape = SubResource("6")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/PlatformLow" unique_id=334914667]
+color = Color(0.164706, 0.184314, 0.227451, 1)
+polygon = PackedVector2Array(-150, -12, 150, -12, 150, 12, -150, 12)
+
+[node name="PlatformHigh" type="StaticBody2D" parent="Environment" unique_id=263134565]
+position = Vector2(1210, 245)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/PlatformHigh" unique_id=974530129]
+shape = SubResource("7")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/PlatformHigh" unique_id=1410970275]
+color = Color(0.164706, 0.184314, 0.227451, 1)
+polygon = PackedVector2Array(-110, -12, 110, -12, 110, 12, -110, 12)
+
+[node name="PlatformWall" type="StaticBody2D" parent="Environment" unique_id=1088004232]
+position = Vector2(1324, 346)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/PlatformWall" unique_id=1656439215]
+shape = SubResource("8")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/PlatformWall" unique_id=888361184]
+color = Color(0.14902, 0.156863, 0.196078, 1)
+polygon = PackedVector2Array(-21, -78, 21, -78, 21, 78, -21, 78)
+
+[node name="CharacterBody2D" parent="." unique_id=1593993717 instance=ExtResource("3_shiro")]
+position = Vector2(220, 456)
+shuriken_scene = ExtResource("4_shuriken")
+
+[node name="Camera2D" type="Camera2D" parent="CharacterBody2D" unique_id=1460485237]
+position = Vector2(250, -120)
+zoom = Vector2(1.2, 1.2)
+limit_left = 0
+limit_top = 0
+limit_right = 1536
+limit_bottom = 768
+
+[node name="GroundSpawnerLeft" type="Node2D" parent="." unique_id=96680139]
+position = Vector2(430, 456)
+script = ExtResource("6_spawner")
+enemy_scene = ExtResource("5_enemy")
+facing_direction = -1
+
+[node name="GroundSpawnerCenter" type="Node2D" parent="." unique_id=434555411]
+position = Vector2(810, 456)
+script = ExtResource("6_spawner")
+enemy_scene = ExtResource("5_enemy")
+facing_direction = -1
+spawn_delay = 0.2
+
+[node name="WallSpawner" type="Node2D" parent="." unique_id=2093494319]
+position = Vector2(1016, 286)
+script = ExtResource("6_spawner")
+enemy_scene = ExtResource("5_enemy")
+facing_direction = -1
+spawn_delay = 0.4
+
+[node name="HighSpawner" type="Node2D" parent="." unique_id=310332913]
+position = Vector2(1246, 201)
+script = ExtResource("6_spawner")
+enemy_scene = ExtResource("5_enemy")
+facing_direction = -1
+spawn_delay = 0.6
+
+[node name="VisualEffects" type="CanvasLayer" parent="." unique_id=1536724457]
+layer = 0
+
+[node name="ShadersParent" type="Node2D" parent="VisualEffects" unique_id=1008591483]
+position = Vector2(768, 384)
+
+[node name="Shaders" type="Node2D" parent="VisualEffects/ShadersParent" unique_id=2082585354]
+position = Vector2(-768, -384)
+
+[node name="ColorRect" type="ColorRect" parent="VisualEffects/ShadersParent/Shaders" unique_id=1752520954]
+material = SubResource("1")
+offset_right = 1536.0
+offset_bottom = 768.0
+mouse_filter = 2
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1271957769]
+script = ExtResource("8_hud")
+player_path = NodePath("../CharacterBody2D")
+
+[node name="Panel" type="Panel" parent="CanvasLayer" unique_id=1077884560]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 418.0
+offset_bottom = 156.0
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Panel" unique_id=697612110]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = 388.0
+offset_bottom = 138.0
+
+[node name="Title" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=1356312170]
+layout_mode = 2
+text = "Blood Demo"
+
+[node name="EnemyCount" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=1631600872]
+layout_mode = 2
+text = "Enemies: ..."
+
+[node name="BloodCount" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=584345950]
+layout_mode = 2
+text = "Blood Objects: ..."
+
+[node name="Player" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=1791756227]
+layout_mode = 2
+text = "Player: ..."
+
+[node name="Controls" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=1569482748]
+layout_mode = 2
+text = "LMB attack | Q throw / teleport | R reset encounter"

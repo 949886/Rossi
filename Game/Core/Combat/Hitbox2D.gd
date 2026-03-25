@@ -43,7 +43,7 @@ func _physics_process(_delta: float) -> void:
 			continue
 
 		if receiver.has_method("receive_attack"):
-			receiver.receive_attack(_build_hit_data())
+			receiver.receive_attack(_build_hit_data(hurtbox, receiver))
 			_already_hit[receiver_id] = true
 
 func set_active(value: bool) -> void:
@@ -53,15 +53,33 @@ func set_active(value: bool) -> void:
 	if not value:
 		_already_hit.clear()
 
-func _build_hit_data() -> Dictionary:
+func _build_hit_data(hurtbox: Hurtbox2D, receiver: Node) -> Dictionary:
 	var direction := Vector2.RIGHT.rotated(global_rotation).normalized()
 	var rotated_knockback := knockback.rotated(global_rotation)
+	var source := get_parent()
+	var attacker_global_position := global_position
+	if source is Node2D:
+		attacker_global_position = (source as Node2D).global_position
+
+	var receiver_global_position := hurtbox.global_position
+	if receiver is Node2D:
+		receiver_global_position = (receiver as Node2D).global_position
+
+	var impact_position := hurtbox.global_position
+	if hurtbox != null:
+		impact_position = hurtbox.get_impact_position(global_position)
+
 	return {
 		"damage": damage,
-		"source": get_parent(),
+		"source": source,
 		"direction": direction,
+		"attack_direction": direction,
 		"knockback": rotated_knockback,
 		"hitstun": hitstun,
 		"invuln_time": invuln_time,
 		"tags": tags,
+		"impact_position": impact_position,
+		"attacker_global_position": attacker_global_position,
+		"receiver_global_position": receiver_global_position,
+		"receiver": receiver,
 	}

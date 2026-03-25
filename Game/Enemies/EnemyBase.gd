@@ -37,6 +37,9 @@ signal state_changed(state_name: String)
 @export var hit_flash_color := Color(1.0, 0.55, 0.55, 1.0)	## Visual feedback when hit
 @export var hit_flash_duration := 0.07
 @export var dead_tint := Color(0.45, 0.45, 0.45, 0.9)
+@export var blood_enabled := true
+@export var blood_hit_scale := 1.0
+@export var blood_death_scale := 1.0
 
 @export_group("Debug")
 @export var show_debug_label := true
@@ -77,6 +80,7 @@ var _patrol_origin_x := 0.0
 var _patrol_direction := 1
 var _debug_label: Label
 var _base_sprite_modulate := Color.WHITE
+var _last_damage_context: Dictionary = {}
 
 var current_health: int:
 	get: return _current_health
@@ -176,6 +180,7 @@ func receive_attack(hit_data: Dictionary) -> void:
 		return
 
 	var damage := int(hit_data.get("damage", 1))
+	var blood_context := _build_blood_context(hit_data)
 	_current_health = max(0, _current_health - damage)
 	_invulnerable_timer = maxf(invuln_duration, float(hit_data.get("invuln_time", invuln_duration)))
 	velocity = hit_data.get("knockback", Vector2.ZERO)
@@ -184,9 +189,11 @@ func receive_attack(hit_data: Dictionary) -> void:
 	hit_taken.emit(hit_data)
 
 	if _current_health <= 0:
+		_last_damage_context = blood_context
 		die()
 		return
 
+	_emit_hit_blood(blood_context)
 	_change_state(State.HIT)
 
 func interact_with(node: Node) -> void:
@@ -200,6 +207,8 @@ func die() -> void:
 	if _state == State.DEAD:
 		return
 
+	_emit_death_blood(_last_damage_context if not _last_damage_context.is_empty() else _build_fallback_blood_context())
+	_last_damage_context.clear()
 	_target = null
 	velocity = Vector2.ZERO
 	_disable_combat_nodes()
@@ -210,6 +219,7 @@ func die() -> void:
 	died.emit()
 
 func reset_for_encounter() -> void:
+	_last_damage_context.clear()
 	_current_health = max_health
 	_invulnerable_timer = 0.0
 	_attack_cooldown_timer = 0.0
@@ -594,3 +604,53 @@ func _clear_visual_persistence_target() -> void:
 		return
 	vision_sensor.clear_visual_persistence()
 	vision_sensor.set_debug_target(null)
+
+func _emit_hit_blood(context: Dictionary) -> void:
+	if not blood_enabled:
+		return
+	var blood_fx := _get_blood_fx_layer()
+	if blood_fx == null:
+		return
+	var payload := context.duplicate(true)
+	payload["blood_scale"] = blood_hit_scale
+	blood_fx.spawn_hit_blood(payload)
+
+func _emit_death_blood(context: Dictionary) -> void:
+	if not blood_enabled:
+		return
+	var blood_fx := _get_blood_fx_layer()
+	if blood_fx == null:
+		return
+	var payload := context.duplicate(true)
+	payload["blood_scale"] = blood_death_scale
+	payload["facing_direction"] = _facing_direction
+	blood_fx.spawn_death_blood(payload)
+
+func _build_blood_context(hit_data: Dictionary) -> Dictionary:
+	var context := hit_data.duplicate(true)
+	context["receiver"] = self
+	context["receiver_global_position"] = global_position
+	if not context.has("impact_position") or not (context["impact_position"] is Vector2):
+		if hurtbox != null:
+			context["impact_position"] = hurtbox.global_position
+		else:
+			context["impact_position"] = global_position
+	if not context.has("attack_direction") or not (context["attack_direction"] is Vector2):
+		context["attack_direction"] = Vector2(_facing_direction, 0.0)
+	return context
+
+func _build_fallback_blood_context() -> Dictionary:
+	return {
+		"receiver": self,
+		"source": self,
+		"impact_position": hurtbox.global_position if hurtbox != null else global_position,
+		"attack_direction": Vector2(_facing_direction, 0.0),
+		"receiver_global_position": global_position,
+		"attacker_global_position": global_position - Vector2(24.0 * _facing_direction, 0.0),
+	}
+
+func _get_blood_fx_layer() -> BloodFxLayer:
+	for node in get_tree().get_nodes_in_group("BloodFxLayer"):
+		if node is BloodFxLayer:
+			return node as BloodFxLayer
+	return null
