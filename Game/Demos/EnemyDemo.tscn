@@ -91,9 +91,10 @@ spawn_delay = 0.35
 position = Vector2(437, 136)
 rotation = 1.5707964
 max_length = 264.0
+starts_enabled = false
 
 [node name="LaserSwitch" parent="." unique_id=2090280682 instance=ExtResource("8_switch")]
-position = Vector2(778, 344)
+position = Vector2(211, 344)
 target_laser_paths = Array[NodePath]([NodePath("../LaserBeam")])
 
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1017]

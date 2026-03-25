@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cp7soa40msiek"]
 
-[ext_resource type="Script" path="res://Game/Core/Player/PlatformerCharacter2D.gd" id="1_7p0v6"]
+[ext_resource type="Script" uid="uid://cqocrep0u5mu3" path="res://Game/Core/Player/PlatformerCharacter2D.gd" id="1_7p0v6"]
 [ext_resource type="SpriteFrames" uid="uid://ctqnpmn1mmwee" path="res://Game/Characters/Shiro/Animations/shiro_sprite_frames.tres" id="1_i25jw"]
 [ext_resource type="AnimationNodeStateMachine" uid="uid://c2ea07gspat02" path="res://Game/Characters/Shiro/Animations/shiro_animation_controller.tres" id="2_7p0v6"]
 
@@ -602,15 +602,13 @@ sprite_frames = ExtResource("1_i25jw")
 animation = &"idle"
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1884903422]
-position = Vector2(6, -20)
+position = Vector2(0, -20)
 shape = SubResource("CapsuleShape2D_xjagb")
 
 [node name="AnimationPlayer" type="AnimationPlayer" parent="." unique_id=2091975394]
-root_node = NodePath("..")
 libraries/ = SubResource("AnimationLibrary_ekk66")
 
 [node name="AnimationTree" type="AnimationTree" parent="." unique_id=940678155]
 active = false
-root_node = NodePath("..")
 tree_root = ExtResource("2_7p0v6")
 anim_player = NodePath("../AnimationPlayer")
