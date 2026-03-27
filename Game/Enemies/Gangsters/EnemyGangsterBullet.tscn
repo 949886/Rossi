@@ -1,0 +1,21 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" uid="uid://byfthljj6m7yj" path="res://Game/Enemies/Projectiles/EnemyProjectile.gd" id="1_projectile"]
+[ext_resource type="Texture2D" uid="uid://dybeahnckq4y1" path="res://Game/Enemies/Gangsters/gun_bullet.png" id="2_bullet"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_bullet"]
+radius = 4.0
+
+[node name="EnemyGangsterBullet" type="Area2D"]
+collision_mask = 3
+script = ExtResource("1_projectile")
+speed = 560.0
+lifespan = 1.8
+knockback = Vector2(150, -18)
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture_filter = 1
+texture = ExtResource("2_bullet")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_bullet")

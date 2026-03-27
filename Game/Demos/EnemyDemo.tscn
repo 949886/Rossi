@@ -4,6 +4,7 @@
 [ext_resource type="PackedScene" uid="uid://cp7soa40msiek" path="res://Game/Characters/Shiro/Shiro.tscn" id="2_shiro"]
 [ext_resource type="PackedScene" uid="uid://c7t8p6v5taq2x" path="res://Game/Characters/Shiro/Items/Shuriken/Shuriken.tscn" id="3_shuriken"]
 [ext_resource type="PackedScene" uid="uid://l1fj7qvub0mh" path="res://Game/Enemies/Gangsters/EnemyGangster.tscn" id="4_enemy"]
+[ext_resource type="PackedScene" path="res://Game/Enemies/Gangsters/EnemyGangsterRanged.tscn" id="9_ranged_enemy"]
 [ext_resource type="Script" uid="uid://be3o6nwd2gsbg" path="res://Game/Enemies/EnemySpawner2D.gd" id="5_spawner"]
 [ext_resource type="PackedScene" uid="uid://hthi1t4oeq54" path="res://Game/Props/Laser/LaserBeam.tscn" id="6_laser"]
 [ext_resource type="Script" uid="uid://hcjjd1p8ikdo" path="res://Game/Demos/EnemyDemoHud.gd" id="7_hud"]
@@ -77,7 +78,7 @@ facing_direction = -1
 [node name="PlatformSpawner" type="Node2D" parent="." unique_id=1015]
 position = Vector2(688, 228)
 script = ExtResource("5_spawner")
-enemy_scene = ExtResource("4_enemy")
+enemy_scene = ExtResource("9_ranged_enemy")
 facing_direction = -1
 
 [node name="RightSpawner" type="Node2D" parent="." unique_id=1019]

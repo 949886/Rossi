@@ -388,30 +388,19 @@ func _change_state(new_state: State) -> void:
 			_play_animation(_get_chase_animation())
 		State.WINDUP:
 			_state_timer = windup_duration
-			_play_animation("melee_attack")
+			_on_enter_windup_state()
 		State.ATTACK:
 			_state_timer = attack_active_duration
 			_attack_cooldown_timer = attack_cooldown
-			if attack_hitbox != null:
-				attack_hitbox.damage = contact_damage
-				attack_hitbox.knockback = contact_knockback
-				attack_hitbox.hitstun = hitstun_duration
-				attack_hitbox.invuln_time = invuln_duration
-				attack_hitbox.set_active(true)
+			_on_enter_attack_state()
 		State.RECOVER:
 			_state_timer = recover_duration
-			if attack_hitbox != null:
-				attack_hitbox.set_active(false)
-			_play_animation("idle")
+			_on_enter_recover_state()
 		State.HIT:
 			_state_timer = hitstun_duration
-			if attack_hitbox != null:
-				attack_hitbox.set_active(false)
-			_play_animation("be_hit")
+			_on_enter_hit_state()
 		State.DEAD:
-			if attack_hitbox != null:
-				attack_hitbox.set_active(false)
-			_play_animation("die")
+			_on_enter_dead_state()
 		State.RESPAWN:
 			_state_timer = 0.15
 			_play_animation("idle")
@@ -424,6 +413,36 @@ func _play_animation(animation_name: String) -> void:
 		animated_sprite.play(animation_name)
 	elif animation_player != null and animation_player.has_animation(animation_name):
 		animation_player.play(animation_name)
+
+func _on_enter_windup_state() -> void:
+	_play_animation("melee_attack")
+
+func _on_enter_attack_state() -> void:
+	if attack_hitbox == null:
+		return
+
+	var attack_knockback := contact_knockback
+	attack_knockback.x = absf(contact_knockback.x) * _facing_direction
+	attack_hitbox.damage = contact_damage
+	attack_hitbox.knockback = attack_knockback
+	attack_hitbox.hitstun = hitstun_duration
+	attack_hitbox.invuln_time = invuln_duration
+	attack_hitbox.set_active(true)
+
+func _on_enter_recover_state() -> void:
+	if attack_hitbox != null:
+		attack_hitbox.set_active(false)
+	_play_animation("idle")
+
+func _on_enter_hit_state() -> void:
+	if attack_hitbox != null:
+		attack_hitbox.set_active(false)
+	_play_animation("be_hit")
+
+func _on_enter_dead_state() -> void:
+	if attack_hitbox != null:
+		attack_hitbox.set_active(false)
+	_play_animation("die")
 
 func _get_patrol_animation() -> String:
 	if animated_sprite != null and animated_sprite.sprite_frames != null:
@@ -530,7 +549,7 @@ func _configure_attack_hitbox() -> void:
 	var local_offset := attack_hitbox_offset
 	local_offset.x *= _facing_direction
 	attack_hitbox.position = local_offset
-	attack_hitbox.rotation = 0.0
+	attack_hitbox.rotation = 0.0 if _facing_direction >= 0 else PI
 	var collision := attack_hitbox.get_node_or_null("CollisionShape2D")
 	if collision != null and collision.shape is RectangleShape2D:
 		(collision.shape as RectangleShape2D).size = attack_hitbox_size
