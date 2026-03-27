@@ -26,6 +26,7 @@ signal state_changed(state_name: String)
 @export var max_fall_speed := 800.0
 
 @export_group("Movement")
+@export var chase_speed_multiplier := 1.35
 @export var return_tolerance := 6.0
 @export var patrol_pause_duration := 0.2
 @export var ground_probe_length := 28.0
@@ -292,7 +293,7 @@ func _process_chase(_delta: float) -> void:
 			velocity.x = 0.0
 			return
 
-		velocity.x = _facing_direction * move_speed
+		velocity.x = _facing_direction * move_speed * chase_speed_multiplier
 		return
 
 	if not _has_visual_persistence_target():
@@ -313,7 +314,7 @@ func _process_chase(_delta: float) -> void:
 		velocity.x = 0.0
 		return
 
-	velocity.x = _facing_direction * move_speed
+	velocity.x = _facing_direction * move_speed * chase_speed_multiplier
 
 func _process_windup() -> void:
 	velocity.x = 0.0
@@ -382,9 +383,9 @@ func _change_state(new_state: State) -> void:
 		State.IDLE:
 			_play_animation("idle")
 		State.PATROL:
-			_play_animation(_get_move_animation())
+			_play_animation(_get_patrol_animation())
 		State.CHASE:
-			_play_animation(_get_move_animation())
+			_play_animation(_get_chase_animation())
 		State.WINDUP:
 			_state_timer = windup_duration
 			_play_animation("melee_attack")
@@ -415,7 +416,7 @@ func _change_state(new_state: State) -> void:
 			_state_timer = 0.15
 			_play_animation("idle")
 		State.RETURN_HOME:
-			_play_animation(_get_move_animation())
+			_play_animation(_get_patrol_animation())
 	_update_debug_label()
 
 func _play_animation(animation_name: String) -> void:
@@ -424,12 +425,20 @@ func _play_animation(animation_name: String) -> void:
 	elif animation_player != null and animation_player.has_animation(animation_name):
 		animation_player.play(animation_name)
 
-func _get_move_animation() -> String:
+func _get_patrol_animation() -> String:
 	if animated_sprite != null and animated_sprite.sprite_frames != null:
 		if animated_sprite.sprite_frames.has_animation("walk"):
 			return "walk"
 		if animated_sprite.sprite_frames.has_animation("run"):
 			return "run"
+	return "idle"
+
+func _get_chase_animation() -> String:
+	if animated_sprite != null and animated_sprite.sprite_frames != null:
+		if animated_sprite.sprite_frames.has_animation("run"):
+			return "run"
+		if animated_sprite.sprite_frames.has_animation("walk"):
+			return "walk"
 	return "idle"
 
 func _update_target() -> void:
