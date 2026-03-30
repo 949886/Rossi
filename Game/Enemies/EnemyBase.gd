@@ -7,6 +7,8 @@ signal respawned
 signal target_acquired(target: Node)
 signal health_changed(current_health: int, max_health: int)
 signal state_changed(state_name: String)
+signal attack_windup_started
+signal attack_performed
 
 @export_group("Stats")
 @export var max_health := 1
@@ -389,10 +391,12 @@ func _change_state(new_state: State) -> void:
 		State.WINDUP:
 			_state_timer = windup_duration
 			_on_enter_windup_state()
+			attack_windup_started.emit()
 		State.ATTACK:
 			_state_timer = attack_active_duration
 			_attack_cooldown_timer = attack_cooldown
 			_on_enter_attack_state()
+			attack_performed.emit()
 		State.RECOVER:
 			_state_timer = recover_duration
 			_on_enter_recover_state()

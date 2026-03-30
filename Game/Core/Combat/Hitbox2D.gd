@@ -1,6 +1,8 @@
 extends Area2D
 class_name Hitbox2D
 
+signal hit_connected(hit_data: Dictionary, hurtbox: Hurtbox2D, receiver: Node)
+
 @export var damage := 1
 @export var knockback := Vector2(180.0, -35.0)
 @export var hitstun := 0.12
@@ -43,8 +45,10 @@ func _physics_process(_delta: float) -> void:
 			continue
 
 		if receiver.has_method("receive_attack"):
-			receiver.receive_attack(_build_hit_data(hurtbox, receiver))
+			var hit_data := _build_hit_data(hurtbox, receiver)
+			receiver.receive_attack(hit_data)
 			_already_hit[receiver_id] = true
+			hit_connected.emit(hit_data, hurtbox, receiver)
 
 func set_active(value: bool) -> void:
 	_active = value

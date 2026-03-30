@@ -3,6 +3,20 @@
 [ext_resource type="Script" uid="uid://cqocrep0u5mu3" path="res://Game/Core/Player/PlatformerCharacter2D.gd" id="1_7p0v6"]
 [ext_resource type="SpriteFrames" uid="uid://ctqnpmn1mmwee" path="res://Game/Characters/Shiro/Animations/shiro_sprite_frames.tres" id="1_i25jw"]
 [ext_resource type="AnimationNodeStateMachine" uid="uid://c2ea07gspat02" path="res://Game/Characters/Shiro/Animations/shiro_animation_controller.tres" id="2_7p0v6"]
+[ext_resource type="Script" path="res://Game/Core/Audio/PlayerAudioController.gd" id="4_player_audio"]
+[ext_resource type="Resource" path="res://Game/Audios/SFX/Player/Movement/player_jump.tres" id="5_player_jump"]
+[ext_resource type="Resource" path="res://Game/Audios/SFX/Player/Movement/player_double_jump.tres" id="6_player_double_jump"]
+[ext_resource type="Resource" path="res://Game/Audios/SFX/Player/Movement/player_wall_jump.tres" id="7_player_wall_jump"]
+[ext_resource type="Resource" path="res://Game/Audios/SFX/Player/Movement/player_land.tres" id="8_player_land"]
+[ext_resource type="Resource" path="res://Game/Audios/SFX/Player/Ability/player_dash.tres" id="9_player_dash"]
+[ext_resource type="Resource" path="res://Game/Audios/SFX/Player/Combat/player_attack_swing.tres" id="10_player_attack_swing"]
+[ext_resource type="Resource" path="res://Game/Audios/SFX/Player/Combat/player_attack_hit.tres" id="11_player_attack_hit"]
+[ext_resource type="Resource" path="res://Game/Audios/SFX/Player/Ability/player_shuriken_throw.tres" id="12_player_shuriken_throw"]
+[ext_resource type="Resource" path="res://Game/Audios/SFX/Player/Ability/player_shuriken_stick.tres" id="13_player_shuriken_stick"]
+[ext_resource type="Resource" path="res://Game/Audios/SFX/Player/Ability/player_teleport.tres" id="14_player_teleport"]
+[ext_resource type="Resource" path="res://Game/Audios/SFX/Player/Combat/player_hurt.tres" id="15_player_hurt"]
+[ext_resource type="Resource" path="res://Game/Audios/SFX/Player/Combat/player_death.tres" id="16_player_death"]
+[ext_resource type="Resource" path="res://Game/Audios/SFX/Player/Movement/player_footstep.tres" id="17_player_footstep"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_xjagb"]
 radius = 6.0
@@ -612,3 +626,19 @@ libraries/ = SubResource("AnimationLibrary_ekk66")
 active = false
 tree_root = ExtResource("2_7p0v6")
 anim_player = NodePath("../AnimationPlayer")
+
+[node name="PlayerAudioController" type="Node" parent="." unique_id=1670041201]
+script = ExtResource("4_player_audio")
+jump_cue = ExtResource("5_player_jump")
+double_jump_cue = ExtResource("6_player_double_jump")
+wall_jump_cue = ExtResource("7_player_wall_jump")
+land_cue = ExtResource("8_player_land")
+dash_cue = ExtResource("9_player_dash")
+attack_swing_cue = ExtResource("10_player_attack_swing")
+attack_hit_cue = ExtResource("11_player_attack_hit")
+shuriken_throw_cue = ExtResource("12_player_shuriken_throw")
+shuriken_stick_cue = ExtResource("13_player_shuriken_stick")
+teleport_cue = ExtResource("14_player_teleport")
+hurt_cue = ExtResource("15_player_hurt")
+death_cue = ExtResource("16_player_death")
+footstep_cue = ExtResource("17_player_footstep")

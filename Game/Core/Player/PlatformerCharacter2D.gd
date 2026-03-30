@@ -7,6 +7,10 @@ signal respawned(spawn_position: Vector2)
 signal checkpoint_set(checkpoint_position: Vector2)
 signal shuriken_spawned(shuriken: Shuriken)
 signal teleported(from_position: Vector2, to_position: Vector2)
+signal jumped(kind: StringName)
+signal landed
+signal dashed
+signal damage_taken(hit_data: Dictionary, current_health: int)
 
 @export_group("Movement")
 @export var move_speed := 200.0
@@ -572,17 +576,20 @@ func _change_state(new_state: State) -> void:
 			if previous_state != State.WALL_SLIDE:
 				velocity.y = jump_velocity
 			play_animation("jump")
+			jumped.emit(&"wall_jump" if previous_state == State.WALL_SLIDE else &"jump")
 		State.JUMP_TO_FALL:
 			play_animation("jump_to_fall")
 		State.DOUBLE_JUMP:
 			_has_double_jump = false
 			velocity.y = double_jump_velocity
 			play_animation("double_jump")
+			jumped.emit(&"double_jump")
 		State.FALL:
 			play_animation("fall")
 		State.LANDING:
 			_has_double_jump = true
 			play_animation("landing")
+			landed.emit()
 		State.FALL_TO_IDLE:
 			play_animation("fall_to_idle")
 		State.ATTACK:
@@ -604,6 +611,7 @@ func _change_state(new_state: State) -> void:
 			_dash_timer = dash_duration
 			_invulnerability_timer = maxf(_invulnerability_timer, dash_invulnerability_duration)
 			play_animation("dash")
+			dashed.emit()
 		State.THROW:
 			if _pending_throw_angle != null:
 				_update_facing(cos(_pending_throw_angle))
@@ -722,6 +730,7 @@ func receive_attack(hit_data: Dictionary) -> void:
 	current_health = max(0, current_health - damage)
 	_invulnerability_timer = maxf(_invulnerability_timer, float(hit_data.get("invuln_time", 0.0)))
 	velocity += hit_data.get("knockback", Vector2.ZERO)
+	damage_taken.emit(hit_data, current_health)
 
 	if current_health <= 0:
 		die()

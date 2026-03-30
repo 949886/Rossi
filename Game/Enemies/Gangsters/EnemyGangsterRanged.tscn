@@ -6,6 +6,12 @@
 [ext_resource type="Script" uid="uid://b0g085vl5dyxk" path="res://Game/Core/Combat/Hitbox2D.gd" id="4_hitbox"]
 [ext_resource type="Script" uid="uid://r1ixpk5r2m4x" path="res://Game/Enemies/VisionSensor2D.gd" id="5_vision"]
 [ext_resource type="PackedScene" path="res://Game/Enemies/Gangsters/EnemyGangsterBullet.tscn" id="6_projectile"]
+[ext_resource type="Script" path="res://Game/Core/Audio/EnemyAudioController.gd" id="7_enemy_audio"]
+[ext_resource type="Resource" path="res://Game/Audios/SFX/Enemy/Common/enemy_alert.tres" id="8_enemy_alert"]
+[ext_resource type="Resource" path="res://Game/Audios/SFX/Enemy/Common/enemy_hit.tres" id="9_enemy_hit"]
+[ext_resource type="Resource" path="res://Game/Audios/SFX/Enemy/Common/enemy_death.tres" id="10_enemy_death"]
+[ext_resource type="Resource" path="res://Game/Audios/SFX/Enemy/Common/enemy_footstep.tres" id="11_enemy_footstep"]
+[ext_resource type="Resource" path="res://Game/Audios/SFX/Enemy/Gangster/gangster_ranged_attack.tres" id="12_enemy_ranged_attack"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_xjagb"]
 radius = 7.0
@@ -380,3 +386,11 @@ target_position = Vector2(14, 0)
 [node name="FrontGroundRayCast2D" type="RayCast2D" parent="." unique_id=1891001008]
 position = Vector2(10, 0)
 target_position = Vector2(0, 28)
+
+[node name="EnemyAudioController" type="Node" parent="." unique_id=1812004002]
+script = ExtResource("7_enemy_audio")
+alert_cue = ExtResource("8_enemy_alert")
+hit_cue = ExtResource("9_enemy_hit")
+death_cue = ExtResource("10_enemy_death")
+footstep_cue = ExtResource("11_enemy_footstep")
+ranged_attack_cue = ExtResource("12_enemy_ranged_attack")

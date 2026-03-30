@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="AudioCue" format=3]
+
+[ext_resource type="Script" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
+
+[resource]
+script = ExtResource("1_audiocue")
+bus = &"SFX_Enemy"
+volume_db = -2.0
+cooldown_sec = 0.05
+positional = true
+max_distance = 1600.0

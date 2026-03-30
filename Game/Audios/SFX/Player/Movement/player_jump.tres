@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="AudioCue" format=3]
+
+[ext_resource type="Script" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
+[ext_resource type="AudioStream" path="res://Game/Audios/SFX/Player/sfx_jump_1.mp3" id="2_jump1"]
+[ext_resource type="AudioStream" path="res://Game/Audios/SFX/Player/sfx_jump_2.mp3" id="3_jump2"]
+
+[resource]
+script = ExtResource("1_audiocue")
+clips = Array[AudioStream]([ExtResource("2_jump1"), ExtResource("3_jump2")])
+bus = &"SFX_Player"
+volume_db = -2.0
+pitch_min = 0.98
+pitch_max = 1.04
+cooldown_sec = 0.04

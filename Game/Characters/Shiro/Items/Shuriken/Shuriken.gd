@@ -1,6 +1,8 @@
 extends Area2D
 class_name Shuriken
 
+signal stuck(impact_position: Vector2, normal: Vector2, target: Node)
+
 @export var speed := 1000.0
 @export var lifespan := 5.0
 @export var afterimage_interval := 0.033334
@@ -58,13 +60,13 @@ func _physics_process(delta: float) -> void:
 			if collider is Node2D:
 				_attached_target = collider
 				_attached_local_position = collider.to_local(global_position)
-			_stick_to_surface()
+			_stick_to_surface(collider)
 			return
 		if collider is StaticBody2D or collider is TileMapLayer or collider is TileMap:
 			# Move exactly to the hit point and stick
 			global_position = result["position"]
 			_stick_normal = result["normal"]
-			_stick_to_surface()
+			_stick_to_surface(collider if collider is Node else null)
 			return
 
 	# Move normally
@@ -76,8 +78,9 @@ func _physics_process(delta: float) -> void:
 		spawn_afterimage()
 		_afterimage_timer = afterimage_interval
 
-func _stick_to_surface() -> void:
+func _stick_to_surface(target: Node = null) -> void:
 	_stuck = true
+	stuck.emit(global_position, _stick_normal, target)
 
 	# Disable further collisions
 	set_deferred("monitoring", false)

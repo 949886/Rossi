@@ -9,10 +9,14 @@ class_name EnemyProjectile
 @export var hitstun := 0.12
 @export var invuln_time := 0.0
 @export var target_group := "Player"
+@export_group("Audio")
+@export var impact_world_cue: AudioCue
+@export var impact_player_cue: AudioCue
 
 var direction := Vector2.RIGHT
 var shooter: Node2D
 var _life_remaining := 0.0
+var _has_impacted := false
 
 func _ready() -> void:
 	add_to_group("ResettableProjectile")
@@ -48,6 +52,7 @@ func _physics_process(delta: float) -> void:
 		var collider = hit.get("collider")
 		if not (collider is Node and target_group != "" and (collider as Node).is_in_group(target_group)):
 			global_position = hit["position"]
+			_play_impact_world(global_position)
 			queue_free()
 			return
 
@@ -72,14 +77,19 @@ func _on_area_entered(area: Area2D) -> void:
 	if target_group != "" and not receiver.is_in_group(target_group):
 		return
 	if receiver.has_method("receive_attack"):
-		receiver.receive_attack(_build_hit_data(hurtbox, receiver))
+		var hit_data := _build_hit_data(hurtbox, receiver)
+		receiver.receive_attack(hit_data)
+		_play_impact_player(hit_data.get("impact_position", global_position))
 		queue_free()
 
 func _on_body_entered(body: Node2D) -> void:
+	if _has_impacted:
+		return
 	if body == shooter:
 		return
 	if target_group != "" and body.is_in_group(target_group):
 		return
+	_play_impact_world(global_position)
 	queue_free()
 
 func _build_hit_data(hurtbox: Hurtbox2D, receiver: Node) -> Dictionary:
@@ -107,3 +117,16 @@ func _build_hit_data(hurtbox: Hurtbox2D, receiver: Node) -> Dictionary:
 		"receiver_global_position": receiver_global_position,
 		"receiver": receiver,
 	}
+
+func _play_impact_world(position: Vector2) -> void:
+	if _has_impacted:
+		return
+	_has_impacted = true
+	SFX.play_cue(impact_world_cue, position)
+
+
+func _play_impact_player(position: Vector2) -> void:
+	if _has_impacted:
+		return
+	_has_impacted = true
+	SFX.play_cue(impact_player_cue, position)

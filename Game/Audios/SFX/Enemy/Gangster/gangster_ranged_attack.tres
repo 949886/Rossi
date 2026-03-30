@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="AudioCue" format=3]
+
+[ext_resource type="Script" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
+[ext_resource type="AudioStream" path="res://Game/Audios/SFX/Enemy/sfx_pistol_shot_1.mp3" id="2_shot"]
+
+[resource]
+script = ExtResource("1_audiocue")
+clips = Array[AudioStream]([ExtResource("2_shot")])
+bus = &"SFX_Enemy"
+volume_db = -2.0
+pitch_min = 0.98
+pitch_max = 1.02
+cooldown_sec = 0.04
+positional = true
+max_distance = 2200.0
