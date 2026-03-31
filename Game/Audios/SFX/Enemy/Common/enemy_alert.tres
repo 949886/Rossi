@@ -1,9 +1,12 @@
-[gd_resource type="Resource" script_class="AudioCue" format=3]
+[gd_resource type="Resource" script_class="AudioCue" format=3 uid="uid://dxct4k157sjcf"]
 
-[ext_resource type="Script" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
+[ext_resource type="AudioStream" uid="uid://g0mwluii3442" path="res://Game/Audios/SFX/Enemy/voc_enemy_alert_1.mp3" id="1_7x46u"]
+[ext_resource type="Script" uid="uid://dyt2q8rsj0v1v" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
+[ext_resource type="AudioStream" uid="uid://u7ae6ywkjiky" path="res://Game/Audios/SFX/Enemy/voc_enemy_alert_2.mp3" id="2_vvhu8"]
 
 [resource]
 script = ExtResource("1_audiocue")
+clips = Array[AudioStream]([ExtResource("1_7x46u"), ExtResource("2_vvhu8")])
 bus = &"SFX_Enemy"
 volume_db = -2.0
 cooldown_sec = 0.2

@@ -13,10 +13,10 @@ static var _container: Node = null
 static var _container_2d: Node2D = null
 
 static func _static_init() -> void:
-	_ensure_audio_buses()
+	_ensure_initialized()
 
 
-## Play a sound effect
+## Play a sound effect globally (non-positional)
 static func play(audio: AudioStream, bus: StringName = ROOT_BUS, volume_db := 0.0, pitch_scale := 1.0) -> void:
 	if not audio:
 		return
@@ -144,12 +144,9 @@ static func _ensure_initialized() -> bool:
 	if is_instance_valid(_container) and is_instance_valid(_container_2d):
 		return true
 
-	var main_loop := Engine.get_main_loop()
-	if not (main_loop is SceneTree):
-		return false
-
-	var root := (main_loop as SceneTree).root
+	var root := (Engine.get_main_loop() as SceneTree).root
 	if root == null:
+		printerr("SFX Module: Unable to initialize - root node not found")
 		return false
 
 	if not is_instance_valid(_container):

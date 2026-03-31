@@ -1,9 +1,11 @@
-[gd_resource type="Resource" script_class="AudioCue" format=3]
+[gd_resource type="Resource" script_class="AudioCue" format=3 uid="uid://bpyrvg333mmxl"]
 
-[ext_resource type="Script" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
+[ext_resource type="AudioStream" uid="uid://cekkn7c0doik5" path="res://Game/Audios/SFX/Player/sfx_shuriken_throw_1.mp3" id="1_2xju4"]
+[ext_resource type="Script" uid="uid://dyt2q8rsj0v1v" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
 
 [resource]
 script = ExtResource("1_audiocue")
+clips = Array[AudioStream]([ExtResource("1_2xju4")])
 bus = &"SFX_Player"
 volume_db = -2.0
 cooldown_sec = 0.05

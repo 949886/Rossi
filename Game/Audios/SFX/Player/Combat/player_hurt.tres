@@ -1,6 +1,6 @@
-[gd_resource type="Resource" script_class="AudioCue" format=3]
+[gd_resource type="Resource" script_class="AudioCue" format=3 uid="uid://b88hll0y0lo04"]
 
-[ext_resource type="Script" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
+[ext_resource type="Script" uid="uid://dyt2q8rsj0v1v" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
 
 [resource]
 script = ExtResource("1_audiocue")

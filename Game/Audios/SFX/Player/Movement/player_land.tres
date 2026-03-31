@@ -1,9 +1,11 @@
-[gd_resource type="Resource" script_class="AudioCue" format=3]
+[gd_resource type="Resource" script_class="AudioCue" format=3 uid="uid://b2rekubc373is"]
 
-[ext_resource type="Script" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
+[ext_resource type="Script" uid="uid://dyt2q8rsj0v1v" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
+[ext_resource type="AudioStream" uid="uid://73ra6q20cg3b" path="res://Game/Audios/SFX/Player/sfx_player_landing.mp3" id="1_b3fhm"]
 
 [resource]
 script = ExtResource("1_audiocue")
+clips = Array[AudioStream]([ExtResource("1_b3fhm")])
 bus = &"SFX_Player"
-volume_db = -3.0
+volume_db = -15.0
 cooldown_sec = 0.05

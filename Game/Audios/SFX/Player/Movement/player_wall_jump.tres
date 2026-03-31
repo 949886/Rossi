@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="AudioCue" format=3]
+[gd_resource type="Resource" script_class="AudioCue" format=3 uid="uid://c6cahocn0p7ls"]
 
-[ext_resource type="Script" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
-[ext_resource type="AudioStream" path="res://Game/Audios/SFX/Player/sfx_wall_jump_1.mp3" id="2_wall_jump"]
+[ext_resource type="Script" uid="uid://dyt2q8rsj0v1v" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
+[ext_resource type="AudioStream" uid="uid://ciitln6abou5f" path="res://Game/Audios/SFX/Player/sfx_wall_jump_1.mp3" id="2_wall_jump"]
 
 [resource]
 script = ExtResource("1_audiocue")

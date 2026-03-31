@@ -1,9 +1,14 @@
-[gd_resource type="Resource" script_class="AudioCue" format=3]
+[gd_resource type="Resource" script_class="AudioCue" format=3 uid="uid://cgsvk4qn104e7"]
 
-[ext_resource type="Script" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
+[ext_resource type="Script" uid="uid://dyt2q8rsj0v1v" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
+[ext_resource type="AudioStream" uid="uid://cg2crq3l7087w" path="res://Game/Audios/SFX/Player/sfx_jump_1.mp3" id="1_tamn7"]
+[ext_resource type="AudioStream" uid="uid://c7mmujn0yaea0" path="res://Game/Audios/SFX/Player/sfx_jump_2.mp3" id="2_1fol0"]
+[ext_resource type="AudioStream" uid="uid://cdo0acr2ldjmq" path="res://Game/Audios/SFX/Player/sfx_swoosh_3.mp3" id="2_wetmu"]
+[ext_resource type="AudioStream" uid="uid://b5vatig30givk" path="res://Game/Audios/SFX/Player/sfx_swoosh_4.mp3" id="3_d8kw7"]
 
 [resource]
 script = ExtResource("1_audiocue")
+clips = Array[AudioStream]([ExtResource("1_tamn7"), ExtResource("2_1fol0"), ExtResource("2_wetmu"), ExtResource("3_d8kw7")])
 bus = &"SFX_Player"
 volume_db = -3.0
 cooldown_sec = 0.05

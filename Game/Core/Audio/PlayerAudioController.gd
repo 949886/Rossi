@@ -17,7 +17,7 @@ class_name PlayerAudioController
 @export var footstep_cue: AudioCue
 
 @export_group("Footsteps")
-@export var run_footstep_frames: PackedInt32Array = PackedInt32Array([2, 6])
+@export var run_footstep_frames: Array[int] = [13, 36]
 
 var _player: PlatformerCharacter2D
 var _last_event_time_by_key: Dictionary = {}

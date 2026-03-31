@@ -1,9 +1,9 @@
-[gd_resource type="Resource" script_class="AudioCue" format=3]
+[gd_resource type="Resource" script_class="AudioCue" format=3 uid="uid://gq0pihwy4wxe"]
 
-[ext_resource type="Script" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
-[ext_resource type="AudioStream" path="res://Game/Audios/SFX/Player/sfx_katana_slash_1.wav" id="2_slash1"]
-[ext_resource type="AudioStream" path="res://Game/Audios/SFX/Player/sfx_katana_slash_2.wav" id="3_slash2"]
-[ext_resource type="AudioStream" path="res://Game/Audios/SFX/Player/sfx_katana_slash_3.wav" id="4_slash3"]
+[ext_resource type="Script" uid="uid://dyt2q8rsj0v1v" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
+[ext_resource type="AudioStream" uid="uid://crks1kx8du775" path="res://Game/Audios/SFX/Player/sfx_katana_slash_1.wav" id="2_slash1"]
+[ext_resource type="AudioStream" uid="uid://bp88t630l3uf2" path="res://Game/Audios/SFX/Player/sfx_katana_slash_2.wav" id="3_slash2"]
+[ext_resource type="AudioStream" uid="uid://b325n4sjt2mhh" path="res://Game/Audios/SFX/Player/sfx_katana_slash_3.wav" id="4_slash3"]
 
 [resource]
 script = ExtResource("1_audiocue")

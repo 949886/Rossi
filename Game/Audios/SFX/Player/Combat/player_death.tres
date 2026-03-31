@@ -1,13 +1,11 @@
-[gd_resource type="Resource" script_class="AudioCue" format=3]
+[gd_resource type="Resource" script_class="AudioCue" format=3 uid="uid://cbe1sjqkismdh"]
 
-[ext_resource type="Script" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
-[ext_resource type="AudioStream" path="res://Game/Audios/SFX/Player/voc_player_die.wav" id="2_death"]
+[ext_resource type="Script" uid="uid://dyt2q8rsj0v1v" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
+[ext_resource type="AudioStream" uid="uid://vwcl226nhnca" path="res://Game/Audios/SFX/Player/voc_player_die.wav" id="2_death"]
 
 [resource]
 script = ExtResource("1_audiocue")
 clips = Array[AudioStream]([ExtResource("2_death")])
 bus = &"SFX_Player"
 volume_db = -1.0
-pitch_min = 1.0
-pitch_max = 1.0
 cooldown_sec = 0.2

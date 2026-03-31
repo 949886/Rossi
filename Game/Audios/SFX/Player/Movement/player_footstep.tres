@@ -1,9 +1,11 @@
-[gd_resource type="Resource" script_class="AudioCue" format=3]
+[gd_resource type="Resource" script_class="AudioCue" format=3 uid="uid://dmi43q4nmubvq"]
 
-[ext_resource type="Script" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
+[ext_resource type="Script" uid="uid://dyt2q8rsj0v1v" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
+[ext_resource type="AudioStream" uid="uid://cyhvsxokt43me" path="res://Game/Audios/SFX/Player/sfx_player_footstep_1.mp3" id="1_wfsy5"]
 
 [resource]
 script = ExtResource("1_audiocue")
+clips = Array[AudioStream]([ExtResource("1_wfsy5")])
 bus = &"SFX_Player"
-volume_db = -6.0
-cooldown_sec = 0.09
+volume_db = -5.0
+cooldown_sec = 0.03
