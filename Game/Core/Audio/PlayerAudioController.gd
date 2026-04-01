@@ -15,6 +15,8 @@ class_name PlayerAudioController
 @export var hurt_cue: AudioCue
 @export var death_cue: AudioCue
 @export var footstep_cue: AudioCue
+@export var chronos_start_cue: AudioCue
+@export var chronos_stop_cue: AudioCue
 
 @export_group("Footsteps")
 @export var run_footstep_frames: Array[int] = [13, 36]
@@ -55,6 +57,12 @@ func _connect_player() -> void:
 		_player.animated_sprite.frame_changed.connect(_on_animated_sprite_frame_changed)
 	if _player.attack_hitbox != null and not _player.attack_hitbox.hit_connected.is_connected(_on_attack_hit_connected):
 		_player.attack_hitbox.hit_connected.connect(_on_attack_hit_connected)
+	var chronos_started_callable := Callable(self, "_on_chronos_started")
+	if _player.has_signal(&"chronos_started") and not _player.is_connected(&"chronos_started", chronos_started_callable):
+		_player.connect(&"chronos_started", chronos_started_callable)
+	var chronos_stopped_callable := Callable(self, "_on_chronos_stopped")
+	if _player.has_signal(&"chronos_stopped") and not _player.is_connected(&"chronos_stopped", chronos_stopped_callable):
+		_player.connect(&"chronos_stopped", chronos_stopped_callable)
 
 
 func _on_jumped(kind: StringName) -> void:
@@ -106,6 +114,12 @@ func _on_damage_taken(_hit_data: Dictionary, _current_health: int) -> void:
 
 func _on_died() -> void:
 	_play_cue(death_cue, "death", _player.global_position)
+
+func _on_chronos_started() -> void:
+	_play_cue(chronos_start_cue, "chronos_start", _player.global_position)
+
+func _on_chronos_stopped() -> void:
+	_play_cue(chronos_stop_cue, "chronos_stop", _player.global_position)
 
 
 func _on_animated_sprite_frame_changed() -> void:

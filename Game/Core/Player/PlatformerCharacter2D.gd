@@ -1,4 +1,4 @@
-extends CharacterBody2D
+extends ChronosNode
 class_name PlatformerCharacter2D
 
 signal attack_started(direction: Vector2)
@@ -118,7 +118,9 @@ var _dash_timer := 0.0
 var _invulnerability_timer := 0.0
 var _is_dead := false
 var _current_respawn_position := Vector2.ZERO
-var _respawn_timer: SceneTreeTimer
+var _respawn_time_left := 0.0
+var _floor_snap_restore_time_left := 0.0
+var _floor_snap_restore_value := 0.0
 
 # Attack tracking
 var _attack_timer := 0.0
@@ -168,6 +170,7 @@ func _get(property: StringName):
 	return null
 
 func _ready() -> void:
+	time_group = &"player"
 	hurtbox = get_node_or_null("Hurtbox")
 	attack_hitbox = get_node_or_null("PlayerAttackHitbox")
 	
@@ -190,6 +193,18 @@ func _ready() -> void:
 	_change_state(State.IDLE)
 
 func _physics_process(delta: float) -> void:
+	delta = get_time_scaled_delta(delta)
+
+	if _floor_snap_restore_time_left > 0.0:
+		_floor_snap_restore_time_left = maxf(0.0, _floor_snap_restore_time_left - delta)
+		if _floor_snap_restore_time_left <= 0.0:
+			floor_snap_length = _floor_snap_restore_value
+
+	if _respawn_time_left > 0.0:
+		_respawn_time_left = maxf(0.0, _respawn_time_left - delta)
+		if _respawn_time_left <= 0.0:
+			_on_respawn_timer_timeout()
+
 	if _invulnerability_timer > 0.0:
 		_invulnerability_timer = maxf(0.0, _invulnerability_timer - delta)
 
@@ -654,7 +669,7 @@ func _try_attack() -> bool:
 func die() -> void:
 	if _is_dead or _current_state == State.RESPAWN:
 		return
-	_respawn_timer = null
+	_respawn_time_left = 0.0
 	if is_instance_valid(_active_shuriken):
 		_active_shuriken.queue_free()
 	_pending_attack_angle = null
@@ -666,11 +681,10 @@ func die() -> void:
 	current_health = 0
 	_change_state(State.DIE)
 	died.emit()
-	_respawn_timer = get_tree().create_timer(respawn_delay)
-	_respawn_timer.timeout.connect(_on_respawn_timer_timeout)
+	_respawn_time_left = respawn_delay
 
 func respawn(spawn_position: Vector2) -> void:
-	_respawn_timer = null
+	_respawn_time_left = 0.0
 	_is_dead = false
 	_invulnerability_timer = 0.0
 	_attack_timer = 0.0
@@ -1080,11 +1094,8 @@ func _try_drop_through_platform() -> bool:
 			floor_snap_length = 0.0
 			position += Vector2(0.0, 4.0)
 			velocity = Vector2(velocity.x, 50.0)
-			# Restore floor snap after passing through
-			get_tree().create_timer(0.15).timeout.connect(func() -> void:
-				if is_instance_valid(self):
-					floor_snap_length = prev_snap
-			)
+			_floor_snap_restore_value = prev_snap
+			_floor_snap_restore_time_left = 0.15
 			return true
 	return false
 

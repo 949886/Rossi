@@ -37,7 +37,7 @@ func _physics_process(_delta: float) -> void:
 	if travel_duration <= 0.01:
 		return
 
-	var time := Time.get_ticks_msec() / 1000.0
+	var time := Chronos.get_elapsed_time_for_group(&"world")
 	var phase := pingpong(float(time / travel_duration), 1.0)
 	global_position = _start_position + travel_offset * phase
 

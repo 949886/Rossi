@@ -16,7 +16,7 @@ func _physics_process(_delta: float) -> void:
 	if cycle_duration <= 0.01:
 		return
 
-	var t := Time.get_ticks_msec() / 1000.0
+	var t := Chronos.get_elapsed_time_for_group(&"world")
 	var phase := pingpong(t / cycle_duration, 1.0)
 	global_position = _start_position + travel_offset * phase
 

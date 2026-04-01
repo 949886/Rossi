@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="AudioCue" format=3]
+
+[ext_resource type="Script" path="res://Game/Core/Audio/AudioCue.gd" id="1_audiocue"]
+[ext_resource type="AudioStream" path="res://Game/Audios/SFX/Misc/sfx_time_slow.ogg" id="2_clip"]
+
+[resource]
+script = ExtResource("1_audiocue")
+clips = Array[AudioStream]([ExtResource("2_clip")])
+bus = &"SFX_Player"
+volume_db = -5.0
+pitch_min = 0.98
+pitch_max = 1.02
+cooldown_sec = 0.08

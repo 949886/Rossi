@@ -24,6 +24,7 @@ var _stick_normal := Vector2.ZERO
 var _afterimage_timer := 0.0
 var _attached_target: Node2D
 var _attached_local_position := Vector2.ZERO
+var _stick_life_left := -1.0
 
 func _ready() -> void:
 	add_to_group("ResettableProjectile")
@@ -35,14 +36,20 @@ func reset_for_encounter() -> void:
 	queue_free()
 
 func _physics_process(delta: float) -> void:
+	var scaled_delta := Chronos.get_delta_for_group(delta, &"player")
 	if _stuck:
+		if _stick_life_left > 0.0:
+			_stick_life_left = maxf(0.0, _stick_life_left - scaled_delta)
+			if _stick_life_left <= 0.0:
+				queue_free()
+				return
 		if is_instance_valid(_attached_target):
 			global_position = _attached_target.to_global(_attached_local_position)
 		elif _attached_target != null:
 			queue_free()
 		return
 
-	var movement := direction * speed * delta
+	var movement := direction * speed * scaled_delta
 
 	# Raycast ahead to see if we hit a wall this frame
 	var space_state := get_world_2d().direct_space_state
@@ -73,24 +80,19 @@ func _physics_process(delta: float) -> void:
 	position += movement
 
 	# Spawn afterimages
-	_afterimage_timer -= delta
+	_afterimage_timer -= scaled_delta
 	if _afterimage_timer <= 0.0:
 		spawn_afterimage()
 		_afterimage_timer = afterimage_interval
 
 func _stick_to_surface(target: Node = null) -> void:
 	_stuck = true
+	_stick_life_left = lifespan
 	stuck.emit(global_position, _stick_normal, target)
 
 	# Disable further collisions
 	set_deferred("monitoring", false)
 	set_deferred("monitorable", false)
-
-	# Start stick lifespan timer
-	get_tree().create_timer(lifespan).timeout.connect(func() -> void:
-		if is_instance_valid(self):
-			queue_free()
-	)
 
 func spawn_afterimage() -> void:
 	if _sprite == null or _sprite.texture == null:

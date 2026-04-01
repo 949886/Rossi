@@ -41,12 +41,13 @@ func reset_for_encounter() -> void:
 	queue_free()
 
 func _physics_process(delta: float) -> void:
-	_life_remaining -= delta
+	var scaled_delta := Chronos.get_delta_for_group(delta, &"projectile")
+	_life_remaining -= scaled_delta
 	if _life_remaining <= 0.0:
 		queue_free()
 		return
 
-	var movement := direction * speed * delta
+	var movement := direction * speed * scaled_delta
 	var hit := _raycast_world(movement)
 	if not hit.is_empty():
 		var collider = hit.get("collider")

@@ -17,6 +17,8 @@
 [ext_resource type="Resource" path="res://Game/Audios/SFX/Player/Combat/player_hurt.tres" id="15_player_hurt"]
 [ext_resource type="Resource" path="res://Game/Audios/SFX/Player/Combat/player_death.tres" id="16_player_death"]
 [ext_resource type="Resource" path="res://Game/Audios/SFX/Player/Movement/player_footstep.tres" id="17_player_footstep"]
+[ext_resource type="Resource" path="res://Game/Audios/SFX/Player/Ability/player_chronos_start.tres" id="18_player_chronos_start"]
+[ext_resource type="Resource" path="res://Game/Audios/SFX/Player/Ability/player_chronos_stop.tres" id="19_player_chronos_stop"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_xjagb"]
 radius = 6.0
@@ -642,3 +644,5 @@ teleport_cue = ExtResource("14_player_teleport")
 hurt_cue = ExtResource("15_player_hurt")
 death_cue = ExtResource("16_player_death")
 footstep_cue = ExtResource("17_player_footstep")
+chronos_start_cue = ExtResource("18_player_chronos_start")
+chronos_stop_cue = ExtResource("19_player_chronos_stop")

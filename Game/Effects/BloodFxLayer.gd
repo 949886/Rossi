@@ -54,7 +54,6 @@ var _flash_rect: ColorRect
 var _droplet_pool: Array[Sprite2D] = []
 var _active_droplets: Array[Dictionary] = []
 var _persistent_stains: Array[Sprite2D] = []
-var _hitstop_token := 0
 var _active_camera: Camera2D
 var _camera_base_offset := Vector2.ZERO
 var _shake_remaining := 0.0
@@ -76,7 +75,6 @@ func _ready() -> void:
 	_find_chromatic_material()
 
 func _exit_tree() -> void:
-	Engine.time_scale = 1.0
 	if _active_camera != null:
 		_active_camera.offset = _camera_base_offset
 
@@ -474,15 +472,7 @@ func _release_droplet(index: int) -> void:
 func _apply_hitstop(duration: float) -> void:
 	if duration <= 0.0:
 		return
-	_hitstop_token += 1
-	var token := _hitstop_token
-	Engine.time_scale = minf(Engine.time_scale, hitstop_time_scale)
-	get_tree().create_timer(duration, true, false, true).timeout.connect(func() -> void:
-		if not is_inside_tree():
-			return
-		if token == _hitstop_token:
-			Engine.time_scale = 1.0
-	)
+	Chronos.play_hitstop(duration, hitstop_time_scale)
 
 func _spawn_screen_flash() -> void:
 	if _flash_rect == null:
