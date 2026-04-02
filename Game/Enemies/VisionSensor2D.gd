@@ -10,6 +10,8 @@ signal visual_debug_toggled(enabled: bool)
 @export var detection_radius := 300
 ## Horizontal field-of-view angle in degrees. Use 360 for omni-directional sensing.
 @export_range(1.0, 360.0, 1.0) var fov_angle_degrees := 360.0
+## Additional half-angle allowed when retaining an already tracked target near the FOV edge.
+@export_range(0.0, 45.0, 0.5) var tracked_target_fov_margin_degrees := 6.0
 ## Default local offset applied when the sensor node is still at the owner's origin.
 @export var vision_offset := Vector2.ZERO
 ## Only nodes in this group can be considered valid targets.
@@ -141,6 +143,21 @@ func has_line_of_sight(target: Node2D) -> bool:
 		if _has_line_of_sight_to_point(target, sample_point):
 			return true
 	return false
+
+func can_retain_target(target: Node2D, validate_target: Callable = Callable()) -> bool:
+	if not sensor_enabled:
+		return false
+	if target == null or not is_instance_valid(target):
+		return false
+	if target_group != "" and not target.is_in_group(target_group):
+		return false
+	if validate_target.is_valid() and not bool(validate_target.call(target)):
+		return false
+	if _uses_fov() and not _is_target_in_fov(target, tracked_target_fov_margin_degrees):
+		return false
+	if require_line_of_sight and not has_line_of_sight(target):
+		return false
+	return true
 
 func _has_line_of_sight_to_point(target: Node2D, point: Vector2) -> bool:
 	var query := PhysicsRayQueryParameters2D.create(global_position, point, line_of_sight_collision_mask)
@@ -298,13 +315,13 @@ func _uses_fov() -> bool:
 func _uses_cone_visual() -> bool:
 	return _uses_fov() and _get_shape_resource() is CircleShape2D
 
-func _is_target_in_fov(target: Node2D) -> bool:
+func _is_target_in_fov(target: Node2D, extra_half_angle_degrees: float = 0.0) -> bool:
 	for sample_point in _get_target_visibility_points(target):
-		if _is_in_fov(sample_point):
+		if _is_in_fov(sample_point, extra_half_angle_degrees):
 			return true
 	return false
 
-func _is_in_fov(world_position: Vector2) -> bool:
+func _is_in_fov(world_position: Vector2, extra_half_angle_degrees: float = 0.0) -> bool:
 	if not _uses_fov():
 		return true
 
@@ -314,7 +331,7 @@ func _is_in_fov(world_position: Vector2) -> bool:
 
 	var forward := Vector2.RIGHT.rotated(_get_current_forward_angle())
 	var angle_to_target := absf(rad_to_deg(forward.angle_to(to_point.normalized())))
-	return angle_to_target <= fov_angle_degrees * 0.5
+	return angle_to_target <= fov_angle_degrees * 0.5 + maxf(extra_half_angle_degrees, 0.0)
 
 func _apply_detection_shape() -> void:
 	var shape := _get_shape_resource()

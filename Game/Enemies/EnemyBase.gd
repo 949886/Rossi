@@ -15,6 +15,8 @@ signal attack_performed
 @export var move_speed := 90.0
 @export var patrol_distance := 96.0
 @export var lose_target_range := 260.0
+@export_range(0.0, 1.0, 0.01) var target_loss_grace_duration := 0.18
+@export_range(0.0, 128.0, 1.0) var leash_reacquire_distance := 16.0
 @export var attack_range := 26.0
 @export var attack_cooldown := 0.8
 @export var windup_duration := 0.25
@@ -79,6 +81,8 @@ var _target: Node2D
 var _state_timer := 0.0
 var _attack_cooldown_timer := 0.0
 var _invulnerable_timer := 0.0
+var _target_loss_grace_timer := 0.0
+var _suspend_targeting_until_home := false
 var _patrol_origin_x := 0.0
 var _patrol_direction := 1
 var _debug_label: Label
@@ -148,6 +152,8 @@ func _physics_process(delta: float) -> void:
 		_attack_cooldown_timer = maxf(0.0, _attack_cooldown_timer - delta)
 	if _invulnerable_timer > 0.0:
 		_invulnerable_timer = maxf(0.0, _invulnerable_timer - delta)
+	if _target_loss_grace_timer > 0.0:
+		_target_loss_grace_timer = maxf(0.0, _target_loss_grace_timer - delta)
 	if _state_timer > 0.0:
 		_state_timer = maxf(0.0, _state_timer - delta)
 
@@ -215,6 +221,8 @@ func die() -> void:
 	_emit_death_blood(_last_damage_context if not _last_damage_context.is_empty() else _build_fallback_blood_context())
 	_last_damage_context.clear()
 	_target = null
+	_target_loss_grace_timer = 0.0
+	_suspend_targeting_until_home = false
 	velocity = Vector2.ZERO
 	_disable_combat_nodes()
 	if collision_shape != null:
@@ -229,6 +237,8 @@ func reset_for_encounter() -> void:
 	_invulnerable_timer = 0.0
 	_attack_cooldown_timer = 0.0
 	_target = null
+	_target_loss_grace_timer = 0.0
+	_suspend_targeting_until_home = false
 	velocity = Vector2.ZERO
 	global_position = _spawn_position
 	_patrol_direction = _spawn_facing_direction
@@ -280,6 +290,8 @@ func _process_chase(_delta: float) -> void:
 	var distance_to_home := global_position.distance_to(_spawn_position)
 	if distance_to_home > lose_target_range:
 		_target = null
+		_target_loss_grace_timer = 0.0
+		_suspend_targeting_until_home = true
 		_clear_visual_persistence_target()
 		_change_state(State.RETURN_HOME)
 		return
@@ -346,12 +358,15 @@ func _process_hit(_delta: float) -> void:
 		_change_state(State.CHASE if _can_chase_target() else State.RETURN_HOME)
 
 func _process_return_home(_delta: float) -> void:
+	if _suspend_targeting_until_home:
+		_target = null
 	if _can_chase_target():
 		_change_state(State.CHASE)
 		return
 
 	var to_home := _spawn_position - global_position
 	if absf(to_home.x) <= return_tolerance:
+		_suspend_targeting_until_home = false
 		global_position.x = _spawn_position.x
 		_change_state(State.PATROL if patrol_distance > 0.0 else State.IDLE)
 		return
@@ -473,18 +488,34 @@ func _update_target() -> void:
 			vision_sensor.set_debug_target(null)
 		return
 
+	if _suspend_targeting_until_home:
+		if global_position.distance_to(_spawn_position) > leash_reacquire_distance:
+			_target = null
+			_target_loss_grace_timer = 0.0
+			if vision_sensor != null:
+				vision_sensor.set_debug_target(null)
+			return
+		_suspend_targeting_until_home = false
+
 	if _is_target_valid(_target):
 		var distance_to_target := global_position.distance_to(_target.global_position)
-		if distance_to_target <= lose_target_range and _has_line_of_sight(_target):
+		if distance_to_target <= lose_target_range and _can_retain_target(_target):
+			_target_loss_grace_timer = target_loss_grace_duration
 			if vision_sensor != null:
 				vision_sensor.track_visible_target(_target)
 				vision_sensor.set_debug_target(_target)
 			return
+		if distance_to_target <= lose_target_range and _target_loss_grace_timer > 0.0:
+			if vision_sensor != null:
+				vision_sensor.set_debug_target(_target)
+			return
 
 	_target = null
+	_target_loss_grace_timer = 0.0
 	var new_target := _find_visible_target()
 	if new_target != null:
 		_target = new_target
+		_target_loss_grace_timer = target_loss_grace_duration
 		target_acquired.emit(new_target)
 	if vision_sensor != null:
 		vision_sensor.set_debug_target(_target)
@@ -506,6 +537,11 @@ func _has_line_of_sight(target: Node2D) -> bool:
 	if vision_sensor == null:
 		return true
 	return vision_sensor.has_line_of_sight(target)
+
+func _can_retain_target(target: Node2D) -> bool:
+	if vision_sensor == null:
+		return _has_line_of_sight(target)
+	return vision_sensor.can_retain_target(target, Callable(self, "_is_target_valid"))
 
 func _can_chase_target() -> bool:
 	return _is_target_valid(_target) or _has_visual_persistence_target()
