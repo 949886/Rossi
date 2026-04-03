@@ -26,8 +26,8 @@ func _ready() -> void:
 		push_warning("EnemyAudioController must be a child of EnemyBase.")
 		return
 
-	if not _enemy.target_acquired.is_connected(_on_target_acquired):
-		_enemy.target_acquired.connect(_on_target_acquired)
+	if not _enemy.alert_started.is_connected(_on_alert_started):
+		_enemy.alert_started.connect(_on_alert_started)
 	if not _enemy.attack_windup_started.is_connected(_on_attack_windup_started):
 		_enemy.attack_windup_started.connect(_on_attack_windup_started)
 	if not _enemy.attack_performed.is_connected(_on_attack_performed):
@@ -40,7 +40,7 @@ func _ready() -> void:
 		_enemy.animated_sprite.frame_changed.connect(_on_animated_sprite_frame_changed)
 
 
-func _on_target_acquired(_target: Node) -> void:
+func _on_alert_started(_target: Node) -> void:
 	_play_cue(alert_cue, "alert", _enemy.global_position)
 
 

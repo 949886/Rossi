@@ -1,17 +1,17 @@
-[gd_scene load_steps=15 format=3]
+[gd_scene format=3 uid="uid://csqmy8ypij7l2"]
 
 [ext_resource type="PackedScene" path="res://Game/Characters/Shiro/ChronosShiro.tscn" id="1_player"]
-[ext_resource type="PackedScene" path="res://Game/Characters/Shiro/Items/Shuriken/Shuriken.tscn" id="2_shuriken"]
-[ext_resource type="Script" path="res://Game/Enemies/EncounterController.gd" id="3_encounter"]
-[ext_resource type="PackedScene" path="res://Game/Enemies/Gangsters/EnemyGangster.tscn" id="4_enemy"]
+[ext_resource type="PackedScene" uid="uid://c7t8p6v5taq2x" path="res://Game/Characters/Shiro/Items/Shuriken/Shuriken.tscn" id="2_shuriken"]
+[ext_resource type="Script" uid="uid://b8uxbkqqcn12" path="res://Game/Enemies/EncounterController.gd" id="3_encounter"]
+[ext_resource type="PackedScene" uid="uid://l1fj7qvub0mh" path="res://Game/Enemies/Gangsters/EnemyGangster.tscn" id="4_enemy"]
 [ext_resource type="PackedScene" path="res://Game/Enemies/Gangsters/EnemyGangsterRanged.tscn" id="5_ranged_enemy"]
-[ext_resource type="Script" path="res://Game/Enemies/EnemySpawner2D.gd" id="6_spawner"]
-[ext_resource type="Script" path="res://Game/Effects/BloodFxLayer.gd" id="7_blood"]
-[ext_resource type="Script" path="res://Game/Demos/ChronosFx.gd" id="8_fx"]
-[ext_resource type="Script" path="res://Game/Demos/ChronosHud.gd" id="9_hud"]
-[ext_resource type="Script" path="res://Game/Props/Laser/MovingLaserBlocker.gd" id="10_blocker"]
-[ext_resource type="Script" path="res://Game/Tutorial/TeleportPlatformTarget.gd" id="11_platform"]
-[ext_resource type="Shader" path="res://Game/Shaders/Chromatic/circular_chormatic/circular_chormatic.gdshader" id="12_shader"]
+[ext_resource type="Script" uid="uid://be3o6nwd2gsbg" path="res://Game/Enemies/EnemySpawner2D.gd" id="6_spawner"]
+[ext_resource type="Script" uid="uid://18fwsmh8o0cc" path="res://Game/Effects/BloodFxLayer.gd" id="7_blood"]
+[ext_resource type="Script" uid="uid://cbh662kgmtfsp" path="res://Game/Demos/ChronosFx.gd" id="8_fx"]
+[ext_resource type="Script" uid="uid://ch4eu2q5yelbt" path="res://Game/Demos/ChronosHud.gd" id="9_hud"]
+[ext_resource type="Script" uid="uid://bvng1qipme2ru" path="res://Game/Props/Laser/MovingLaserBlocker.gd" id="10_blocker"]
+[ext_resource type="Script" uid="uid://0ur503tdypjw" path="res://Game/Tutorial/TeleportPlatformTarget.gd" id="11_platform"]
+[ext_resource type="Shader" uid="uid://dejeiy537grca" path="res://Game/Shaders/Chromatic/circular_chormatic/circular_chormatic.gdshader" id="12_shader"]
 
 [sub_resource type="RectangleShape2D" id="1_floor_shape"]
 size = Vector2(1600, 48)
@@ -27,82 +27,94 @@ shader = ExtResource("12_shader")
 shader_parameter/MAX_DIST_PX = 2.0
 shader_parameter/roundness = 0.0
 
-[node name="ChronosDemo" type="Node2D"]
+[node name="ChronosDemo" type="Node2D" unique_id=713353325]
 
-[node name="Backdrop" type="Polygon2D" parent="."]
+[node name="Backdrop" type="Polygon2D" parent="." unique_id=104363632]
 z_index = -20
 color = Color(0.0666667, 0.0862745, 0.12549, 1)
 polygon = PackedVector2Array(0, 0, 1664, 0, 1664, 896, 0, 896)
 
-[node name="BackdropGlow" type="Polygon2D" parent="."]
+[node name="BackdropGlow" type="Polygon2D" parent="." unique_id=1474578956]
 z_index = -18
 color = Color(0.0784314, 0.211765, 0.298039, 0.16)
 polygon = PackedVector2Array(0, 430, 1664, 430, 1664, 896, 0, 896)
 
-[node name="EncounterController" type="Node" parent="."]
+[node name="EncounterController" type="Node" parent="." unique_id=1985237448]
 script = ExtResource("3_encounter")
 player_path = NodePath("../ChronosCharacter2D")
 
-[node name="BloodFxLayer" type="Node" parent="."]
+[node name="BloodFxLayer" type="Node" parent="." unique_id=78250407]
 script = ExtResource("7_blood")
 
-[node name="Environment" type="Node2D" parent="."]
+[node name="Environment" type="Node2D" parent="." unique_id=1487936527]
 
-[node name="Floor" type="StaticBody2D" parent="Environment"]
+[node name="Floor" type="StaticBody2D" parent="Environment" unique_id=265648456]
 position = Vector2(832, 650)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/Floor"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/Floor" unique_id=1100033789]
 shape = SubResource("1_floor_shape")
 
-[node name="Polygon2D" type="Polygon2D" parent="Environment/Floor"]
+[node name="Polygon2D" type="Polygon2D" parent="Environment/Floor" unique_id=1401690160]
 color = Color(0.113725, 0.129412, 0.164706, 1)
 polygon = PackedVector2Array(-800, -24, 800, -24, 800, 24, -800, 24)
 
-[node name="LeftWall" type="StaticBody2D" parent="Environment"]
+[node name="LeftWall" type="StaticBody2D" parent="Environment" unique_id=1064802978]
 position = Vector2(72, 482)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/LeftWall"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/LeftWall" unique_id=1106687259]
 shape = SubResource("2_wall_shape")
 
-[node name="Polygon2D" type="Polygon2D" parent="Environment/LeftWall"]
+[node name="Polygon2D" type="Polygon2D" parent="Environment/LeftWall" unique_id=1049156497]
 color = Color(0.113725, 0.129412, 0.164706, 1)
 polygon = PackedVector2Array(-24, -170, 24, -170, 24, 170, -24, 170)
 
-[node name="RightWall" type="StaticBody2D" parent="Environment"]
+[node name="RightWall" type="StaticBody2D" parent="Environment" unique_id=2023687069]
 position = Vector2(1592, 482)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/RightWall"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/RightWall" unique_id=43154334]
 shape = SubResource("2_wall_shape")
 
-[node name="Polygon2D" type="Polygon2D" parent="Environment/RightWall"]
+[node name="Polygon2D" type="Polygon2D" parent="Environment/RightWall" unique_id=2115143069]
 color = Color(0.113725, 0.129412, 0.164706, 1)
 polygon = PackedVector2Array(-24, -170, 24, -170, 24, 170, -24, 170)
 
-[node name="CenterPlatform" type="StaticBody2D" parent="Environment"]
+[node name="CenterPlatform" type="StaticBody2D" parent="Environment" unique_id=938381978]
 position = Vector2(760, 500)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/CenterPlatform"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/CenterPlatform" unique_id=664931255]
 shape = SubResource("3_platform_shape")
 
-[node name="Polygon2D" type="Polygon2D" parent="Environment/CenterPlatform"]
+[node name="Polygon2D" type="Polygon2D" parent="Environment/CenterPlatform" unique_id=1895721364]
 color = Color(0.160784, 0.184314, 0.227451, 1)
 polygon = PackedVector2Array(-110, -12, 110, -12, 110, 12, -110, 12)
 
-[node name="UpperPlatform" type="StaticBody2D" parent="Environment"]
+[node name="UpperPlatform" type="StaticBody2D" parent="Environment" unique_id=444186211]
 position = Vector2(1160, 360)
 
-[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/UpperPlatform"]
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/UpperPlatform" unique_id=1261508697]
 shape = SubResource("3_platform_shape")
 
-[node name="Polygon2D" type="Polygon2D" parent="Environment/UpperPlatform"]
+[node name="Polygon2D" type="Polygon2D" parent="Environment/UpperPlatform" unique_id=1228227280]
 color = Color(0.160784, 0.184314, 0.227451, 1)
 polygon = PackedVector2Array(-110, -12, 110, -12, 110, 12, -110, 12)
 
-[node name="ChronosCharacter2D" parent="." instance=ExtResource("1_player")]
+[node name="ChronosCharacter2D" parent="." unique_id=1987012960 instance=ExtResource("1_player")]
 position = Vector2(220, 606)
+chronos_stamina_max = 100.0
+chronos_stamina_use_per_second = 28.0
+chronos_stamina_recover_per_second = 38.0
+chronos_stamina_recover_delay = 0.2
+chronos_cooldown = 0.45
+chronos_afterimage_interval = 0.045
+chronos_afterimage_fade_duration = 0.22
+chronos_afterimage_color = Color(0.58, 0.92, 1, 0.3)
+chronos_afterimage_min_speed = 65.0
+chronos_afterimage_trail_distance = 18.0
+chronos_start_burst_count = 3
+chronos_stop_burst_count = 2
 shuriken_scene = ExtResource("2_shuriken")
 
-[node name="Camera2D" type="Camera2D" parent="ChronosCharacter2D"]
+[node name="Camera2D" type="Camera2D" parent="ChronosCharacter2D" unique_id=522854492]
 position = Vector2(320, -120)
 zoom = Vector2(1.15, 1.15)
 limit_left = 0
@@ -110,103 +122,105 @@ limit_top = 0
 limit_right = 1664
 limit_bottom = 896
 
-[node name="GroundSpawner" type="Node2D" parent="."]
+[node name="GroundSpawner" type="Node2D" parent="." unique_id=1288867826]
 position = Vector2(620, 606)
 script = ExtResource("6_spawner")
 enemy_scene = ExtResource("4_enemy")
 facing_direction = -1
 
-[node name="CenterSpawner" type="Node2D" parent="."]
+[node name="CenterSpawner" type="Node2D" parent="." unique_id=1326600463]
 position = Vector2(900, 456)
 script = ExtResource("6_spawner")
 enemy_scene = ExtResource("4_enemy")
 facing_direction = -1
 spawn_delay = 0.15
 
-[node name="RangedSpawner" type="Node2D" parent="."]
+[node name="RangedSpawner" type="Node2D" parent="." unique_id=1140443591]
 position = Vector2(1310, 316)
 script = ExtResource("6_spawner")
 enemy_scene = ExtResource("5_ranged_enemy")
 facing_direction = -1
 spawn_delay = 0.35
 
-[node name="MovingLaserBlocker" type="AnimatableBody2D" parent="."]
+[node name="MovingLaserBlocker" type="AnimatableBody2D" parent="." unique_id=1569756104]
 position = Vector2(1030, 620)
 script = ExtResource("10_blocker")
 travel_offset = Vector2(0, -190)
 cycle_duration = 2.6
 
-[node name="TeleportPlatformTarget" type="AnimatableBody2D" parent="."]
+[node name="TeleportPlatformTarget" type="AnimatableBody2D" parent="." unique_id=815557910]
 position = Vector2(1360, 580)
 script = ExtResource("11_platform")
 travel_offset = Vector2(180, -120)
 travel_duration = 2.8
 
-[node name="ChronosFx" type="CanvasLayer" parent="."]
+[node name="ChronosFx" type="CanvasLayer" parent="." unique_id=1811302230]
 script = ExtResource("8_fx")
 
-[node name="ShadersParent" type="Node2D" parent="ChronosFx"]
+[node name="ShadersParent" type="Node2D" parent="ChronosFx" unique_id=1093134414]
 position = Vector2(832, 448)
+metadata/_edit_lock_ = true
 
-[node name="Shaders" type="Node2D" parent="ChronosFx/ShadersParent"]
+[node name="Shaders" type="Node2D" parent="ChronosFx/ShadersParent" unique_id=83025095]
 position = Vector2(-832, -448)
+metadata/_edit_lock_ = true
 
-[node name="ChromaticRect" type="ColorRect" parent="ChronosFx/ShadersParent/Shaders"]
+[node name="ChromaticRect" type="ColorRect" parent="ChronosFx/ShadersParent/Shaders" unique_id=1010452170]
 material = SubResource("4_chromatic_material")
 offset_right = 1664.0
 offset_bottom = 896.0
 mouse_filter = 2
+metadata/_edit_lock_ = true
 
-[node name="TintRect" type="ColorRect" parent="ChronosFx/ShadersParent/Shaders"]
+[node name="TintRect" type="ColorRect" parent="ChronosFx/ShadersParent/Shaders" unique_id=1814056691]
 offset_right = 1664.0
 offset_bottom = 896.0
 mouse_filter = 2
 color = Color(0.56, 0.8, 1, 0)
+metadata/_edit_lock_ = true
 
-[node name="ChronosHud" type="CanvasLayer" parent="."]
+[node name="ChronosHud" type="CanvasLayer" parent="." unique_id=635347001]
 script = ExtResource("9_hud")
 player_path = NodePath("../ChronosCharacter2D")
 
-[node name="Panel" type="Panel" parent="ChronosHud"]
+[node name="Panel" type="Panel" parent="ChronosHud" unique_id=1322657137]
 offset_left = 16.0
 offset_top = 16.0
 offset_right = 460.0
 offset_bottom = 212.0
 
-[node name="VBox" type="VBoxContainer" parent="ChronosHud/Panel"]
+[node name="VBox" type="VBoxContainer" parent="ChronosHud/Panel" unique_id=1494042272]
 layout_mode = 0
 offset_left = 12.0
 offset_top = 10.0
 offset_right = 430.0
 offset_bottom = 186.0
 
-[node name="Title" type="Label" parent="ChronosHud/Panel/VBox"]
+[node name="Title" type="Label" parent="ChronosHud/Panel/VBox" unique_id=1765963332]
 layout_mode = 2
 text = "Chronos Demo"
 
-[node name="Player" type="Label" parent="ChronosHud/Panel/VBox"]
+[node name="Player" type="Label" parent="ChronosHud/Panel/VBox" unique_id=1750303921]
 layout_mode = 2
 text = "Player: ..."
 
-[node name="ChronosStatus" type="Label" parent="ChronosHud/Panel/VBox"]
+[node name="ChronosStatus" type="Label" parent="ChronosHud/Panel/VBox" unique_id=1816006234]
 layout_mode = 2
 text = "Chronos: ..."
 
-[node name="StaminaBar" type="ProgressBar" parent="ChronosHud/Panel/VBox"]
+[node name="StaminaBar" type="ProgressBar" parent="ChronosHud/Panel/VBox" unique_id=1155236299]
 layout_mode = 2
-max_value = 100.0
 value = 100.0
 show_percentage = false
 
-[node name="CooldownBar" type="ProgressBar" parent="ChronosHud/Panel/VBox"]
+[node name="CooldownBar" type="ProgressBar" parent="ChronosHud/Panel/VBox" unique_id=1173454237]
 layout_mode = 2
-max_value = 100.0
 show_percentage = false
 
-[node name="EnemyCount" type="Label" parent="ChronosHud/Panel/VBox"]
+[node name="EnemyCount" type="Label" parent="ChronosHud/Panel/VBox" unique_id=1590019023]
 layout_mode = 2
 text = "Enemies: ..."
 
-[node name="Controls" type="Label" parent="ChronosHud/Panel/VBox"]
+[node name="Controls" type="Label" parent="ChronosHud/Panel/VBox" unique_id=1319740102]
 layout_mode = 2
 text = "Hold CTRL chronos | LMB attack | Q throw / teleport | R reset encounter"

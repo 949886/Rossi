@@ -5,6 +5,7 @@ signal hit_taken(hit_data: Dictionary)
 signal died
 signal respawned
 signal target_acquired(target: Node)
+signal alert_started(target: Node)
 signal health_changed(current_health: int, max_health: int)
 signal state_changed(state_name: String)
 signal attack_windup_started
@@ -17,6 +18,10 @@ signal attack_performed
 @export var lose_target_range := 260.0
 @export_range(0.0, 1.0, 0.01) var target_loss_grace_duration := 0.18
 @export_range(0.0, 128.0, 1.0) var leash_reacquire_distance := 16.0
+@export var enable_investigation := true
+@export_range(0.0, 10.0, 0.1) var investigate_duration := 1.5
+@export_range(0.0, 5.0, 0.05) var investigate_turn_interval := 0.4
+@export_range(0.0, 64.0, 1.0) var investigate_arrival_tolerance := 8.0
 @export var attack_range := 26.0
 @export var attack_cooldown := 0.8
 @export var windup_duration := 0.25
@@ -63,6 +68,7 @@ enum State {
 	IDLE,
 	PATROL,
 	CHASE,
+	SEARCH,
 	WINDUP,
 	ATTACK,
 	RECOVER,
@@ -82,7 +88,11 @@ var _state_timer := 0.0
 var _attack_cooldown_timer := 0.0
 var _invulnerable_timer := 0.0
 var _target_loss_grace_timer := 0.0
+var _investigation_turn_timer := 0.0
 var _suspend_targeting_until_home := false
+var _investigation_position := Vector2.ZERO
+var _has_investigation_position := false
+var _alert_cycle_active := false
 var _patrol_origin_x := 0.0
 var _patrol_direction := 1
 var _debug_label: Label
@@ -167,6 +177,8 @@ func _physics_process(delta: float) -> void:
 			_process_patrol(delta)
 		State.CHASE:
 			_process_chase(delta)
+		State.SEARCH:
+			_process_search(delta)
 		State.WINDUP:
 			_process_windup()
 		State.ATTACK:
@@ -222,7 +234,10 @@ func die() -> void:
 	_last_damage_context.clear()
 	_target = null
 	_target_loss_grace_timer = 0.0
+	_investigation_turn_timer = 0.0
 	_suspend_targeting_until_home = false
+	_has_investigation_position = false
+	_alert_cycle_active = false
 	velocity = Vector2.ZERO
 	_disable_combat_nodes()
 	if collision_shape != null:
@@ -238,7 +253,10 @@ func reset_for_encounter() -> void:
 	_attack_cooldown_timer = 0.0
 	_target = null
 	_target_loss_grace_timer = 0.0
+	_investigation_turn_timer = 0.0
 	_suspend_targeting_until_home = false
+	_has_investigation_position = false
+	_alert_cycle_active = false
 	velocity = Vector2.ZERO
 	global_position = _spawn_position
 	_patrol_direction = _spawn_facing_direction
@@ -262,14 +280,14 @@ func reset_for_encounter() -> void:
 
 func _process_idle(_delta: float) -> void:
 	velocity.x = move_toward(velocity.x, 0.0, move_speed)
-	if _can_chase_target():
+	if _can_detect_target():
 		_change_state(State.CHASE)
 		return
 	if patrol_distance > 0.0 and _state_timer <= 0.0:
 		_change_state(State.PATROL)
 
 func _process_patrol(_delta: float) -> void:
-	if _can_chase_target():
+	if _can_detect_target():
 		_change_state(State.CHASE)
 		return
 
@@ -289,12 +307,15 @@ func _process_patrol(_delta: float) -> void:
 func _process_chase(_delta: float) -> void:
 	var distance_to_home := global_position.distance_to(_spawn_position)
 	if distance_to_home > lose_target_range:
-		_target = null
-		_target_loss_grace_timer = 0.0
-		_suspend_targeting_until_home = true
-		_clear_visual_persistence_target()
-		_change_state(State.RETURN_HOME)
-		return
+		if not _is_target_valid(_target) and _can_finish_investigation_before_return():
+			pass
+		else:
+			_target = null
+			_target_loss_grace_timer = 0.0
+			_suspend_targeting_until_home = true
+			_clear_investigation_target()
+			_change_state(State.RETURN_HOME)
+			return
 
 	if _is_target_valid(_target):
 		var to_target := _target.global_position - global_position
@@ -312,15 +333,20 @@ func _process_chase(_delta: float) -> void:
 		velocity.x = _facing_direction * move_speed * chase_speed_multiplier
 		return
 
-	if not _has_visual_persistence_target():
+	if not _has_investigation_target():
+		_clear_investigation_target()
 		_change_state(State.RETURN_HOME)
 		return
 
-	var to_last_seen := _get_visual_persistence_position() - global_position
-	if absf(to_last_seen.x) <= _get_visual_persistence_arrival_tolerance():
+	var to_last_seen := _get_investigation_position() - global_position
+	if absf(to_last_seen.x) <= _get_investigation_arrival_tolerance():
 		velocity.x = 0.0
-		_clear_visual_persistence_target()
-		_change_state(State.RETURN_HOME)
+		global_position.x = _get_investigation_position().x
+		if enable_investigation and investigate_duration > 0.0:
+			_change_state(State.SEARCH)
+		else:
+			_clear_investigation_target()
+			_change_state(State.RETURN_HOME)
 		return
 
 	if absf(to_last_seen.x) > 1.0:
@@ -328,14 +354,41 @@ func _process_chase(_delta: float) -> void:
 
 	if _is_blocked_forward():
 		velocity.x = 0.0
+		if enable_investigation and investigate_duration > 0.0:
+			_change_state(State.SEARCH)
+		else:
+			_clear_investigation_target()
+			_change_state(State.RETURN_HOME)
 		return
 
 	velocity.x = _facing_direction * move_speed * chase_speed_multiplier
 
+func _process_search(delta: float) -> void:
+	velocity.x = 0.0
+	if _can_detect_target():
+		_change_state(State.CHASE)
+		return
+	if not _has_investigation_target():
+		_change_state(State.RETURN_HOME)
+		return
+	if _state_timer <= 0.0:
+		_clear_investigation_target()
+		_change_state(State.RETURN_HOME)
+		return
+	if investigate_turn_interval <= 0.0:
+		return
+
+	_investigation_turn_timer = maxf(0.0, _investigation_turn_timer - delta)
+	if _investigation_turn_timer > 0.0:
+		return
+
+	_update_facing(-_facing_direction)
+	_investigation_turn_timer = investigate_turn_interval
+
 func _process_windup() -> void:
 	velocity.x = 0.0
 	if not _is_target_valid(_target):
-		_change_state(State.CHASE if _has_visual_persistence_target() else State.RETURN_HOME)
+		_change_state(State.CHASE if _can_resume_engagement() else State.RETURN_HOME)
 		return
 	if _state_timer <= 0.0:
 		_change_state(State.ATTACK)
@@ -350,23 +403,25 @@ func _process_attack() -> void:
 func _process_recover() -> void:
 	velocity.x = 0.0
 	if _state_timer <= 0.0:
-		_change_state(State.CHASE if _can_chase_target() else State.IDLE)
+		_change_state(State.CHASE if _can_resume_engagement() else State.IDLE)
 
 func _process_hit(_delta: float) -> void:
 	velocity.x = move_toward(velocity.x, 0.0, move_speed * 3.0)
 	if _state_timer <= 0.0:
-		_change_state(State.CHASE if _can_chase_target() else State.RETURN_HOME)
+		_change_state(State.CHASE if _can_resume_engagement() else State.RETURN_HOME)
 
 func _process_return_home(_delta: float) -> void:
 	if _suspend_targeting_until_home:
 		_target = null
-	if _can_chase_target():
+	if _can_detect_target():
 		_change_state(State.CHASE)
 		return
 
 	var to_home := _spawn_position - global_position
 	if absf(to_home.x) <= return_tolerance:
 		_suspend_targeting_until_home = false
+		_clear_investigation_target()
+		_alert_cycle_active = false
 		global_position.x = _spawn_position.x
 		_change_state(State.PATROL if patrol_distance > 0.0 else State.IDLE)
 		return
@@ -405,6 +460,9 @@ func _change_state(new_state: State) -> void:
 			_play_animation(_get_patrol_animation())
 		State.CHASE:
 			_play_animation(_get_chase_animation())
+		State.SEARCH:
+			_state_timer = investigate_duration
+			_on_enter_search_state()
 		State.WINDUP:
 			_state_timer = windup_duration
 			_on_enter_windup_state()
@@ -437,6 +495,12 @@ func _play_animation(animation_name: String) -> void:
 
 func _on_enter_windup_state() -> void:
 	_play_animation("melee_attack")
+
+func _on_enter_search_state() -> void:
+	if attack_hitbox != null:
+		attack_hitbox.set_active(false)
+	_investigation_turn_timer = investigate_turn_interval
+	_play_animation("idle")
 
 func _on_enter_attack_state() -> void:
 	if attack_hitbox == null:
@@ -501,6 +565,7 @@ func _update_target() -> void:
 		var distance_to_target := global_position.distance_to(_target.global_position)
 		if distance_to_target <= lose_target_range and _can_retain_target(_target):
 			_target_loss_grace_timer = target_loss_grace_duration
+			_remember_investigation_position(_target.global_position)
 			if vision_sensor != null:
 				vision_sensor.track_visible_target(_target)
 				vision_sensor.set_debug_target(_target)
@@ -516,6 +581,10 @@ func _update_target() -> void:
 	if new_target != null:
 		_target = new_target
 		_target_loss_grace_timer = target_loss_grace_duration
+		_remember_investigation_position(new_target.global_position)
+		if not _alert_cycle_active:
+			_alert_cycle_active = true
+			alert_started.emit(new_target)
 		target_acquired.emit(new_target)
 	if vision_sensor != null:
 		vision_sensor.set_debug_target(_target)
@@ -543,8 +612,11 @@ func _can_retain_target(target: Node2D) -> bool:
 		return _has_line_of_sight(target)
 	return vision_sensor.can_retain_target(target, Callable(self, "_is_target_valid"))
 
-func _can_chase_target() -> bool:
-	return _is_target_valid(_target) or _has_visual_persistence_target()
+func _can_detect_target() -> bool:
+	return _is_target_valid(_target) and _can_retain_target(_target)
+
+func _can_resume_engagement() -> bool:
+	return _is_target_valid(_target) or _has_investigation_target()
 
 func _can_attack_target() -> bool:
 	if not _is_target_valid(_target):
@@ -648,6 +720,8 @@ func _update_debug_label() -> void:
 	var target_text := "none"
 	if is_instance_valid(_target):
 		target_text = _target.name
+	elif _has_investigation_target():
+		target_text = "last seen"
 	elif _has_visual_persistence_target():
 		target_text = "last seen"
 	_debug_label.text = "%s  HP %d/%d\nTarget: %s" % [state_name, _current_health, max_health, target_text]
@@ -674,6 +748,31 @@ func _clear_visual_persistence_target() -> void:
 		return
 	vision_sensor.clear_visual_persistence()
 	vision_sensor.set_debug_target(null)
+
+func _remember_investigation_position(position: Vector2) -> void:
+	if not enable_investigation:
+		return
+	_investigation_position = position
+	_has_investigation_position = true
+
+func _has_investigation_target() -> bool:
+	return enable_investigation and _has_investigation_position
+
+func _get_investigation_position() -> Vector2:
+	return _investigation_position
+
+func _get_investigation_arrival_tolerance() -> float:
+	return maxf(investigate_arrival_tolerance, return_tolerance)
+
+func _clear_investigation_target() -> void:
+	_has_investigation_position = false
+	_clear_visual_persistence_target()
+
+func _can_finish_investigation_before_return() -> bool:
+	if not _has_investigation_target():
+		return false
+	var max_investigation_distance := lose_target_range + _get_investigation_arrival_tolerance()
+	return _investigation_position.distance_to(_spawn_position) <= max_investigation_distance
 
 func _emit_hit_blood(context: Dictionary) -> void:
 	if not blood_enabled:

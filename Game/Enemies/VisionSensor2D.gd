@@ -57,13 +57,14 @@ signal visual_debug_toggled(enabled: bool)
 
 @export_group("Editor Preview")
 @export var editor_preview_enabled := true
-@export_enum("idle", "patrol", "chase", "windup", "attack", "recover", "hit", "dead", "respawn", "return_home") var editor_preview_state := "idle"
+@export_enum("idle", "patrol", "chase", "search", "windup", "attack", "recover", "hit", "dead", "respawn", "return_home") var editor_preview_state := "idle"
 @export_range(-1, 1, 2) var editor_preview_facing_direction := 1
 
 @export_group("State Colors")
 @export var idle_color := Color(0.33, 0.9, 0.55, 1.0)
 @export var patrol_color := Color(0.24, 0.72, 1.0, 1.0)
 @export var chase_color := Color(1.0, 0.72, 0.26, 1.0)
+@export var search_color := Color(1.0, 0.9, 0.38, 1.0)
 @export var windup_color := Color(1.0, 0.46, 0.26, 1.0)
 @export var attack_color := Color(1.0, 0.2, 0.2, 1.0)
 @export var recover_color := Color(0.95, 0.56, 0.25, 1.0)
@@ -354,6 +355,8 @@ func _get_state_color(state_name: String) -> Color:
 			return patrol_color
 		"chase":
 			return chase_color
+		"search":
+			return search_color
 		"windup":
 			return windup_color
 		"attack":

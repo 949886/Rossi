@@ -2,15 +2,15 @@
 
 [ext_resource type="Script" uid="uid://d2xwwrsr472c5" path="res://Game/Enemies/EnemyBase.gd" id="1_enemy"]
 [ext_resource type="SpriteFrames" uid="uid://n1rudh1at43k" path="res://Game/Enemies/Gangsters/gangsters_animations.tres" id="2_uxs4r"]
-[ext_resource type="Script" uid="uid://vvvc1tiw61sd" path="res://Game/Core/Combat/Hurtbox2D.gd" id="3_hurtbox"]
+[ext_resource type="Script" path="res://Game/Core/Combat/Hurtbox2D.gd" id="3_hurtbox"]
 [ext_resource type="Script" uid="uid://b0g085vl5dyxk" path="res://Game/Core/Combat/Hitbox2D.gd" id="4_hitbox"]
 [ext_resource type="Script" uid="uid://r1ixpk5r2m4x" path="res://Game/Enemies/VisionSensor2D.gd" id="5_vision"]
-[ext_resource type="Script" path="res://Game/Core/Audio/EnemyAudioController.gd" id="6_enemy_audio"]
-[ext_resource type="Resource" path="res://Game/Audios/SFX/Enemy/Common/enemy_alert.tres" id="7_enemy_alert"]
+[ext_resource type="Script" uid="uid://cgwxubfxamslc" path="res://Game/Core/Audio/EnemyAudioController.gd" id="6_enemy_audio"]
+[ext_resource type="Resource" uid="uid://dxct4k157sjcf" path="res://Game/Audios/SFX/Enemy/Common/enemy_alert.tres" id="7_enemy_alert"]
 [ext_resource type="Resource" path="res://Game/Audios/SFX/Enemy/Gangster/gangster_melee_windup.tres" id="8_enemy_windup"]
 [ext_resource type="Resource" path="res://Game/Audios/SFX/Enemy/Gangster/gangster_melee_attack.tres" id="9_enemy_attack"]
 [ext_resource type="Resource" path="res://Game/Audios/SFX/Enemy/Common/enemy_hit.tres" id="10_enemy_hit"]
-[ext_resource type="Resource" path="res://Game/Audios/SFX/Enemy/Common/enemy_death.tres" id="11_enemy_death"]
+[ext_resource type="Resource" uid="uid://b2nucdlk0g2an" path="res://Game/Audios/SFX/Enemy/Common/enemy_death.tres" id="11_enemy_death"]
 [ext_resource type="Resource" path="res://Game/Audios/SFX/Enemy/Common/enemy_footstep.tres" id="12_enemy_footstep"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_xjagb"]
@@ -323,7 +323,7 @@ collision_mask = 3
 script = ExtResource("1_enemy")
 move_speed = 88.0
 patrol_distance = 84.0
-lose_target_range = 280.0
+lose_target_range = 1000.0
 attack_range = 28.0
 windup_duration = 0.24
 hitstun_duration = 0.16
@@ -347,8 +347,6 @@ libraries/ = SubResource("AnimationLibrary_aiehk")
 position = Vector2(0, -61)
 script = ExtResource("5_vision")
 fov_angle_degrees = 30.0
-use_target_bounds_sampling = null
-target_bounds_padding = null
 enable_visual_persistence = true
 visual_persistence_duration = 2.0
 use_crisp_outline = false
