@@ -11,6 +11,7 @@ signal jumped(kind: StringName)
 signal landed
 signal dashed
 signal damage_taken(hit_data: Dictionary, current_health: int)
+signal deflect_success(context: Dictionary)
 
 @export_group("Movement")
 @export var move_speed := 200.0
@@ -59,6 +60,9 @@ signal damage_taken(hit_data: Dictionary, current_health: int)
 @export var attack_knockback := Vector2(220.0, -35.0)
 @export var attack_hitstun := 0.12
 @export var attack_invuln_time := 0.0
+@export_group("Deflect")
+@export var deflect_hitstop_duration := 0.045
+@export_range(0.001, 1.0, 0.001) var deflect_hitstop_time_scale := 0.03
 
 @export_group("Shuriken")
 @export var shuriken_scene: PackedScene
@@ -131,6 +135,7 @@ var _attack_hitbox_remaining_timer := 0.0
 var _attack_direction := Vector2.RIGHT
 var _air_attack_count := 0
 var current_health := 1
+var _parried_projectile_ids: Dictionary = {}
 
 # Wall slide tracking
 var _wall_direction := 0 # -1 = wall on left, 1 = wall on right
@@ -736,8 +741,15 @@ func _try_flying_thunder_god_teleport() -> bool:
 func is_attack_active() -> bool:
 	return _current_state == State.ATTACK and _attack_timer > 0.0
 
+func is_deflect_window_active() -> bool:
+	return _current_state == State.ATTACK and attack_hitbox != null and attack_hitbox.active
+
 func receive_attack(hit_data: Dictionary) -> void:
 	if _is_dead or _current_state == State.RESPAWN or is_invulnerable:
+		return
+	if _try_deflect_projectile_from_hit_data(hit_data):
+		return
+	if try_deflect_melee(hit_data):
 		return
 
 	var damage := int(hit_data.get("damage", 1))
@@ -1042,14 +1054,122 @@ func _update_attack_hitbox(delta: float) -> void:
 
 	if attack_hitbox.active:
 		_attack_hitbox_remaining_timer -= delta
+		_process_projectile_parries()
 		if _attack_hitbox_remaining_timer <= 0.0:
 			_deactivate_attack_hitbox()
 
 func _deactivate_attack_hitbox() -> void:
 	_attack_hitbox_delay_timer = 0.0
 	_attack_hitbox_remaining_timer = 0.0
+	_parried_projectile_ids.clear()
 	if attack_hitbox != null:
 		attack_hitbox.set_active(false)
+
+func _process_projectile_parries() -> void:
+	if attack_hitbox == null or not attack_hitbox.active:
+		return
+
+	for area in attack_hitbox.get_overlapping_areas():
+		if not (area is EnemyProjectile):
+			continue
+		_try_deflect_projectile(area as EnemyProjectile)
+
+func _try_deflect_projectile_from_hit_data(hit_data: Dictionary) -> bool:
+	var source = hit_data.get("source")
+	if not (source is EnemyProjectile):
+		return false
+	return _try_deflect_projectile(source as EnemyProjectile)
+
+func _try_deflect_projectile(projectile: EnemyProjectile) -> bool:
+	if not is_deflect_window_active():
+		return false
+	if projectile == null or not is_instance_valid(projectile) or projectile.is_queued_for_deletion():
+		return false
+	if projectile.target_group != "Player":
+		return false
+
+	var projectile_id := projectile.get_instance_id()
+	if _parried_projectile_ids.has(projectile_id):
+		return false
+	_parried_projectile_ids[projectile_id] = true
+
+	var deflect_direction := -projectile.direction
+	if deflect_direction.length_squared() < 0.0001:
+		deflect_direction = Vector2(_facing_direction, 0.0)
+	projectile.deflect(self, deflect_direction)
+	_emit_deflect_success({
+		"kind": "projectile",
+		"source": projectile,
+		"impact_position": projectile.global_position,
+		"attack_direction": deflect_direction.normalized(),
+	})
+	return true
+
+func try_deflect_melee(hit_data: Dictionary) -> bool:
+	if not is_deflect_window_active():
+		return false
+
+	var hitbox_variant = hit_data.get("hitbox")
+	if not (hitbox_variant is Hitbox2D):
+		return false
+
+	var incoming_hitbox := hitbox_variant as Hitbox2D
+	if incoming_hitbox.target_group != "Player":
+		return false
+
+	var attacker := incoming_hitbox.get_parent()
+	if attacker == null or not attacker.is_in_group("Enemy") or not attacker.has_method("receive_attack"):
+		return false
+
+	incoming_hitbox.set_active(false)
+
+	var deflect_direction := Vector2(_facing_direction, 0.0)
+	var receiver_global_position := global_position + deflect_direction * 12.0
+	if attacker is Node2D:
+		var attacker_node := attacker as Node2D
+		receiver_global_position = attacker_node.global_position
+		var to_attacker := attacker_node.global_position - global_position
+		if to_attacker.length_squared() >= 0.0001:
+			deflect_direction = to_attacker.normalized()
+
+	var incoming_knockback: Vector2 = hit_data.get("knockback", Vector2.ZERO)
+	var deflect_knockback := Vector2(-incoming_knockback.x, incoming_knockback.y)
+	if absf(deflect_knockback.x) < 0.01:
+		var horizontal_sign := signf(deflect_direction.x)
+		if absf(horizontal_sign) < 0.01:
+			horizontal_sign = float(_facing_direction)
+		deflect_knockback.x = 180.0 * horizontal_sign
+	if deflect_knockback.y >= -1.0:
+		deflect_knockback.y = -28.0
+
+	var deflect_hit_data := {
+		"damage": 0,
+		"source": self,
+		"direction": deflect_direction,
+		"attack_direction": deflect_direction,
+		"knockback": deflect_knockback,
+		"hitstun": maxf(0.12, float(hit_data.get("hitstun", 0.12))),
+		"invuln_time": 0.0,
+		"tags": PackedStringArray(["deflect"]),
+		"impact_position": receiver_global_position,
+		"attacker_global_position": global_position,
+		"receiver_global_position": receiver_global_position,
+		"receiver": attacker,
+	}
+	attacker.receive_attack(deflect_hit_data)
+
+	_emit_deflect_success({
+		"kind": "melee",
+		"source": incoming_hitbox,
+		"receiver": attacker,
+		"impact_position": receiver_global_position,
+		"attack_direction": deflect_direction,
+	})
+	return true
+
+func _emit_deflect_success(context: Dictionary) -> void:
+	Chronos.play_hitstop(deflect_hitstop_duration, deflect_hitstop_time_scale)
+	deflect_success.emit(context)
 
 func _detect_wall_slide() -> void:
 	if enable_wall_jump and is_on_wall() and not is_on_floor():

@@ -9,6 +9,7 @@ class_name PlayerAudioController
 @export var dash_cue: AudioCue
 @export var attack_swing_cue: AudioCue
 @export var attack_hit_cue: AudioCue
+@export var deflect_cue: AudioCue
 @export var shuriken_throw_cue: AudioCue
 @export var shuriken_stick_cue: AudioCue
 @export var teleport_cue: AudioCue
@@ -53,6 +54,8 @@ func _connect_player() -> void:
 		_player.damage_taken.connect(_on_damage_taken)
 	if not _player.died.is_connected(_on_died):
 		_player.died.connect(_on_died)
+	if not _player.deflect_success.is_connected(_on_deflect_success):
+		_player.deflect_success.connect(_on_deflect_success)
 	if _player.animated_sprite != null and not _player.animated_sprite.frame_changed.is_connected(_on_animated_sprite_frame_changed):
 		_player.animated_sprite.frame_changed.connect(_on_animated_sprite_frame_changed)
 	if _player.attack_hitbox != null and not _player.attack_hitbox.hit_connected.is_connected(_on_attack_hit_connected):
@@ -114,6 +117,10 @@ func _on_damage_taken(_hit_data: Dictionary, _current_health: int) -> void:
 
 func _on_died() -> void:
 	_play_cue(death_cue, "death", _player.global_position)
+
+func _on_deflect_success(context: Dictionary) -> void:
+	var impact_position: Vector2 = context.get("impact_position", _player.global_position)
+	_play_cue(deflect_cue if deflect_cue != null else attack_hit_cue, "deflect", impact_position)
 
 func _on_chronos_started() -> void:
 	_play_cue(chronos_start_cue, "chronos_start", _player.global_position)

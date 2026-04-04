@@ -3,12 +3,12 @@
 importer="wav"
 type="AudioStreamWAV"
 uid="uid://7ni3np7y28tp"
-path="res://.godot/imported/sfx_reflect_bullet.wav-d57ed32736b2c4696afcd8bcc93331a9.sample"
+path="res://.godot/imported/sfx_deflect_bullet.wav-6c05ea7777da78190088f2da2e9db3b0.sample"
 
 [deps]
 
-source_file="res://Game/Audios/SFX/Misc/sfx_reflect_bullet.wav"
-dest_files=["res://.godot/imported/sfx_reflect_bullet.wav-d57ed32736b2c4696afcd8bcc93331a9.sample"]
+source_file="res://Game/Audios/SFX/Player/sfx_deflect_bullet.wav"
+dest_files=["res://.godot/imported/sfx_deflect_bullet.wav-6c05ea7777da78190088f2da2e9db3b0.sample"]
 
 [params]
 

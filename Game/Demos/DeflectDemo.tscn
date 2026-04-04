@@ -1,0 +1,181 @@
+[gd_scene format=3 uid="uid://dyfgxkdxwnh73"]
+
+[ext_resource type="Script" uid="uid://b8uxbkqqcn12" path="res://Game/Enemies/EncounterController.gd" id="1_encounter"]
+[ext_resource type="PackedScene" uid="uid://cp7soa40msiek" path="res://Game/Characters/Shiro/Shiro.tscn" id="2_shiro"]
+[ext_resource type="PackedScene" uid="uid://c7t8p6v5taq2x" path="res://Game/Characters/Shiro/Items/Shuriken/Shuriken.tscn" id="3_shuriken"]
+[ext_resource type="PackedScene" uid="uid://bh0lr32xa8ibl" path="res://Game/Enemies/Gangsters/EnemyGangsterRanged.tscn" id="4_ranged_enemy"]
+[ext_resource type="Script" uid="uid://be3o6nwd2gsbg" path="res://Game/Enemies/EnemySpawner2D.gd" id="5_spawner"]
+[ext_resource type="Script" uid="uid://hcjjd1p8ikdo" path="res://Game/Demos/EnemyDemoHud.gd" id="6_hud"]
+[ext_resource type="Script" uid="uid://18fwsmh8o0cc" path="res://Game/Effects/BloodFxLayer.gd" id="7_blood"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
+size = Vector2(1500, 56)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(48, 288)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cover_large"]
+size = Vector2(64, 172)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cover_small"]
+size = Vector2(36, 138)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform"]
+size = Vector2(240, 24)
+
+[node name="ReflectDemo" type="Node2D" unique_id=128767636]
+
+[node name="Backdrop" type="Polygon2D" parent="." unique_id=1917372727]
+z_index = -20
+color = Color(0.054902, 0.0862745, 0.12549, 1)
+polygon = PackedVector2Array(0, 0, 1536, 0, 1536, 768, 0, 768)
+
+[node name="BackdropGlow" type="Polygon2D" parent="." unique_id=25792863]
+z_index = -18
+color = Color(0.0745098, 0.219608, 0.282353, 0.18)
+polygon = PackedVector2Array(0, 398, 1536, 398, 1536, 768, 0, 768)
+
+[node name="EncounterController" type="Node" parent="." unique_id=1137982764]
+script = ExtResource("1_encounter")
+player_path = NodePath("../CharacterBody2D")
+
+[node name="BloodFxLayer" type="Node" parent="." unique_id=1982719446]
+script = ExtResource("7_blood")
+
+[node name="Environment" type="Node2D" parent="." unique_id=483969190]
+
+[node name="Floor" type="StaticBody2D" parent="Environment" unique_id=665710796]
+position = Vector2(768, 500)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/Floor" unique_id=910215492]
+shape = SubResource("RectangleShape2D_floor")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/Floor" unique_id=1478346130]
+color = Color(0.109804, 0.141176, 0.180392, 1)
+polygon = PackedVector2Array(-750, -28, 750, -28, 750, 28, -750, 28)
+
+[node name="LeftWall" type="StaticBody2D" parent="Environment" unique_id=977652078]
+position = Vector2(72, 356)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/LeftWall" unique_id=1325818754]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/LeftWall" unique_id=1928301189]
+color = Color(0.0901961, 0.113725, 0.145098, 1)
+polygon = PackedVector2Array(-24, -144, 24, -144, 24, 144, -24, 144)
+
+[node name="RightWall" type="StaticBody2D" parent="Environment" unique_id=239710403]
+position = Vector2(1464, 356)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/RightWall" unique_id=570932360]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/RightWall" unique_id=126160523]
+color = Color(0.0901961, 0.113725, 0.145098, 1)
+polygon = PackedVector2Array(-24, -144, 24, -144, 24, 144, -24, 144)
+
+[node name="CenterCover" type="StaticBody2D" parent="Environment" unique_id=1417068284]
+position = Vector2(752, 128)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/CenterCover" unique_id=467841500]
+shape = SubResource("RectangleShape2D_cover_large")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/CenterCover" unique_id=85362212]
+color = Color(0.141176, 0.172549, 0.211765, 1)
+polygon = PackedVector2Array(-32, -86, 32, -86, 32, 86, -32, 86)
+
+[node name="SideCover" type="StaticBody2D" parent="Environment" unique_id=195095522]
+position = Vector2(1016, 431)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/SideCover" unique_id=1006198566]
+shape = SubResource("RectangleShape2D_cover_small")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/SideCover" unique_id=1143511961]
+color = Color(0.160784, 0.188235, 0.231373, 1)
+polygon = PackedVector2Array(-18, -69, 18, -69, 18, 69, -18, 69)
+
+[node name="UpperPlatform" type="StaticBody2D" parent="Environment" unique_id=1940343337]
+position = Vector2(1186, 332)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/UpperPlatform" unique_id=841244895]
+shape = SubResource("RectangleShape2D_platform")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/UpperPlatform" unique_id=2114960288]
+color = Color(0.172549, 0.211765, 0.254902, 1)
+polygon = PackedVector2Array(-120, -12, 120, -12, 120, 12, -120, 12)
+
+[node name="MidPlatform" type="StaticBody2D" parent="Environment" unique_id=331783286]
+position = Vector2(520, 360)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/MidPlatform" unique_id=70977567]
+shape = SubResource("RectangleShape2D_platform")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/MidPlatform" unique_id=768183773]
+color = Color(0.152941, 0.188235, 0.231373, 1)
+polygon = PackedVector2Array(-120, -12, 120, -12, 120, 12, -120, 12)
+
+[node name="CharacterBody2D" parent="." unique_id=830453049 instance=ExtResource("2_shiro")]
+position = Vector2(220, 456)
+shuriken_scene = ExtResource("3_shuriken")
+max_health = 50
+
+[node name="Camera2D" type="Camera2D" parent="CharacterBody2D" unique_id=1115834456]
+position = Vector2(250, -120)
+zoom = Vector2(1.15, 1.15)
+limit_left = 0
+limit_top = 0
+limit_right = 1536
+limit_bottom = 768
+
+[node name="GroundShooter" type="Node2D" parent="." unique_id=1662029076]
+position = Vector2(894, 456)
+script = ExtResource("5_spawner")
+enemy_scene = ExtResource("4_ranged_enemy")
+facing_direction = -1
+
+[node name="UpperShooter" type="Node2D" parent="." unique_id=1068314918]
+position = Vector2(1194, 279)
+script = ExtResource("5_spawner")
+enemy_scene = ExtResource("4_ranged_enemy")
+facing_direction = -1
+spawn_delay = 0.35
+
+[node name="FarShooter" type="Node2D" parent="." unique_id=1348710560]
+position = Vector2(1360, 456)
+script = ExtResource("5_spawner")
+enemy_scene = ExtResource("4_ranged_enemy")
+facing_direction = -1
+spawn_delay = 0.7
+
+[node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1620740152]
+script = ExtResource("6_hud")
+player_path = NodePath("../CharacterBody2D")
+
+[node name="Panel" type="Panel" parent="CanvasLayer" unique_id=362021614]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 470.0
+offset_bottom = 148.0
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Panel" unique_id=1890349106]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = 442.0
+offset_bottom = 130.0
+
+[node name="Title" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=1912356539]
+layout_mode = 2
+text = "Reflect Demo"
+
+[node name="EnemyCount" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=517695273]
+layout_mode = 2
+text = "Enemies: ..."
+
+[node name="Player" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=392192917]
+layout_mode = 2
+text = "Player: ..."
+
+[node name="Controls" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=669820366]
+layout_mode = 2
+text = "LMB attack/deflect | Aim with mouse to send bullets back | Q throw/teleport | V vision debug | R reset encounter"

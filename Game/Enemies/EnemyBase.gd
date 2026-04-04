@@ -216,7 +216,8 @@ func receive_attack(hit_data: Dictionary) -> void:
 		die()
 		return
 
-	_emit_hit_blood(blood_context)
+	if not _should_suppress_hit_blood(hit_data, damage):
+		_emit_hit_blood(blood_context)
 	_change_state(State.HIT)
 
 func interact_with(node: Node) -> void:
@@ -807,6 +808,16 @@ func _build_blood_context(hit_data: Dictionary) -> Dictionary:
 	if not context.has("attack_direction") or not (context["attack_direction"] is Vector2):
 		context["attack_direction"] = Vector2(_facing_direction, 0.0)
 	return context
+
+func _should_suppress_hit_blood(hit_data: Dictionary, damage: int) -> bool:
+	if damage > 0:
+		return false
+	var tags_variant = hit_data.get("tags", PackedStringArray())
+	if tags_variant is PackedStringArray:
+		return (tags_variant as PackedStringArray).has("deflect")
+	if tags_variant is Array:
+		return (tags_variant as Array).has("deflect")
+	return false
 
 func _build_fallback_blood_context() -> Dictionary:
 	return {

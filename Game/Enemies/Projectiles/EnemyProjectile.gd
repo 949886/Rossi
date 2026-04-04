@@ -9,6 +9,7 @@ class_name EnemyProjectile
 @export var hitstun := 0.12
 @export var invuln_time := 0.0
 @export var target_group := "Player"
+@export var tags: PackedStringArray = PackedStringArray(["projectile"])
 @export_group("Audio")
 @export var impact_world_cue: AudioCue
 @export var impact_player_cue: AudioCue
@@ -17,12 +18,13 @@ var direction := Vector2.RIGHT
 var shooter: Node2D
 var _life_remaining := 0.0
 var _has_impacted := false
+var _is_deflected := false
 
 func _ready() -> void:
 	add_to_group("ResettableProjectile")
 	_life_remaining = lifespan
 	monitoring = true
-	monitorable = false
+	monitorable = true
 	area_entered.connect(_on_area_entered)
 	body_entered.connect(_on_body_entered)
 
@@ -33,8 +35,31 @@ func _ready() -> void:
 
 func configure_projectile(source: Node2D, shot_direction: Vector2) -> void:
 	shooter = source
+	target_group = "Player"
+	tags = PackedStringArray(["projectile"])
+	_has_impacted = false
+	_is_deflected = false
 	if shot_direction.length_squared() >= 0.0001:
 		direction = shot_direction.normalized()
+	rotation = direction.angle()
+
+func deflect(deflector: Node2D, new_direction: Vector2) -> void:
+	shooter = deflector
+	target_group = "Enemy"
+	_life_remaining = lifespan
+	_has_impacted = false
+	_is_deflected = true
+	if not tags.has("deflect"):
+		tags.append("deflect")
+	if not tags.has("reflected_projectile"):
+		tags.append("reflected_projectile")
+
+	var reflected_direction := new_direction
+	if reflected_direction.length_squared() < 0.0001:
+		reflected_direction = -direction
+	if reflected_direction.length_squared() < 0.0001:
+		reflected_direction = Vector2.RIGHT
+	direction = reflected_direction.normalized()
 	rotation = direction.angle()
 
 func reset_for_encounter() -> void:
@@ -78,8 +103,13 @@ func _on_area_entered(area: Area2D) -> void:
 	if target_group != "" and not receiver.is_in_group(target_group):
 		return
 	if receiver.has_method("receive_attack"):
+		var targeted_player_before_hit := target_group == "Player"
 		var hit_data := _build_hit_data(hurtbox, receiver)
 		receiver.receive_attack(hit_data)
+		if is_queued_for_deletion():
+			return
+		if targeted_player_before_hit and _is_deflected:
+			return
 		_play_impact_player(hit_data.get("impact_position", global_position))
 		queue_free()
 
@@ -113,6 +143,7 @@ func _build_hit_data(hurtbox: Hurtbox2D, receiver: Node) -> Dictionary:
 		"knockback": projectile_knockback,
 		"hitstun": hitstun,
 		"invuln_time": invuln_time,
+		"tags": tags.duplicate(),
 		"impact_position": hurtbox.get_impact_position(global_position),
 		"attacker_global_position": attacker_global_position,
 		"receiver_global_position": receiver_global_position,
