@@ -242,7 +242,7 @@ func die() -> void:
 	velocity = Vector2.ZERO
 	_disable_combat_nodes()
 	if collision_shape != null:
-		collision_shape.disabled = true
+		_set_collision_shape_disabled(collision_shape, true)
 	_apply_dead_visuals()
 	_change_state(State.DEAD)
 	died.emit()
@@ -264,13 +264,15 @@ func reset_for_encounter() -> void:
 	if animated_sprite != null:
 		animated_sprite.modulate = _base_sprite_modulate
 	if collision_shape != null:
-		collision_shape.disabled = false
+		_set_collision_shape_disabled(collision_shape, false)
 	if vision_sensor != null:
 		vision_sensor.set_sensor_enabled(true)
 		vision_sensor.clear_visual_persistence()
 		vision_sensor.set_debug_target(null)
 	if hurtbox != null:
-		hurtbox.monitorable = true
+		hurtbox.set_deferred("monitorable", true)
+		hurtbox.set_deferred("monitoring", false)
+		_set_area_collision_shapes_disabled(hurtbox, false)
 	if attack_hitbox != null:
 		attack_hitbox.set_active(false)
 	_emit_health_changed()
@@ -439,11 +441,14 @@ func _process_respawn() -> void:
 		_change_state(State.PATROL if patrol_distance > 0.0 else State.IDLE)
 
 func _process_dead(_delta: float) -> void:
-	velocity.x = move_toward(velocity.x, 0.0, move_speed)
+	velocity = Vector2.ZERO
 	if attack_hitbox != null:
 		attack_hitbox.set_active(false)
 
 func _apply_gravity(delta: float) -> void:
+	if _state == State.DEAD:
+		velocity.y = 0.0
+		return
 	if not is_on_floor():
 		velocity.y = minf(velocity.y + gravity * delta, max_fall_speed)
 	else:
@@ -490,6 +495,8 @@ func _change_state(new_state: State) -> void:
 
 func _play_animation(animation_name: String) -> void:
 	if animated_sprite != null and animated_sprite.sprite_frames != null and animated_sprite.sprite_frames.has_animation(animation_name):
+		if animation_name == "die":
+			animated_sprite.sprite_frames.set_animation_loop(animation_name, false)
 		animated_sprite.play(animation_name)
 	elif animation_player != null and animation_player.has_animation(animation_name):
 		animation_player.play(animation_name)
@@ -685,7 +692,21 @@ func _disable_combat_nodes() -> void:
 		vision_sensor.set_sensor_enabled(false)
 		vision_sensor.set_debug_target(null)
 	if hurtbox != null:
-		hurtbox.monitorable = false
+		hurtbox.set_deferred("monitorable", false)
+		hurtbox.set_deferred("monitoring", false)
+		_set_area_collision_shapes_disabled(hurtbox, true)
+
+func _set_collision_shape_disabled(shape: CollisionShape2D, disabled: bool) -> void:
+	if shape == null:
+		return
+	shape.set_deferred("disabled", disabled)
+
+func _set_area_collision_shapes_disabled(area: Area2D, disabled: bool) -> void:
+	if area == null:
+		return
+	for child in area.get_children():
+		if child is CollisionShape2D:
+			(child as CollisionShape2D).set_deferred("disabled", disabled)
 
 func _play_hit_feedback() -> void:
 	if animated_sprite == null:
