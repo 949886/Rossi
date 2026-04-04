@@ -28,6 +28,12 @@ signal deflect_success(context: Dictionary)
 @export var max_fall_speed := 600.0
 @export var jump_cut_multiplier := 0.5
 
+@export_group("Wall Jump")
+@export var enable_wall_jump := true
+@export var wall_slide_gravity := 150.0
+@export var wall_jump_horizontal_speed := 300.0
+@export var wall_jump_vertical_speed := -380.0
+
 @export_group("Dash")
 @export var dash_speed := 1000.0
 @export var dash_duration := 0.15
@@ -36,12 +42,6 @@ signal deflect_success(context: Dictionary)
 @export var max_dash_charges := 2
 @export var afterimage_fade_duration := 0.3
 @export var afterimage_color := Color(0.4, 0.8, 1.0, 0.6)
-
-@export_group("Wall Jump")
-@export var enable_wall_jump := true
-@export var wall_slide_gravity := 150.0
-@export var wall_jump_horizontal_speed := 300.0
-@export var wall_jump_vertical_speed := -380.0
 
 @export_group("Attack")
 @export var attack_speed := 720.0
@@ -60,6 +60,7 @@ signal deflect_success(context: Dictionary)
 @export var attack_knockback := Vector2(220.0, -35.0)
 @export var attack_hitstun := 0.12
 @export var attack_invuln_time := 0.0
+
 @export_group("Deflect")
 @export var deflect_hitstop_duration := 0.045
 @export_range(0.001, 1.0, 0.001) var deflect_hitstop_time_scale := 0.03
@@ -749,7 +750,7 @@ func receive_attack(hit_data: Dictionary) -> void:
 		return
 	if _try_deflect_projectile_from_hit_data(hit_data):
 		return
-	if try_deflect_melee(hit_data):
+	if _try_deflect_melee(hit_data):
 		return
 
 	var damage := int(hit_data.get("damage", 1))
@@ -1105,7 +1106,7 @@ func _try_deflect_projectile(projectile: EnemyProjectile) -> bool:
 	})
 	return true
 
-func try_deflect_melee(hit_data: Dictionary) -> bool:
+func _try_deflect_melee(hit_data: Dictionary) -> bool:
 	if not is_deflect_window_active():
 		return false
 

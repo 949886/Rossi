@@ -1,12 +1,14 @@
 [gd_scene format=3 uid="uid://dyfgxkdxwnh73"]
 
 [ext_resource type="Script" uid="uid://b8uxbkqqcn12" path="res://Game/Enemies/EncounterController.gd" id="1_encounter"]
-[ext_resource type="PackedScene" uid="uid://cp7soa40msiek" path="res://Game/Characters/Shiro/Shiro.tscn" id="2_shiro"]
 [ext_resource type="PackedScene" uid="uid://c7t8p6v5taq2x" path="res://Game/Characters/Shiro/Items/Shuriken/Shuriken.tscn" id="3_shuriken"]
 [ext_resource type="PackedScene" uid="uid://bh0lr32xa8ibl" path="res://Game/Enemies/Gangsters/EnemyGangsterRanged.tscn" id="4_ranged_enemy"]
 [ext_resource type="Script" uid="uid://be3o6nwd2gsbg" path="res://Game/Enemies/EnemySpawner2D.gd" id="5_spawner"]
 [ext_resource type="Script" uid="uid://hcjjd1p8ikdo" path="res://Game/Demos/EnemyDemoHud.gd" id="6_hud"]
 [ext_resource type="Script" uid="uid://18fwsmh8o0cc" path="res://Game/Effects/BloodFxLayer.gd" id="7_blood"]
+[ext_resource type="Script" uid="uid://cbh662kgmtfsp" path="res://Game/Demos/ChronosFx.gd" id="8_40shl"]
+[ext_resource type="PackedScene" path="res://Game/Characters/Shiro/ChronosShiro.tscn" id="8_w1a6p"]
+[ext_resource type="Shader" uid="uid://dejeiy537grca" path="res://Game/Shaders/Chromatic/circular_chormatic/circular_chormatic.gdshader" id="9_w1a6p"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(1500, 56)
@@ -23,6 +25,11 @@ size = Vector2(36, 138)
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_platform"]
 size = Vector2(240, 24)
 
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_p2f5c"]
+shader = ExtResource("9_w1a6p")
+shader_parameter/MAX_DIST_PX = 2.0
+shader_parameter/roundness = 0.0
+
 [node name="ReflectDemo" type="Node2D" unique_id=128767636]
 
 [node name="Backdrop" type="Polygon2D" parent="." unique_id=1917372727]
@@ -37,7 +44,6 @@ polygon = PackedVector2Array(0, 398, 1536, 398, 1536, 768, 0, 768)
 
 [node name="EncounterController" type="Node" parent="." unique_id=1137982764]
 script = ExtResource("1_encounter")
-player_path = NodePath("../CharacterBody2D")
 
 [node name="BloodFxLayer" type="Node" parent="." unique_id=1982719446]
 script = ExtResource("7_blood")
@@ -114,19 +120,6 @@ shape = SubResource("RectangleShape2D_platform")
 color = Color(0.152941, 0.188235, 0.231373, 1)
 polygon = PackedVector2Array(-120, -12, 120, -12, 120, 12, -120, 12)
 
-[node name="CharacterBody2D" parent="." unique_id=830453049 instance=ExtResource("2_shiro")]
-position = Vector2(220, 456)
-shuriken_scene = ExtResource("3_shuriken")
-max_health = 50
-
-[node name="Camera2D" type="Camera2D" parent="CharacterBody2D" unique_id=1115834456]
-position = Vector2(250, -120)
-zoom = Vector2(1.15, 1.15)
-limit_left = 0
-limit_top = 0
-limit_right = 1536
-limit_bottom = 768
-
 [node name="GroundShooter" type="Node2D" parent="." unique_id=1662029076]
 position = Vector2(894, 456)
 script = ExtResource("5_spawner")
@@ -147,9 +140,33 @@ enemy_scene = ExtResource("4_ranged_enemy")
 facing_direction = -1
 spawn_delay = 0.7
 
+[node name="ChronosFx" type="CanvasLayer" parent="." unique_id=2098577849]
+script = ExtResource("8_40shl")
+
+[node name="ShadersParent" type="Node2D" parent="ChronosFx" unique_id=877481985]
+position = Vector2(832, 448)
+metadata/_edit_lock_ = true
+
+[node name="Shaders" type="Node2D" parent="ChronosFx/ShadersParent" unique_id=1571374241]
+position = Vector2(-832, -448)
+metadata/_edit_lock_ = true
+
+[node name="ChromaticRect" type="ColorRect" parent="ChronosFx/ShadersParent/Shaders" unique_id=554114496]
+material = SubResource("ShaderMaterial_p2f5c")
+offset_right = 1664.0
+offset_bottom = 896.0
+mouse_filter = 2
+metadata/_edit_lock_ = true
+
+[node name="TintRect" type="ColorRect" parent="ChronosFx/ShadersParent/Shaders" unique_id=1794699341]
+offset_right = 1664.0
+offset_bottom = 896.0
+mouse_filter = 2
+color = Color(0.56, 0.8, 1, 0)
+metadata/_edit_lock_ = true
+
 [node name="CanvasLayer" type="CanvasLayer" parent="." unique_id=1620740152]
 script = ExtResource("6_hud")
-player_path = NodePath("../CharacterBody2D")
 
 [node name="Panel" type="Panel" parent="CanvasLayer" unique_id=362021614]
 offset_left = 16.0
@@ -179,3 +196,27 @@ text = "Player: ..."
 [node name="Controls" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=669820366]
 layout_mode = 2
 text = "LMB attack/deflect | Aim with mouse to send bullets back | Q throw/teleport | V vision debug | R reset encounter"
+
+[node name="ChronosCharacter2D" parent="." unique_id=1881076433 instance=ExtResource("8_w1a6p")]
+position = Vector2(220, 445)
+chronos_stamina_max = 100.0
+chronos_stamina_use_per_second = 28.0
+chronos_stamina_recover_per_second = 38.0
+chronos_stamina_recover_delay = 0.2
+chronos_cooldown = 0.45
+chronos_afterimage_interval = 0.045
+chronos_afterimage_fade_duration = 0.22
+chronos_afterimage_color = Color(0.58, 0.92, 1, 0.3)
+chronos_afterimage_min_speed = 65.0
+chronos_afterimage_trail_distance = 18.0
+chronos_start_burst_count = 3
+chronos_stop_burst_count = 2
+shuriken_scene = ExtResource("3_shuriken")
+
+[node name="Camera2D" type="Camera2D" parent="ChronosCharacter2D" unique_id=22446990]
+position = Vector2(320, -120)
+zoom = Vector2(1.15, 1.15)
+limit_left = 0
+limit_top = 0
+limit_right = 1664
+limit_bottom = 896

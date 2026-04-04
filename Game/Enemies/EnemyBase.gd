@@ -12,47 +12,92 @@ signal attack_windup_started
 signal attack_performed
 
 @export_group("Stats")
+@export_subgroup("Vitality")
+## Enemy maximum health. When health reaches 0, the enemy dies and enters the DEAD state.
 @export var max_health := 1
+## Base horizontal movement speed used by patrol, chase acceleration, and hit recovery damping.
 @export var move_speed := 90.0
-@export var patrol_distance := 96.0
-@export var lose_target_range := 260.0
-@export_range(0.0, 1.0, 0.01) var target_loss_grace_duration := 0.18
-@export_range(0.0, 128.0, 1.0) var leash_reacquire_distance := 16.0
-@export var enable_investigation := true
-@export_range(0.0, 10.0, 0.1) var investigate_duration := 1.5
-@export_range(0.0, 5.0, 0.05) var investigate_turn_interval := 0.4
-@export_range(0.0, 64.0, 1.0) var investigate_arrival_tolerance := 8.0
+
+@export_subgroup("Combat")
+## Horizontal range within which the enemy can start a melee attack.
 @export var attack_range := 26.0
+## Cooldown between completed attacks.
 @export var attack_cooldown := 0.8
+## Delay before the hitbox becomes active after the attack starts.
 @export var windup_duration := 0.25
+## How long the attack hitbox stays active.
 @export var attack_active_duration := 0.12
+## Recovery time after an attack finishes before the enemy can act again.
 @export var recover_duration := 0.2
+## Duration of the HIT state applied to victims and this enemy after taking damage.
 @export var hitstun_duration := 0.18
+## Temporary invulnerability applied after taking a hit to prevent immediate repeated damage.
 @export var invuln_duration := 0.0
+## Damage dealt by the enemy's melee hitbox.
 @export var contact_damage := 1
+## Knockback applied to the victim on hit. The X direction is flipped automatically with facing.
 @export var contact_knockback := Vector2(160.0, -20.0)
+
+@export_subgroup("Investigation")
+## Enables moving to the player's last seen position and briefly searching after losing sight.
+@export var enable_investigation := true
+## How long the enemy remains in SEARCH state before giving up and returning home.
+@export_range(0.0, 10.0, 0.1) var investigate_duration := 1.5
+## How often the enemy turns around while searching the last seen location.
+@export_range(0.0, 5.0, 0.05) var investigate_turn_interval := 0.4
+## Horizontal tolerance for considering the last seen position reached.
+@export_range(0.0, 64.0, 1.0) var investigate_arrival_tolerance := 8.0
+
+@export_subgroup("Physics")
+## Downward acceleration applied while the enemy is airborne.
 @export var gravity := 980.0
+## Maximum falling speed clamp while airborne.
 @export var max_fall_speed := 800.0
 
 @export_group("Movement")
+## Multiplier applied to move_speed while actively chasing a target or investigation point.
 @export var chase_speed_multiplier := 1.35
+## Distance to the spawn point at which RETURN_HOME snaps the enemy back onto its home X position.
 @export var return_tolerance := 6.0
+## Pause duration after reaching a patrol edge or obstacle before walking the other way.
 @export var patrol_pause_duration := 0.2
+## Downward ray length used to detect missing ground ahead.
 @export var ground_probe_length := 28.0
+## Forward ray length used to detect walls or blockers ahead.
 @export var wall_probe_length := 14.0
+## Local position of the attack hitbox relative to the enemy. X is mirrored by facing direction.
 @export var attack_hitbox_offset := Vector2(18.0, -32.0)
+## Size of the rectangular melee hitbox collision shape.
 @export var attack_hitbox_size := Vector2(26.0, 18.0)
 
+@export_subgroup("Detection")
+## Patrol radius measured from the spawn point. Set to 0 to keep the enemy idle in place.
+@export var patrol_distance := 96.0
+## Maximum distance from the spawn point before the enemy gives up pursuit and returns home.
+@export var lose_target_range := 260.0
+## Small grace window after losing line of sight before the target is fully dropped.
+@export_range(0.0, 1.0, 0.01) var target_loss_grace_duration := 0.18
+## Distance from home within which suspended targeting can be restored while returning.
+@export_range(0.0, 128.0, 1.0) var leash_reacquire_distance := 16.0
+
 @export_group("Feedback")
-@export var hit_flash_color := Color(1.0, 0.55, 0.55, 1.0)	## Visual feedback when hit
+## Sprite tint applied briefly when the enemy takes damage.
+@export var hit_flash_color := Color(1.0, 0.55, 0.55, 1.0)
+## Duration of the hit flash tween back to the base sprite color.
 @export var hit_flash_duration := 0.07
+## Final tint applied when the enemy dies.
 @export var dead_tint := Color(0.45, 0.45, 0.45, 0.9)
+## Enables spawning blood VFX on hit and death.
 @export var blood_enabled := true
+## Scale multiplier for blood VFX spawned from non-lethal hits.
 @export var blood_hit_scale := 1.0
+## Scale multiplier for blood VFX spawned on death.
 @export var blood_death_scale := 1.0
 
 @export_group("Debug")
+## Shows a runtime label above the enemy with current state, health, and target information.
 @export var show_debug_label := true
+## Local offset of the debug label relative to the enemy origin.
 @export var debug_label_offset := Vector2(0.0, -118.0)
 
 @onready var animated_sprite: AnimatedSprite2D = $"AnimatedSprite2D"

@@ -1,7 +1,9 @@
 extends Node
 class_name BloodFxLayer
 
-const BLOOD_PARTICLE_TEXTURES: Array[Texture2D] = [
+@export_group("Textures")
+## Textures used by airborne droplets and directional spray particles.
+@export var blood_particle_textures: Array[Texture2D] = [
 	preload("res://Game/Effects/Textures/efx_blood_particle_1.png"),
 	preload("res://Game/Effects/Textures/efx_blood_particle_2.png"),
 	preload("res://Game/Effects/Textures/efx_blood_particle_3.png"),
@@ -9,12 +11,14 @@ const BLOOD_PARTICLE_TEXTURES: Array[Texture2D] = [
 	preload("res://Game/Effects/Textures/efx_blood_particle_5.png"),
 ]
 
-const BLOOD_FLOOR_TEXTURES: Array[Texture2D] = [
+## Textures used for floor splashes and soft blood clouds.
+@export var blood_floor_textures: Array[Texture2D] = [
 	preload("res://Game/Effects/Textures/efx_blood_background_1.png"),
 	preload("res://Game/Effects/Textures/efx_blood_background_2.png"),
 ]
 
-const BLOOD_WALL_TEXTURES: Array[Texture2D] = [
+## Textures used when a droplet or impact leaves a stain on a wall surface.
+@export var blood_wall_textures: Array[Texture2D] = [
 	preload("res://Game/Effects/Textures/efx_blood_wall_1.png"),
 	preload("res://Game/Effects/Textures/efx_blood_wall_2.png"),
 ]
@@ -247,7 +251,7 @@ func _rebuild_droplet_pool() -> void:
 
 func _spawn_blood_cloud(origin: Vector2, scale_amount: float, front: bool) -> void:
 	var sprite := Sprite2D.new()
-	sprite.texture = _random_texture(BLOOD_FLOOR_TEXTURES)
+	sprite.texture = _random_texture(blood_floor_textures)
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	sprite.global_position = origin
 	sprite.rotation = _rng.randf_range(-PI, PI)
@@ -273,7 +277,7 @@ func _spawn_spray_burst(origin: Vector2, direction: Vector2, count: int, spread:
 
 	for _index in range(count):
 		var sprite := Sprite2D.new()
-		sprite.texture = _random_texture(BLOOD_PARTICLE_TEXTURES)
+		sprite.texture = _random_texture(blood_particle_textures)
 		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		sprite.global_position = origin
 		sprite.modulate = Color(0.85, 0.05, 0.05, _rng.randf_range(0.72, 0.94))
@@ -300,7 +304,7 @@ func _spawn_slash_fan_burst(origin: Vector2, slash_direction: Vector2, count: in
 
 	for index in range(count):
 		var sprite := Sprite2D.new()
-		sprite.texture = _random_texture(BLOOD_PARTICLE_TEXTURES)
+		sprite.texture = _random_texture(blood_particle_textures)
 		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 		var t := 0.0
 		if count > 1:
@@ -351,7 +355,7 @@ func _spawn_slash_fan_droplets(origin: Vector2, slash_direction: Vector2, count:
 		var scale_amount := _rng.randf_range(min_scale, max_scale)
 		var speed := _rng.randf_range(min_speed, max_speed)
 
-		sprite.texture = _random_texture(BLOOD_PARTICLE_TEXTURES)
+		sprite.texture = _random_texture(blood_particle_textures)
 		sprite.global_position = origin + side_offset + dir * _rng.randf_range(0.0, 6.0)
 		sprite.scale = Vector2.ONE * scale_amount
 		sprite.rotation = dir.angle()
@@ -382,7 +386,7 @@ func _spawn_droplet_spray(origin: Vector2, direction: Vector2, count: int, sprea
 			break
 
 		var velocity := base_direction.rotated(_rng.randf_range(-spread, spread)) * _rng.randf_range(min_speed, max_speed)
-		sprite.texture = _random_texture(BLOOD_PARTICLE_TEXTURES)
+		sprite.texture = _random_texture(blood_particle_textures)
 		sprite.global_position = origin + Vector2(_rng.randf_range(-4.0, 4.0), _rng.randf_range(-6.0, 6.0))
 		sprite.scale = Vector2.ONE * _rng.randf_range(min_scale, max_scale)
 		sprite.rotation = velocity.angle()
@@ -427,7 +431,7 @@ func _spawn_wall_stain_near(origin: Vector2, primary_direction: Vector2, seconda
 func _spawn_surface_stain(position: Vector2, normal: Vector2, scale_amount: float, rotation_bias: float) -> void:
 	var sprite := Sprite2D.new()
 	var floor_surface := absf(normal.y) > 0.55
-	sprite.texture = _random_texture(BLOOD_FLOOR_TEXTURES if floor_surface else BLOOD_WALL_TEXTURES)
+	sprite.texture = _random_texture(blood_floor_textures if floor_surface else blood_wall_textures)
 	sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	sprite.global_position = position + normal * 1.5
 	sprite.modulate = Color(0.78, 0.08, 0.08, _rng.randf_range(0.76, 0.94))
