@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="AbilityDefinition" format=3 uid="uid://u20rdmo3nou2"]
+
+[ext_resource type="Script" uid="uid://b77lgiubjba1d" path="res://Game/Core/Ability/AbilityDefinition.gd" id="1_ability_definition"]
+[ext_resource type="Script" uid="uid://cr57me05tq4ym" path="res://Game/Abilities/Player/ChronosAbility.gd" id="2_chronos_runtime"]
+
+[resource]
+script = ExtResource("1_ability_definition")
+id = &"chronos"
+runtime_script = ExtResource("2_chronos_runtime")
+slot = &"utility"
+input_action = &"chronos"
+tags = PackedStringArray("player", "time")

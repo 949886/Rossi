@@ -1,4 +1,4 @@
-extends ChronosNode
+extends AbilityCharacter2D
 class_name PlatformerCharacter2D
 
 signal attack_started(direction: Vector2)
@@ -176,7 +176,8 @@ func _get(property: StringName):
 	return null
 
 func _ready() -> void:
-	time_group = &"player"
+	super._ready()
+	
 	hurtbox = get_node_or_null("Hurtbox")
 	attack_hitbox = get_node_or_null("PlayerAttackHitbox")
 	
@@ -199,6 +200,7 @@ func _ready() -> void:
 	_change_state(State.IDLE)
 
 func _physics_process(delta: float) -> void:
+	super._physics_process(delta)
 	delta = get_time_scaled_delta(delta)
 
 	if _floor_snap_restore_time_left > 0.0:
@@ -947,6 +949,11 @@ func _on_animation_finished(anim_name: StringName) -> void:
 
 func _get_move_input() -> float:
 	return Input.get_axis("move_left", "move_right")
+
+func get_time_scaled_delta(delta: float) -> float:
+	if Engine.is_editor_hint():
+		return delta
+	return Chronos.get_delta_for_group(delta, Chronos.PLAYER_GROUP)
 
 func _apply_gravity(delta: float, gravity_scale := 1.0) -> void:
 	if not is_on_floor():
