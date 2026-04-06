@@ -815,10 +815,10 @@ func _clear_visual_persistence_target() -> void:
 	vision_sensor.clear_visual_persistence()
 	vision_sensor.set_debug_target(null)
 
-func _remember_investigation_position(position: Vector2) -> void:
+func _remember_investigation_position(investigation_position: Vector2) -> void:
 	if not enable_investigation:
 		return
-	_investigation_position = position
+	_investigation_position = investigation_position
 	_has_investigation_position = true
 
 func _has_investigation_target() -> bool:

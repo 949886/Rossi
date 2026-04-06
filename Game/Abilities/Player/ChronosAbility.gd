@@ -53,7 +53,7 @@ func _exit_tree() -> void:
 	if Chronos.is_chronos_enabled():
 		Chronos.set_chronos_enabled(false)
 
-func _physics_process(delta: float) -> void:
+func _physics_process(_delta: float) -> void:
 	var real_delta := Chronos.get_real_delta()
 	_update_chronos_state(real_delta)
 	_update_chronos_afterimage(real_delta)
@@ -255,7 +255,7 @@ func _on_player_die() -> void:
 	_set_chronos_running(false, false)
 	_chronos_afterimage_left = 0.0
 
-func _on_player_respawn(spawn_position: Vector2) -> void:
+func _on_player_respawn(_pawn_position: Vector2) -> void:
 	_set_chronos_running(false, false)
 	chronos_stamina = chronos_stamina_max
 	chronos_cooldown_left = 0.0

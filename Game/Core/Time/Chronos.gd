@@ -110,7 +110,7 @@ func _get_chronos_time_scale_for_group(time_group: StringName) -> float:
 			return world_time_scale
 
 func _normalize_time_group(time_group: StringName) -> StringName:
-	if time_group == StringName():
+	if time_group.is_empty():
 		return WORLD_GROUP
 	if _elapsed_time_by_group.has(time_group):
 		return time_group

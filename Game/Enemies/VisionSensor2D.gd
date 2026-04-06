@@ -7,7 +7,7 @@ signal visual_debug_toggled(enabled: bool)
 
 @export_group("Detection")
 ## Max detection distance measured from the sensor origin.
-@export var detection_radius := 300
+@export var detection_radius := 300.0
 ## Horizontal field-of-view angle in degrees. Use 360 for omni-directional sensing.
 @export_range(1.0, 360.0, 1.0) var fov_angle_degrees := 360.0
 ## Additional half-angle allowed when retaining an already tracked target near the FOV edge.

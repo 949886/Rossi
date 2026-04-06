@@ -150,15 +150,15 @@ func _build_hit_data(hurtbox: Hurtbox2D, receiver: Node) -> Dictionary:
 		"receiver": receiver,
 	}
 
-func _play_impact_world(position: Vector2) -> void:
+func _play_impact_world(impact_position: Vector2) -> void:
 	if _has_impacted:
 		return
 	_has_impacted = true
-	SFX.play_cue(impact_world_cue, position)
+	SFX.play_cue(impact_world_cue, impact_position)
 
 
-func _play_impact_player(position: Vector2) -> void:
+func _play_impact_player(impact_position: Vector2) -> void:
 	if _has_impacted:
 		return
 	_has_impacted = true
-	SFX.play_cue(impact_player_cue, position)
+	SFX.play_cue(impact_player_cue, impact_position)
