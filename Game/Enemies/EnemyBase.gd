@@ -1,4 +1,4 @@
-extends ChronosNode
+extends CharacterBody2D
 class_name EnemyBase
 
 signal hit_taken(hit_data: Dictionary)
@@ -154,7 +154,6 @@ var state_name: String:
 	get: return String(State.keys()[_state]).to_lower()
 
 func _ready() -> void:
-	time_group = &"enemy"
 	add_to_group("Enemy")
 	_spawn_position = global_position
 	_patrol_origin_x = global_position.x
@@ -202,7 +201,7 @@ func initialize_spawn(spawn_position: Vector2, facing_direction: int) -> void:
 	_update_facing(_spawn_facing_direction)
 
 func _physics_process(delta: float) -> void:
-	delta = get_time_scaled_delta(delta)
+	delta = Chronos.get_delta_for_group(delta, Chronos.ENEMY_GROUP)
 	if _attack_cooldown_timer > 0.0:
 		_attack_cooldown_timer = maxf(0.0, _attack_cooldown_timer - delta)
 	if _invulnerable_timer > 0.0:

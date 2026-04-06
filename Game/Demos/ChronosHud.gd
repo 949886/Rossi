@@ -1,6 +1,8 @@
 extends CanvasLayer
 class_name ChronosHud
 
+const CHRONOS_ABILITY_ID := &"chronos"
+
 @export var player_path: NodePath
 @export var title_label_path: NodePath = NodePath("Panel/VBox/Title")
 @export var player_label_path: NodePath = NodePath("Panel/VBox/Player")
@@ -10,7 +12,8 @@ class_name ChronosHud
 @export var stamina_bar_path: NodePath = NodePath("Panel/VBox/StaminaBar")
 @export var cooldown_bar_path: NodePath = NodePath("Panel/VBox/CooldownBar")
 
-var _player: ChronosCharacter2D
+var _player: PlatformerCharacter2D
+var _chronos_ability: ChronosAbility
 var _title_label: Label
 var _player_label: Label
 var _chronos_status_label: Label
@@ -21,6 +24,7 @@ var _cooldown_bar: ProgressBar
 
 func _ready() -> void:
 	_player = _resolve_player()
+	_chronos_ability = _resolve_chronos_ability()
 	_title_label = get_node_or_null(title_label_path) as Label
 	_player_label = get_node_or_null(player_label_path) as Label
 	_chronos_status_label = get_node_or_null(chronos_status_label_path) as Label
@@ -33,18 +37,24 @@ func _ready() -> void:
 func _process(_delta: float) -> void:
 	if not is_instance_valid(_player):
 		_player = _resolve_player()
+		_chronos_ability = _resolve_chronos_ability()
 	_update_ui()
 
-func _resolve_player() -> ChronosCharacter2D:
+func _resolve_player() -> PlatformerCharacter2D:
 	if player_path != NodePath():
 		var explicit_player := get_node_or_null(player_path)
-		if explicit_player is ChronosCharacter2D:
-			return explicit_player as ChronosCharacter2D
+		if explicit_player is PlatformerCharacter2D:
+			return explicit_player as PlatformerCharacter2D
 
 	for player in get_tree().get_nodes_in_group("Player"):
-		if player is ChronosCharacter2D:
-			return player as ChronosCharacter2D
+		if player is PlatformerCharacter2D:
+			return player as PlatformerCharacter2D
 	return null
+
+func _resolve_chronos_ability() -> ChronosAbility:
+	if not is_instance_valid(_player):
+		return null
+	return _player.abilities.get(String(CHRONOS_ABILITY_ID), null) as ChronosAbility
 
 func _update_ui() -> void:
 	if _title_label != null:
@@ -74,26 +84,32 @@ func _update_ui() -> void:
 			_cooldown_bar.value = 0.0
 		return
 
+	if _chronos_ability == null:
+		_chronos_ability = _resolve_chronos_ability()
+
 	if _player_label != null:
 		var status := "dead" if _player.is_dead else "ready"
 		_player_label.text = "Player: %s  HP %d/%d" % [status, _player.current_health, _player.max_health]
 
 	if _chronos_status_label != null:
-		var chronos_state := "ready"
-		if _player.is_chronos_running:
-			chronos_state = "running"
-		elif _player.chronos_cooldown_left > 0.0:
-			chronos_state = "cooling down"
-		elif _player.chronos_stamina <= 0.0:
-			chronos_state = "recovering"
-		_chronos_status_label.text = "Chronos: %s  Stamina %.0f / %.0f" % [
-			chronos_state,
-			_player.chronos_stamina,
-			_player.chronos_stamina_max,
-		]
+		if _chronos_ability == null:
+			_chronos_status_label.text = "Chronos: unavailable"
+		else:
+			var chronos_state := "ready"
+			if _chronos_ability.is_chronos_running:
+				chronos_state = "running"
+			elif _chronos_ability.chronos_cooldown_left > 0.0:
+				chronos_state = "cooling down"
+			elif _chronos_ability.chronos_stamina <= 0.0:
+				chronos_state = "recovering"
+			_chronos_status_label.text = "Chronos: %s  Stamina %.0f / %.0f" % [
+				chronos_state,
+				_chronos_ability.chronos_stamina,
+				_chronos_ability.chronos_stamina_max,
+			]
 
 	if _stamina_bar != null:
-		_stamina_bar.value = _player.chronos_stamina_percent * 100.0
+		_stamina_bar.value = _chronos_ability.chronos_stamina_percent * 100.0 if _chronos_ability != null else 0.0
 
 	if _cooldown_bar != null:
-		_cooldown_bar.value = _player.chronos_cooldown_percent * 100.0
+		_cooldown_bar.value = _chronos_ability.chronos_cooldown_percent * 100.0 if _chronos_ability != null else 0.0

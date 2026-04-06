@@ -23,6 +23,7 @@ class_name PlayerAudioController
 @export var run_footstep_frames: Array[int] = [13, 36]
 
 var _player: PlatformerCharacter2D
+var _chronos_ability: ChronosAbility
 var _last_event_time_by_key: Dictionary = {}
 var _last_footstep_animation: StringName = &""
 var _last_footstep_frame := -1
@@ -60,12 +61,7 @@ func _connect_player() -> void:
 		_player.animated_sprite.frame_changed.connect(_on_animated_sprite_frame_changed)
 	if _player.attack_hitbox != null and not _player.attack_hitbox.hit_connected.is_connected(_on_attack_hit_connected):
 		_player.attack_hitbox.hit_connected.connect(_on_attack_hit_connected)
-	var chronos_started_callable := Callable(self, "_on_chronos_started")
-	if _player.has_signal(&"chronos_started") and not _player.is_connected(&"chronos_started", chronos_started_callable):
-		_player.connect(&"chronos_started", chronos_started_callable)
-	var chronos_stopped_callable := Callable(self, "_on_chronos_stopped")
-	if _player.has_signal(&"chronos_stopped") and not _player.is_connected(&"chronos_stopped", chronos_stopped_callable):
-		_player.connect(&"chronos_stopped", chronos_stopped_callable)
+	_connect_chronos_audio()
 
 
 func _on_jumped(kind: StringName) -> void:
@@ -127,6 +123,24 @@ func _on_chronos_started() -> void:
 
 func _on_chronos_stopped() -> void:
 	_play_cue(chronos_stop_cue, "chronos_stop", _player.global_position)
+
+func _connect_chronos_audio() -> void:
+	_chronos_ability = _player.abilities.get("chronos", null) as ChronosAbility
+	if _chronos_ability != null:
+		var started_callable := Callable(self, "_on_chronos_started")
+		if not _chronos_ability.chronos_started.is_connected(started_callable):
+			_chronos_ability.chronos_started.connect(started_callable)
+		var stopped_callable := Callable(self, "_on_chronos_stopped")
+		if not _chronos_ability.chronos_stopped.is_connected(stopped_callable):
+			_chronos_ability.chronos_stopped.connect(stopped_callable)
+		return
+
+	var chronos_started_callable := Callable(self, "_on_chronos_started")
+	if _player.has_signal(&"chronos_started") and not _player.is_connected(&"chronos_started", chronos_started_callable):
+		_player.connect(&"chronos_started", chronos_started_callable)
+	var chronos_stopped_callable := Callable(self, "_on_chronos_stopped")
+	if _player.has_signal(&"chronos_stopped") and not _player.is_connected(&"chronos_stopped", chronos_stopped_callable):
+		_player.connect(&"chronos_stopped", chronos_stopped_callable)
 
 
 func _on_animated_sprite_frame_changed() -> void:

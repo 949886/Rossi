@@ -3,6 +3,7 @@
 [ext_resource type="Script" uid="uid://cqocrep0u5mu3" path="res://Game/Core/Player/PlatformerCharacter2D.gd" id="1_7p0v6"]
 [ext_resource type="SpriteFrames" uid="uid://ctqnpmn1mmwee" path="res://Game/Characters/Shiro/Animations/shiro_sprite_frames.tres" id="1_i25jw"]
 [ext_resource type="AnimationNodeStateMachine" uid="uid://c2ea07gspat02" path="res://Game/Characters/Shiro/Animations/shiro_animation_controller.tres" id="2_7p0v6"]
+[ext_resource type="PackedScene" uid="uid://c7t8p6v5taq2x" path="res://Game/Characters/Shiro/Items/Shuriken/Shuriken.tscn" id="3_shuriken_scene"]
 [ext_resource type="Script" uid="uid://dhgf73ow87fbm" path="res://Game/Core/Audio/PlayerAudioController.gd" id="4_player_audio"]
 [ext_resource type="Resource" uid="uid://dwecu2ngtsxge" path="res://Game/Audios/SFX/Player/Movement/player_jump.tres" id="5_player_jump"]
 [ext_resource type="Resource" path="res://Game/Audios/SFX/Player/Movement/player_double_jump.tres" id="6_player_double_jump"]
@@ -611,6 +612,7 @@ _data = {
 [node name="CharacterBody2D" type="CharacterBody2D" unique_id=2018056203 groups=["Player"]]
 collision_mask = 3
 script = ExtResource("1_7p0v6")
+shuriken_scene = ExtResource("3_shuriken_scene")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=290157219]
 texture_filter = 1

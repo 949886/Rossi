@@ -1,10 +1,11 @@
 [gd_scene format=3 uid="uid://csqmy8ypij7l2"]
 
 [ext_resource type="PackedScene" path="res://Game/Characters/Shiro/ChronosShiro.tscn" id="1_player"]
-[ext_resource type="PackedScene" uid="uid://c7t8p6v5taq2x" path="res://Game/Characters/Shiro/Items/Shuriken/Shuriken.tscn" id="2_shuriken"]
 [ext_resource type="Script" uid="uid://b8uxbkqqcn12" path="res://Game/Enemies/EncounterController.gd" id="3_encounter"]
 [ext_resource type="PackedScene" uid="uid://l1fj7qvub0mh" path="res://Game/Enemies/Gangsters/EnemyGangster.tscn" id="4_enemy"]
-[ext_resource type="PackedScene" path="res://Game/Enemies/Gangsters/EnemyGangsterRanged.tscn" id="5_ranged_enemy"]
+[ext_resource type="Script" uid="uid://b77lgiubjba1d" path="res://Game/Core/Ability/AbilityData.gd" id="4_ucm7e"]
+[ext_resource type="Resource" uid="uid://u20rdmo3nou2" path="res://Game/Abilities/Player/ChronosAbility.tres" id="5_8kecc"]
+[ext_resource type="PackedScene" uid="uid://bh0lr32xa8ibl" path="res://Game/Enemies/Gangsters/EnemyGangsterRanged.tscn" id="5_ranged_enemy"]
 [ext_resource type="Script" uid="uid://be3o6nwd2gsbg" path="res://Game/Enemies/EnemySpawner2D.gd" id="6_spawner"]
 [ext_resource type="Script" uid="uid://18fwsmh8o0cc" path="res://Game/Effects/BloodFxLayer.gd" id="7_blood"]
 [ext_resource type="Script" uid="uid://cbh662kgmtfsp" path="res://Game/Demos/ChronosFx.gd" id="8_fx"]
@@ -100,19 +101,7 @@ polygon = PackedVector2Array(-110, -12, 110, -12, 110, 12, -110, 12)
 
 [node name="ChronosCharacter2D" parent="." unique_id=1987012960 instance=ExtResource("1_player")]
 position = Vector2(220, 606)
-chronos_stamina_max = 100.0
-chronos_stamina_use_per_second = 28.0
-chronos_stamina_recover_per_second = 38.0
-chronos_stamina_recover_delay = 0.2
-chronos_cooldown = 0.45
-chronos_afterimage_interval = 0.045
-chronos_afterimage_fade_duration = 0.22
-chronos_afterimage_color = Color(0.58, 0.92, 1, 0.3)
-chronos_afterimage_min_speed = 65.0
-chronos_afterimage_trail_distance = 18.0
-chronos_start_burst_count = 3
-chronos_stop_burst_count = 2
-shuriken_scene = ExtResource("2_shuriken")
+ability_data_list = Array[ExtResource("4_ucm7e")]([ExtResource("5_8kecc")])
 
 [node name="Camera2D" type="Camera2D" parent="ChronosCharacter2D" unique_id=522854492]
 position = Vector2(320, -120)
