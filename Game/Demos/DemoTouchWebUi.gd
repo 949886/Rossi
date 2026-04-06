@@ -1,6 +1,8 @@
 extends Node
 class_name DemoTouchWebUi
 
+const CHRONOS_ABILITY_ID := "chronos"
+
 @export var player_path: NodePath
 @export var touch_ui_path: NodePath = ^"../TouchUI"
 @export var show_touch_info_panel := false
@@ -12,9 +14,11 @@ var _jump_button: Control
 var _attack_button: Control
 var _dash_button: Control
 var _throw_button: Control
+var _chronos_button: Control
 var _info_label: Label
 var _info_panel: PanelContainer
 var _show_info := false
+var _chronos_ability: ChronosAbility
 
 func _ready() -> void:
 	_player = get_node_or_null(player_path)
@@ -27,9 +31,11 @@ func _ready() -> void:
 	_attack_button = _touch_ui.get_node_or_null("TouchControls/ButtonArea/AttackBtn") as Control
 	_dash_button = _touch_ui.get_node_or_null("TouchControls/ButtonArea/DashBtn") as Control
 	_throw_button = _touch_ui.get_node_or_null("TouchControls/ButtonArea/ThrowBtn") as Control
+	_chronos_button = _touch_ui.get_node_or_null("TouchControls/ButtonArea/ChronosBtn") as Control
 	_info_label = _touch_ui.get_node_or_null("InfoPanel/InfoLabel") as Label
 	_info_panel = _touch_ui.get_node_or_null("InfoPanel") as PanelContainer
 	_show_info = show_touch_info_panel
+	_chronos_ability = _resolve_chronos_ability()
 
 	_style_info_panel()
 	if _info_panel != null:
@@ -37,9 +43,11 @@ func _ready() -> void:
 
 	_connect_direction_button(_attack_button, "on_virtual_attack_activated")
 	_connect_direction_button(_throw_button, "on_virtual_throw_activated")
+	_update_chronos_button()
 
 func _process(_delta: float) -> void:
 	_update_dash_button()
+	_update_chronos_button()
 	_update_info_panel()
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -86,6 +94,25 @@ func _update_dash_button() -> void:
 	if dash_recharge_progress != null:
 		_dash_button.set("cooldown_progress", dash_recharge_progress)
 
+func _update_chronos_button() -> void:
+	if _chronos_button == null:
+		return
+
+	if _chronos_ability == null:
+		_chronos_ability = _resolve_chronos_ability()
+
+	var has_chronos := _chronos_ability != null
+	_chronos_button.visible = has_chronos
+	if not has_chronos:
+		return
+
+	if _chronos_ability.is_chronos_running:
+		_chronos_button.modulate = Color.WHITE
+	elif _chronos_ability.is_chronos_ready:
+		_chronos_button.modulate = Color(0.9, 0.98, 1.0, 0.95)
+	else:
+		_chronos_button.modulate = Color(0.7, 0.7, 0.7, 0.55)
+
 func _update_info_panel() -> void:
 	if _info_label == null or not _show_info:
 		return
@@ -95,7 +122,7 @@ func _update_info_panel() -> void:
 		output = _joystick.get("output")
 
 	_info_label.text = (
-		"Joystick: (%.2f, %.2f)\nJump: %s  Attack: %s  Dash: %s  Throw: %s"
+		"Joystick: (%.2f, %.2f)\nJump: %s  Attack: %s  Dash: %s\nThrow: %s  Chronos: %s"
 		% [
 			output.x,
 			output.y,
@@ -103,6 +130,7 @@ func _update_info_panel() -> void:
 			_on_off(_attack_button),
 			_on_off(_dash_button),
 			_on_off(_throw_button),
+			_chronos_status_text(),
 		]
 	)
 
@@ -110,3 +138,17 @@ func _on_off(button: Control) -> String:
 	if button == null:
 		return "off"
 	return "ON" if bool(button.get("is_pressed")) else "off"
+
+func _chronos_status_text() -> String:
+	if _chronos_ability == null:
+		return "n/a"
+	return _on_off(_chronos_button)
+
+func _resolve_chronos_ability() -> ChronosAbility:
+	if _player == null:
+		return null
+
+	var abilities = _player.get("abilities")
+	if abilities is Dictionary:
+		return abilities.get(CHRONOS_ABILITY_ID, null) as ChronosAbility
+	return null

@@ -4,15 +4,16 @@
 [ext_resource type="Script" uid="uid://c67f4r8yop3tj" path="res://Game/Tutorial/TutorialProgressController.gd" id="2_h7g52"]
 [ext_resource type="Script" uid="uid://dwdl4xcb1jog3" path="res://Game/Tutorial/SimpleSolid.gd" id="3_qn3ij"]
 [ext_resource type="PackedScene" uid="uid://cp7soa40msiek" path="res://Game/Characters/Shiro/Shiro.tscn" id="4_a0d6y"]
-[ext_resource type="PackedScene" uid="uid://c7t8p6v5taq2x" path="res://Game/Characters/Shiro/Items/Shuriken/Shuriken.tscn" id="5_4xhwu"]
 [ext_resource type="Script" uid="uid://bsxm83ggw1m5i" path="res://Game/Tutorial/PromptTrigger.gd" id="6_prompt"]
 [ext_resource type="Script" uid="uid://rtq637fh6wls" path="res://Game/Tutorial/TutorialEventTrigger.gd" id="7_event"]
 [ext_resource type="Script" uid="uid://cpehx60dbmxj6" path="res://Game/Tutorial/TutorialGate.gd" id="7_y5ctq"]
+[ext_resource type="Script" uid="uid://b77lgiubjba1d" path="res://Game/Core/Ability/AbilityData.gd" id="8_0u5e6"]
 [ext_resource type="Script" uid="uid://crlaucp0rkgoe" path="res://Game/Tutorial/MeleeTutorialDoor.gd" id="8_g6gbl"]
 [ext_resource type="Script" uid="uid://bbjciv6prsbqq" path="res://Game/Tutorial/TutorialDummyEnemy.gd" id="9_hfd7m"]
+[ext_resource type="Resource" uid="uid://u20rdmo3nou2" path="res://Game/Abilities/Player/ChronosAbility.tres" id="9_v6ejf"]
 [ext_resource type="Script" uid="uid://0ur503tdypjw" path="res://Game/Tutorial/TeleportPlatformTarget.gd" id="10_25q88"]
 [ext_resource type="Script" uid="uid://c3nwql5b0lq35" path="res://Game/Tutorial/Killzone.gd" id="11_t7s14"]
-[ext_resource type="Script" path="res://Game/Demos/DemoTouchWebUi.gd" id="12_touch_helper"]
+[ext_resource type="Script" uid="uid://beghx46p8soo8" path="res://Game/Demos/DemoTouchWebUi.gd" id="12_touch_helper"]
 [ext_resource type="PackedScene" uid="uid://cieg12mva0pyu" path="res://Game/UI/Mobile/TouchUI.tscn" id="13_touch_ui"]
 [ext_resource type="PackedScene" uid="uid://r6u2rs6k33ro" path="res://Game/UI/Web/WebFullscreenButton.tscn" id="14_web_ui"]
 
@@ -133,7 +134,7 @@ travel_duration = 2.8
 
 [node name="CharacterBody2D" parent="World" unique_id=485804767 instance=ExtResource("4_a0d6y")]
 position = Vector2(40, 340)
-shuriken_scene = ExtResource("5_4xhwu")
+ability_data_list = Array[ExtResource("8_0u5e6")]([ExtResource("9_v6ejf")])
 
 [node name="Camera2D" type="Camera2D" parent="World/CharacterBody2D" unique_id=703966695]
 zoom = Vector2(1.6, 1.6)
@@ -254,14 +255,14 @@ script = ExtResource("2_h7g52")
 prompt_layer_path = NodePath("../PromptLayer")
 player_path = NodePath("../World/CharacterBody2D")
 
-[node name="TouchUI" parent="." instance=ExtResource("13_touch_ui")]
+[node name="TouchUI" parent="." unique_id=905064101 instance=ExtResource("13_touch_ui")]
 
-[node name="WebUI" type="CanvasLayer" parent="."]
+[node name="WebUI" type="CanvasLayer" parent="." unique_id=199572613]
 layer = 20
 
-[node name="WebFullscreenButtonHost" parent="WebUI" instance=ExtResource("14_web_ui")]
+[node name="WebFullscreenButtonHost" parent="WebUI" unique_id=451988497 instance=ExtResource("14_web_ui")]
 visible = false
 
-[node name="DemoTouchWebUi" type="Node" parent="."]
+[node name="DemoTouchWebUi" type="Node" parent="." unique_id=12872203]
 script = ExtResource("12_touch_helper")
 player_path = NodePath("../World/CharacterBody2D")

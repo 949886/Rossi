@@ -63,8 +63,8 @@ metadata/_edit_use_anchors_ = true
 [node name="JumpBtn" type="Control" parent="TouchControls/ButtonArea" unique_id=550102539]
 custom_minimum_size = Vector2(80, 80)
 layout_mode = 1
-anchor_left = 0.25
-anchor_right = 0.65
+anchor_left = 0.16
+anchor_right = 0.56
 anchor_bottom = 0.42
 script = ExtResource("3_qe6ek")
 action = "jump"
@@ -116,15 +116,30 @@ label = "Y"
 label_font_size = 18
 metadata/_edit_use_anchors_ = true
 
+[node name="ChronosBtn" type="Control" parent="TouchControls/ButtonArea" unique_id=149103447]
+custom_minimum_size = Vector2(80, 80)
+layout_mode = 1
+anchor_left = 0.59
+anchor_right = 0.99
+anchor_bottom = 0.42
+script = ExtResource("3_qe6ek")
+action = "chronos"
+normal_color = Color(0.1, 0.45, 0.55, 0.65)
+pressed_color = Color(0.3, 0.85, 1, 0.9)
+label = "C"
+label_font_size = 18
+metadata/_edit_use_anchors_ = true
+
 [node name="InfoPanel" type="PanelContainer" parent="." unique_id=1645266867]
 offset_left = 10.0
 offset_top = 10.0
-offset_right = 310.0
-offset_bottom = 60.0
+offset_right = 350.0
+offset_bottom = 90.0
 
 [node name="InfoLabel" type="Label" parent="InfoPanel" unique_id=1451341191]
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 1, 1, 1)
 theme_override_font_sizes/font_size = 13
 text = "Joystick: (0.00, 0.00)
-Jump: off  Attack: off  Dash: off"
+Jump: off  Attack: off  Dash: off
+Throw: off  Chronos: off"

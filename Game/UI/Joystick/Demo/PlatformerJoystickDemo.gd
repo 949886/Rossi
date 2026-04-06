@@ -4,12 +4,15 @@
 
 extends Node2D
 
+const CHRONOS_ABILITY_ID := "chronos"
+
 # Node references - resolved from the scene tree
 @onready var _joystick = $"TouchUI/TouchControls/JoystickArea/Joystick"
 @onready var _jump_button = $"TouchUI/TouchControls/ButtonArea/JumpBtn"
 @onready var _attack_button = $"TouchUI/TouchControls/ButtonArea/AttackBtn"
 @onready var _dash_button = $"TouchUI/TouchControls/ButtonArea/DashBtn"
 @onready var _throw_button = $"TouchUI/TouchControls/ButtonArea/ThrowBtn"
+@onready var _chronos_button = $"TouchUI/TouchControls/ButtonArea/ChronosBtn"
 @onready var _info_label: Label = $"TouchUI/InfoPanel/InfoLabel"
 @onready var _touch_ui: TouchUI = $"TouchUI"
 @onready var _info_panel: PanelContainer = $"TouchUI/InfoPanel"
@@ -18,6 +21,7 @@ extends Node2D
 @onready var _player = $"Playground/CharacterBody2D"
 
 var _show_info := true
+var _chronos_ability: ChronosAbility
 
 func _ready() -> void:
 	# Apply a semi-transparent panel style to InfoPanel
@@ -35,6 +39,9 @@ func _ready() -> void:
 	if _throw_button != null and _player != null and _player.has_method("on_virtual_throw_activated"):
 		_throw_button.direction_activated.connect(Callable(_player, "on_virtual_throw_activated"))
 
+	_chronos_ability = _resolve_chronos_ability()
+	_update_chronos_button()
+
 func _process(_delta: float) -> void:
 	# Update Skill Button UI
 	if _player != null and _dash_button != null:
@@ -42,10 +49,12 @@ func _process(_delta: float) -> void:
 		_dash_button.max_charge_count = _player.get("max_dash_charges")
 		_dash_button.cooldown_progress = _player.get("dash_recharge_progress")
 
+	_update_chronos_button()
+
 	if _info_label != null and _show_info:
 		var output: Vector2 = _joystick.output if _joystick != null else Vector2.ZERO
 		_info_label.text = (
-			"Joystick: (%.2f, %.2f)\nJump: %s  Attack: %s  Dash: %s  Throw: %s"
+			"Joystick: (%.2f, %.2f)\nJump: %s  Attack: %s  Dash: %s\nThrow: %s  Chronos: %s"
 			% [
 				output.x,
 				output.y,
@@ -53,6 +62,7 @@ func _process(_delta: float) -> void:
 				"ON" if _attack_button != null and _attack_button.is_pressed else "off",
 				"ON" if _dash_button != null and _dash_button.is_pressed else "off",
 				"ON" if _throw_button != null and _throw_button.is_pressed else "off",
+				_get_chronos_status_text(),
 			]
 		)
 
@@ -67,3 +77,35 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and event.keycode == KEY_F2:
 		if _touch_ui != null and _touch_ui.has_method("toggle_touch_ui"):
 			_touch_ui.toggle_touch_ui()
+
+func _update_chronos_button() -> void:
+	if _chronos_button == null:
+		return
+
+	if _chronos_ability == null:
+		_chronos_ability = _resolve_chronos_ability()
+
+	var has_chronos := _chronos_ability != null
+	_chronos_button.visible = has_chronos
+	if not has_chronos:
+		return
+
+	if _chronos_ability.is_chronos_running:
+		_chronos_button.modulate = Color.WHITE
+	elif _chronos_ability.is_chronos_ready:
+		_chronos_button.modulate = Color(0.9, 0.98, 1.0, 0.95)
+	else:
+		_chronos_button.modulate = Color(0.7, 0.7, 0.7, 0.55)
+
+func _get_chronos_status_text() -> String:
+	if _chronos_ability == null:
+		return "n/a"
+	return "ON" if _chronos_button != null and _chronos_button.is_pressed else "off"
+
+func _resolve_chronos_ability() -> ChronosAbility:
+	if _player == null:
+		return null
+	var abilities = _player.get("abilities")
+	if abilities is Dictionary:
+		return abilities.get(CHRONOS_ABILITY_ID, null) as ChronosAbility
+	return null

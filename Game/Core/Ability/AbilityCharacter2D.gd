@@ -2,7 +2,9 @@ extends CharacterBody2D
 class_name AbilityCharacter2D
 
 @export var ability_data_list: Array[AbilityData] = []
-@export var abilities: Dictionary[String, Ability] = {}
+var abilities: Dictionary[String, Ability] = {}:
+	get: return abilities
+	
 
 func _ready() -> void:
 	_initialize_abilities()
