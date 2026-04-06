@@ -1000,7 +1000,7 @@ func _get_slash_direction() -> Vector2:
 	return to_mouse.normalized()
 
 func _get_dash_direction() -> int:
-	if not use_mouse_dash_direction:
+	if not _should_use_mouse_dash_direction():
 		return _facing_direction
 	var mouse_delta_x := get_global_mouse_position().x - global_position.x
 	if mouse_delta_x > 0.1:
@@ -1008,6 +1008,9 @@ func _get_dash_direction() -> int:
 	if mouse_delta_x < -0.1:
 		return -1
 	return _facing_direction
+
+func _should_use_mouse_dash_direction() -> bool:
+	return use_mouse_dash_direction and PlatformUtils.is_desktop_platform()
 
 func _get_slash_animation_name() -> String:
 	if animation_player.has_animation("jump_attack"):

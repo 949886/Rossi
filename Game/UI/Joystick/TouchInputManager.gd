@@ -131,4 +131,4 @@ func _create_button(name: String, action_name: String, button_label: String, rad
 	return button
 
 func _is_mobile_platform() -> bool:
-	return OS.has_feature("mobile") or OS.has_feature("android") or OS.has_feature("ios")
+	return PlatformUtils.is_mobile_platform()

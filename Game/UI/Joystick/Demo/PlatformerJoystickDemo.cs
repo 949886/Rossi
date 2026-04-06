@@ -77,35 +77,7 @@ public partial class PlatformerJoystickDemo : Node2D
 
     private static bool ShouldShowTouchUi()
     {
-        if (OS.HasFeature("mobile") || OS.HasFeature("android") || OS.HasFeature("ios"))
-        {
-            return true;
-        }
-
-        if (OS.HasFeature("web"))
-        {
-            return IsMobileWebBrowser();
-        }
-
-        return false;
-    }
-
-    private static bool IsMobileWebBrowser()
-    {
-        var result = JavaScriptBridge.Eval(
-            """
-            (() => {
-                const ua = navigator.userAgent || "";
-                const mobileUa = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
-                const touchPoints = navigator.maxTouchPoints || 0;
-                const shortSide = Math.min(window.screen.width || 0, window.screen.height || 0);
-                return mobileUa || (touchPoints > 1 && shortSide > 0 && shortSide <= 1024);
-            })()
-            """,
-            true
-        );
-
-        return result.VariantType == Variant.Type.Bool && result.AsBool();
+        return PlatformUtils.IsMobilePlatform();
     }
 
     private void CreateFullscreenButton()

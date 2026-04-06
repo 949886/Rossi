@@ -38,25 +38,4 @@ func _should_show_touch_ui() -> bool:
 		VisibilityMode.ALWAYS_HIDE:
 			return false
 		_:
-			return _is_mobile_platform()
-
-func _is_mobile_platform() -> bool:
-	if OS.has_feature("mobile") or OS.has_feature("android") or OS.has_feature("ios"):
-		return true
-
-	if OS.has_feature("web"):
-		return _is_mobile_web_browser()
-
-	return false
-
-func _is_mobile_web_browser() -> bool:
-	var result = JavaScriptBridge.eval("""
-		(() => {
-			const ua = navigator.userAgent || "";
-			const mobileUa = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini|Mobile/i.test(ua);
-			const touchPoints = navigator.maxTouchPoints || 0;
-			const shortSide = Math.min(window.screen.width || 0, window.screen.height || 0);
-			return mobileUa || (touchPoints > 1 && shortSide > 0 && shortSide <= 1024);
-		})()
-	""", true)
-	return bool(result)
+			return PlatformUtils.is_mobile_platform()

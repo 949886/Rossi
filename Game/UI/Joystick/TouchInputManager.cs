@@ -233,7 +233,7 @@ namespace VirtualJoystickPlugin
 
         private bool _IsMobilePlatform()
         {
-            return OS.HasFeature("mobile") || OS.HasFeature("android") || OS.HasFeature("ios");
+            return PlatformUtils.IsMobilePlatform();
         }
 
         #endregion

@@ -1420,7 +1420,7 @@ public partial class PlatformerCharacter2D : CharacterBody2D
 
     private int GetDashDirection()
     {
-        if (!useMouseDashDirection)
+        if (!ShouldUseMouseDashDirection())
             return _facingDirection;
 
         float mouseDeltaX = GetGlobalMousePosition().X - GlobalPosition.X;
@@ -1429,6 +1429,11 @@ public partial class PlatformerCharacter2D : CharacterBody2D
         if (mouseDeltaX < -0.1f)
             return -1;
         return _facingDirection;
+    }
+
+    private bool ShouldUseMouseDashDirection()
+    {
+        return useMouseDashDirection && PlatformUtils.IsDesktopPlatform();
     }
 
     private string GetSlashAnimationName()
