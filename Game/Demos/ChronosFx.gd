@@ -14,15 +14,20 @@ class_name ChronosFx
 var _chromatic_rect: ColorRect
 var _tint_rect: ColorRect
 var _chromatic_material: ShaderMaterial
+var _shaders_parent: Node2D
+var _shaders_root: Node2D
 var _base_chromatic_strength := 0.0
 var _current_chromatic_strength := 0.0
 var _blend := 0.0
 var _pulse := 0.0
 var _was_chronos_enabled := false
+var _last_viewport_size := Vector2.ZERO
 
 func _ready() -> void:
 	_chromatic_rect = get_node_or_null(chromatic_rect_path) as ColorRect
 	_tint_rect = get_node_or_null(tint_rect_path) as ColorRect
+	_shaders_root = _chromatic_rect.get_parent() as Node2D if _chromatic_rect != null else null
+	_shaders_parent = _shaders_root.get_parent() as Node2D if _shaders_root != null else null
 	if _chromatic_rect != null and _chromatic_rect.material is ShaderMaterial:
 		_chromatic_material = _chromatic_rect.material as ShaderMaterial
 		var current_value: Variant = _chromatic_material.get_shader_parameter("MAX_DIST_PX")
@@ -32,9 +37,12 @@ func _ready() -> void:
 
 	if _tint_rect != null:
 		_tint_rect.color = Color(active_tint_color.r, active_tint_color.g, active_tint_color.b, 0.0)
+	_update_layout()
 	_was_chronos_enabled = Chronos.is_chronos_enabled()
 
 func _process(_delta: float) -> void:
+	_update_layout()
+
 	var real_delta := Chronos.get_real_delta()
 	if real_delta <= 0.0:
 		return
@@ -57,3 +65,26 @@ func _process(_delta: float) -> void:
 	if _tint_rect != null:
 		var tint_alpha := clampf(active_tint_color.a * _blend + _pulse * 0.18, 0.0, 1.0)
 		_tint_rect.color = Color(active_tint_color.r, active_tint_color.g, active_tint_color.b, tint_alpha)
+
+func _update_layout() -> void:
+	var viewport := get_viewport()
+	if viewport == null:
+		return
+
+	var visible_rect := viewport.get_visible_rect()
+	var viewport_size := visible_rect.size
+	if viewport_size == Vector2.ZERO or viewport_size.is_equal_approx(_last_viewport_size):
+		return
+	_last_viewport_size = viewport_size
+
+	if _shaders_parent != null:
+		_shaders_parent.position = visible_rect.position + viewport_size * 0.5
+	if _shaders_root != null:
+		_shaders_root.position = -viewport_size * 0.5
+
+	if _chromatic_rect != null:
+		_chromatic_rect.position = Vector2.ZERO
+		_chromatic_rect.size = viewport_size
+	if _tint_rect != null:
+		_tint_rect.position = Vector2.ZERO
+		_tint_rect.size = viewport_size

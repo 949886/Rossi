@@ -5,6 +5,7 @@ signal chronos_started
 signal chronos_stopped
 
 @export_group("Chronos")	
+@export var chronos_fx_scene: PackedScene
 @export var chronos_stamina_max := 100.0
 @export var chronos_stamina_use_per_second := 28.0
 @export var chronos_stamina_recover_per_second := 38.0
@@ -72,6 +73,7 @@ func get_public_state() -> Dictionary:
 func apply_compat_config(config: Dictionary, reset_runtime := false) -> void:
 	for property_name in config.keys():
 		if property_name in [
+			"chronos_fx_scene",
 			"chronos_stamina_max",
 			"chronos_stamina_use_per_second",
 			"chronos_stamina_recover_per_second",
@@ -128,6 +130,8 @@ func _set_chronos_running(enabled: bool, start_cooldown: bool) -> void:
 	if enabled == was_running:
 		return
 
+	if enabled:
+		_ensure_chronos_fx()
 	Chronos.set_chronos_enabled(enabled)
 
 	if enabled:
@@ -143,6 +147,31 @@ func _set_chronos_running(enabled: bool, start_cooldown: bool) -> void:
 		if start_cooldown:
 			chronos_cooldown_left = chronos_cooldown
 			_chronos_stamina_recover_delay_left = chronos_stamina_recover_delay
+
+func _ensure_chronos_fx() -> void:
+	var current_scene := get_tree().current_scene
+	if current_scene == null:
+		return
+	if _find_existing_chronos_fx(current_scene) != null:
+		return
+
+	if chronos_fx_scene == null:
+		return
+
+	var chronos_fx := chronos_fx_scene.instantiate()
+	if chronos_fx == null:
+		return
+	current_scene.add_child(chronos_fx)
+
+func _find_existing_chronos_fx(root: Node) -> Node:
+	if root is ChronosFx:
+		return root
+	for child in root.get_children():
+		if child is Node:
+			var result := _find_existing_chronos_fx(child as Node)
+			if result != null:
+				return result
+	return null
 
 func _update_chronos_afterimage(real_delta: float) -> void:
 	if real_delta <= 0.0:

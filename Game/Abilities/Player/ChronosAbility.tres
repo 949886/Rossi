@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://b77lgiubjba1d" path="res://Game/Core/Ability/AbilityData.gd" id="1_ability_data"]
 [ext_resource type="Script" uid="uid://cr57me05tq4ym" path="res://Game/Abilities/Player/ChronosAbility.gd" id="2_chronos_runtime"]
+[ext_resource type="PackedScene" path="res://Game/Demos/ChronosFx.tscn" id="3_chronos_fx"]
 
 [resource]
 script = ExtResource("1_ability_data")
@@ -10,3 +11,6 @@ runtime_script = ExtResource("2_chronos_runtime")
 slot = &"utility"
 input_action = &"chronos"
 tags = PackedStringArray("player", "time")
+config = {
+"chronos_fx_scene": ExtResource("3_chronos_fx")
+}
