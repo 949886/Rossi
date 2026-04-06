@@ -51,6 +51,7 @@ script = ExtResource("1_4bsh7")
 [node name="World" type="Node2D" parent="." unique_id=1244857932]
 
 [node name="Background" type="ColorRect" parent="World" unique_id=1549436998]
+z_index = -10
 offset_right = 3800.0
 offset_bottom = 900.0
 color = Color(0.6, 0.7033333, 0.8, 1)

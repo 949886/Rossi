@@ -25,7 +25,7 @@ func setup(next_owner, next_data: AbilityData = null) -> void:
 			input_action = data.input_action
 		if data.tags.size() > 0:
 			tags = data.tags
-		_apply_data_config(data.config)
+		_apply_data_config(data.get_overrided_config())
 
 	_on_setup()
 

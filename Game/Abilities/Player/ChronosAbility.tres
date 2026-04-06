@@ -6,11 +6,11 @@
 
 [resource]
 script = ExtResource("1_ability_data")
-id = &"chronos"
 runtime_script = ExtResource("2_chronos_runtime")
+id = &"chronos"
 slot = &"utility"
 input_action = &"chronos"
 tags = PackedStringArray("player", "time")
-config = {
+config_overrides = {
 "chronos_fx_scene": ExtResource("3_chronos_fx")
 }

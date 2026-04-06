@@ -1,15 +1,16 @@
 [gd_scene format=3 uid="uid://dyfgxkdxwnh73"]
 
 [ext_resource type="Script" uid="uid://b8uxbkqqcn12" path="res://Game/Enemies/EncounterController.gd" id="1_encounter"]
-[ext_resource type="PackedScene" uid="uid://c7t8p6v5taq2x" path="res://Game/Characters/Shiro/Items/Shuriken/Shuriken.tscn" id="3_shuriken"]
 [ext_resource type="PackedScene" uid="uid://bh0lr32xa8ibl" path="res://Game/Enemies/Gangsters/EnemyGangsterRanged.tscn" id="4_ranged_enemy"]
 [ext_resource type="Script" uid="uid://be3o6nwd2gsbg" path="res://Game/Enemies/EnemySpawner2D.gd" id="5_spawner"]
 [ext_resource type="Script" uid="uid://hcjjd1p8ikdo" path="res://Game/Demos/EnemyDemoHud.gd" id="6_hud"]
 [ext_resource type="Script" uid="uid://18fwsmh8o0cc" path="res://Game/Effects/BloodFxLayer.gd" id="7_blood"]
 [ext_resource type="Script" uid="uid://cbh662kgmtfsp" path="res://Game/Demos/ChronosFx.gd" id="8_40shl"]
 [ext_resource type="PackedScene" path="res://Game/Characters/Shiro/ChronosShiro.tscn" id="8_w1a6p"]
+[ext_resource type="Script" uid="uid://b77lgiubjba1d" path="res://Game/Core/Ability/AbilityData.gd" id="9_c087t"]
 [ext_resource type="Shader" uid="uid://dejeiy537grca" path="res://Game/Shaders/Chromatic/circular_chormatic/circular_chormatic.gdshader" id="9_w1a6p"]
-[ext_resource type="Script" path="res://Game/Demos/DemoTouchWebUi.gd" id="10_touch_helper"]
+[ext_resource type="Resource" uid="uid://u20rdmo3nou2" path="res://Game/Abilities/Player/ChronosAbility.tres" id="10_crbmy"]
+[ext_resource type="Script" uid="uid://beghx46p8soo8" path="res://Game/Demos/DemoTouchWebUi.gd" id="10_touch_helper"]
 [ext_resource type="PackedScene" uid="uid://cieg12mva0pyu" path="res://Game/UI/Mobile/TouchUI.tscn" id="11_touch_ui"]
 [ext_resource type="PackedScene" uid="uid://r6u2rs6k33ro" path="res://Game/UI/Web/WebFullscreenButton.tscn" id="12_web_ui"]
 
@@ -202,19 +203,7 @@ text = "LMB attack/deflect | Aim with mouse to send bullets back | Q throw/telep
 
 [node name="ChronosCharacter2D" parent="." unique_id=1881076433 instance=ExtResource("8_w1a6p")]
 position = Vector2(220, 445)
-chronos_stamina_max = 100.0
-chronos_stamina_use_per_second = 28.0
-chronos_stamina_recover_per_second = 38.0
-chronos_stamina_recover_delay = 0.2
-chronos_cooldown = 0.45
-chronos_afterimage_interval = 0.045
-chronos_afterimage_fade_duration = 0.22
-chronos_afterimage_color = Color(0.58, 0.92, 1, 0.3)
-chronos_afterimage_min_speed = 65.0
-chronos_afterimage_trail_distance = 18.0
-chronos_start_burst_count = 3
-chronos_stop_burst_count = 2
-shuriken_scene = ExtResource("3_shuriken")
+ability_data_list = Array[ExtResource("9_c087t")]([ExtResource("10_crbmy")])
 
 [node name="Camera2D" type="Camera2D" parent="ChronosCharacter2D" unique_id=22446990]
 position = Vector2(320, -120)
@@ -224,14 +213,14 @@ limit_top = 0
 limit_right = 1664
 limit_bottom = 896
 
-[node name="TouchUI" parent="." instance=ExtResource("11_touch_ui")]
+[node name="TouchUI" parent="." unique_id=1845179839 instance=ExtResource("11_touch_ui")]
 
-[node name="WebUI" type="CanvasLayer" parent="."]
+[node name="WebUI" type="CanvasLayer" parent="." unique_id=856320125]
 layer = 20
 
-[node name="WebFullscreenButtonHost" parent="WebUI" instance=ExtResource("12_web_ui")]
+[node name="WebFullscreenButtonHost" parent="WebUI" unique_id=590652974 instance=ExtResource("12_web_ui")]
 visible = false
 
-[node name="DemoTouchWebUi" type="Node" parent="."]
+[node name="DemoTouchWebUi" type="Node" parent="." unique_id=2070166822]
 script = ExtResource("10_touch_helper")
 player_path = NodePath("../ChronosCharacter2D")
