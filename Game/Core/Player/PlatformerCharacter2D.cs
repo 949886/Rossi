@@ -42,6 +42,7 @@ public partial class PlatformerCharacter2D : CharacterBody2D
     [Export] private float dashInvulnerabilityDuration = 0.15f;
     [Export] private float dashCooldown = 0.8f;
     [Export] private int maxDashCharges = 2;
+    [Export] private bool useMouseDashDirection = true;
     [Export] private float afterimageFadeDuration = 0.3f;
     [Export] private Color afterimageColor = new Color(0.4f, 0.8f, 1.0f, 0.6f);
 
@@ -124,6 +125,7 @@ public partial class PlatformerCharacter2D : CharacterBody2D
     private int _dashCharges;
     private float _dashRechargeTimer;
     private float _dashTimer;
+    private int _dashDirection = 1;
     private float _invulnerabilityTimer;
     private bool _isDead;
     private Vector2 _currentRespawnPosition;
@@ -793,7 +795,7 @@ public partial class PlatformerCharacter2D : CharacterBody2D
 
         // Override velocity during dash (no gravity)
         var vel = this.Velocity;
-        vel.X = _facingDirection * dashSpeed;
+        vel.X = _dashDirection * dashSpeed;
         vel.Y = 0;
         this.Velocity = vel;
 
@@ -902,6 +904,8 @@ public partial class PlatformerCharacter2D : CharacterBody2D
                 _dashCharges--;
                 _dashRechargeTimer = dashCooldown;
                 _dashTimer = dashDuration;
+                _dashDirection = GetDashDirection();
+                UpdateFacing(_dashDirection);
                 _invulnerabilityTimer = Mathf.Max(_invulnerabilityTimer, dashInvulnerabilityDuration);
                 PlayAnimation("dash");
                 break;
@@ -1412,6 +1416,19 @@ public partial class PlatformerCharacter2D : CharacterBody2D
 
         Vector2 direction = toMouse.Normalized();
         return direction;
+    }
+
+    private int GetDashDirection()
+    {
+        if (!useMouseDashDirection)
+            return _facingDirection;
+
+        float mouseDeltaX = GetGlobalMousePosition().X - GlobalPosition.X;
+        if (mouseDeltaX > 0.1f)
+            return 1;
+        if (mouseDeltaX < -0.1f)
+            return -1;
+        return _facingDirection;
     }
 
     private string GetSlashAnimationName()

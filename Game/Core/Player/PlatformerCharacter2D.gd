@@ -40,6 +40,7 @@ signal deflect_success(context: Dictionary)
 @export var dash_invulnerability_duration := 0.15
 @export var dash_cooldown := 0.8
 @export var max_dash_charges := 2
+@export var use_mouse_dash_direction := true
 @export var afterimage_fade_duration := 0.3
 @export var afterimage_color := Color(0.4, 0.8, 1.0, 0.6)
 
@@ -120,6 +121,7 @@ var _has_double_jump := true
 var _dash_charges := 0
 var _dash_recharge_timer := 0.0
 var _dash_timer := 0.0
+var _dash_direction := 1
 var _invulnerability_timer := 0.0
 var _is_dead := false
 var _current_respawn_position := Vector2.ZERO
@@ -567,7 +569,7 @@ func _instantiate_shuriken(override_angle = null) -> void:
 func _process_dash(delta: float) -> void:
 	_dash_timer -= delta
 	# Override velocity during dash (no gravity)
-	velocity.x = _facing_direction * dash_speed
+	velocity.x = _dash_direction * dash_speed
 	velocity.y = 0.0
 	if _dash_timer <= 0.0:
 		# Kill dash momentum so the character doesn't slide
@@ -635,6 +637,8 @@ func _change_state(new_state: State) -> void:
 			_dash_charges -= 1
 			_dash_recharge_timer = dash_cooldown
 			_dash_timer = dash_duration
+			_dash_direction = _get_dash_direction()
+			_update_facing(_dash_direction)
 			_invulnerability_timer = maxf(_invulnerability_timer, dash_invulnerability_duration)
 			play_animation("dash")
 			dashed.emit()
@@ -994,6 +998,16 @@ func _get_slash_direction() -> Vector2:
 	if to_mouse.length_squared() < 0.0001:
 		to_mouse = Vector2(_facing_direction, 0.0)
 	return to_mouse.normalized()
+
+func _get_dash_direction() -> int:
+	if not use_mouse_dash_direction:
+		return _facing_direction
+	var mouse_delta_x := get_global_mouse_position().x - global_position.x
+	if mouse_delta_x > 0.1:
+		return 1
+	if mouse_delta_x < -0.1:
+		return -1
+	return _facing_direction
 
 func _get_slash_animation_name() -> String:
 	if animation_player.has_animation("jump_attack"):
