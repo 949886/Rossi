@@ -118,6 +118,7 @@ static func _get_idle_player() -> AudioStreamPlayer:
 	# If no idle player is available, create a new one
 	var new_player := AudioStreamPlayer.new()
 	new_player.name = "SFX Player %d" % _players.size()
+	_configure_player_for_platform(new_player)
 	_container.add_child(new_player)
 	_players.append(new_player)
 
@@ -134,6 +135,7 @@ static func _get_idle_player_2d() -> AudioStreamPlayer2D:
 
 	var new_player := AudioStreamPlayer2D.new()
 	new_player.name = "SFX Player2D %d" % _players_2d.size()
+	_configure_player_2d_for_platform(new_player)
 	_container_2d.add_child(new_player)
 	_players_2d.append(new_player)
 	return new_player
@@ -157,6 +159,7 @@ static func _ensure_initialized() -> bool:
 		for i in range(MAX_PLAYERS):
 			var player := AudioStreamPlayer.new()
 			player.name = "SFX Player %d" % i
+			_configure_player_for_platform(player)
 			_container.add_child(player)
 			_players.append(player)
 
@@ -168,6 +171,7 @@ static func _ensure_initialized() -> bool:
 		for i in range(MAX_PLAYERS):
 			var player_2d := AudioStreamPlayer2D.new()
 			player_2d.name = "SFX Player2D %d" % i
+			_configure_player_2d_for_platform(player_2d)
 			_container_2d.add_child(player_2d)
 			_players_2d.append(player_2d)
 
@@ -198,3 +202,17 @@ static func _get_random_pitch_scale(pitch_min: float, pitch_max: float) -> float
 	if is_equal_approx(min_pitch, max_pitch):
 		return min_pitch
 	return randf_range(min_pitch, max_pitch)
+
+
+static func _configure_player_for_platform(player: AudioStreamPlayer) -> void:
+	if player == null:
+		return
+	if OS.has_feature("web"):
+		player.playback_type = AudioServer.PLAYBACK_TYPE_STREAM
+
+
+static func _configure_player_2d_for_platform(player: AudioStreamPlayer2D) -> void:
+	if player == null:
+		return
+	if OS.has_feature("web"):
+		player.playback_type = AudioServer.PLAYBACK_TYPE_STREAM
