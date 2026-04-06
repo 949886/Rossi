@@ -12,6 +12,9 @@
 [ext_resource type="Script" uid="uid://bbjciv6prsbqq" path="res://Game/Tutorial/TutorialDummyEnemy.gd" id="9_hfd7m"]
 [ext_resource type="Script" uid="uid://0ur503tdypjw" path="res://Game/Tutorial/TeleportPlatformTarget.gd" id="10_25q88"]
 [ext_resource type="Script" uid="uid://c3nwql5b0lq35" path="res://Game/Tutorial/Killzone.gd" id="11_t7s14"]
+[ext_resource type="Script" path="res://Game/Demos/DemoTouchWebUi.gd" id="12_touch_helper"]
+[ext_resource type="PackedScene" uid="uid://cieg12mva0pyu" path="res://Game/UI/Mobile/TouchUI.tscn" id="13_touch_ui"]
+[ext_resource type="PackedScene" uid="uid://r6u2rs6k33ro" path="res://Game/UI/Web/WebFullscreenButton.tscn" id="14_web_ui"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_move_start"]
 size = Vector2(185, 160)
@@ -249,4 +252,16 @@ shape = SubResource("WorldBoundaryShape2D_vqf4r")
 [node name="ProgressController" type="Node" parent="." unique_id=343341849]
 script = ExtResource("2_h7g52")
 prompt_layer_path = NodePath("../PromptLayer")
+player_path = NodePath("../World/CharacterBody2D")
+
+[node name="TouchUI" parent="." instance=ExtResource("13_touch_ui")]
+
+[node name="WebUI" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="WebFullscreenButtonHost" parent="WebUI" instance=ExtResource("14_web_ui")]
+visible = false
+
+[node name="DemoTouchWebUi" type="Node" parent="."]
+script = ExtResource("12_touch_helper")
 player_path = NodePath("../World/CharacterBody2D")

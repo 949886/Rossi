@@ -9,6 +9,9 @@
 [ext_resource type="PackedScene" uid="uid://hthi1t4oeq54" path="res://Game/Props/Laser/LaserBeam.tscn" id="6_laser"]
 [ext_resource type="Script" uid="uid://hcjjd1p8ikdo" path="res://Game/Demos/EnemyDemoHud.gd" id="7_hud"]
 [ext_resource type="PackedScene" uid="uid://bk3o3fpuk1ery" path="res://Game/Props/Laser/LaserSwitch.tscn" id="8_switch"]
+[ext_resource type="Script" path="res://Game/Demos/DemoTouchWebUi.gd" id="10_touch_helper"]
+[ext_resource type="PackedScene" uid="uid://cieg12mva0pyu" path="res://Game/UI/Mobile/TouchUI.tscn" id="11_touch_ui"]
+[ext_resource type="PackedScene" uid="uid://r6u2rs6k33ro" path="res://Game/UI/Web/WebFullscreenButton.tscn" id="12_web_ui"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(960, 48)
@@ -130,3 +133,15 @@ text = "Player: ..."
 [node name="Controls" type="Label" parent="CanvasLayer/Panel/VBox" unique_id=1024]
 layout_mode = 2
 text = "LMB attack/deflect | Q throw/teleport | F switch laser | R reset encounter"
+
+[node name="TouchUI" parent="." instance=ExtResource("11_touch_ui")]
+
+[node name="WebUI" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="WebFullscreenButtonHost" parent="WebUI" instance=ExtResource("12_web_ui")]
+visible = false
+
+[node name="DemoTouchWebUi" type="Node" parent="."]
+script = ExtResource("10_touch_helper")
+player_path = NodePath("../CharacterBody2D")

@@ -4,6 +4,9 @@
 [ext_resource type="Script" path="res://Game/Props/Laser/LaserBeam.gd" id="2_ictog"]
 [ext_resource type="Script" path="res://Game/Props/Laser/LaserSwitch.gd" id="3_m6df7"]
 [ext_resource type="PackedScene" path="res://Game/Props/Laser/MovingLaserBlocker.tscn" id="4_0h31y"]
+[ext_resource type="Script" path="res://Game/Demos/DemoTouchWebUi.gd" id="5_touch_helper"]
+[ext_resource type="PackedScene" uid="uid://cieg12mva0pyu" path="res://Game/UI/Mobile/TouchUI.tscn" id="6_touch_ui"]
+[ext_resource type="PackedScene" uid="uid://r6u2rs6k33ro" path="res://Game/UI/Web/WebFullscreenButton.tscn" id="7_web_ui"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_ywakd"]
 size = Vector2(1000, 9)
@@ -108,3 +111,15 @@ theme_override_font_sizes/font_size = 18
 text = "Laser Demo
 Move: A / D    Jump: Space    Dash: Shift    Interact: F
 Touching an active beam kills you. Dash invulnerability lets you pass through if timed well."
+
+[node name="TouchUI" parent="." instance=ExtResource("6_touch_ui")]
+
+[node name="WebUI" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="WebFullscreenButtonHost" parent="WebUI" instance=ExtResource("7_web_ui")]
+visible = false
+
+[node name="DemoTouchWebUi" type="Node" parent="."]
+script = ExtResource("5_touch_helper")
+player_path = NodePath("../Playground/CharacterBody2D")

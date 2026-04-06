@@ -9,6 +9,9 @@
 [ext_resource type="Script" uid="uid://cbh662kgmtfsp" path="res://Game/Demos/ChronosFx.gd" id="8_40shl"]
 [ext_resource type="PackedScene" path="res://Game/Characters/Shiro/ChronosShiro.tscn" id="8_w1a6p"]
 [ext_resource type="Shader" uid="uid://dejeiy537grca" path="res://Game/Shaders/Chromatic/circular_chormatic/circular_chormatic.gdshader" id="9_w1a6p"]
+[ext_resource type="Script" path="res://Game/Demos/DemoTouchWebUi.gd" id="10_touch_helper"]
+[ext_resource type="PackedScene" uid="uid://cieg12mva0pyu" path="res://Game/UI/Mobile/TouchUI.tscn" id="11_touch_ui"]
+[ext_resource type="PackedScene" uid="uid://r6u2rs6k33ro" path="res://Game/UI/Web/WebFullscreenButton.tscn" id="12_web_ui"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
 size = Vector2(1500, 56)
@@ -220,3 +223,15 @@ limit_left = 0
 limit_top = 0
 limit_right = 1664
 limit_bottom = 896
+
+[node name="TouchUI" parent="." instance=ExtResource("11_touch_ui")]
+
+[node name="WebUI" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="WebFullscreenButtonHost" parent="WebUI" instance=ExtResource("12_web_ui")]
+visible = false
+
+[node name="DemoTouchWebUi" type="Node" parent="."]
+script = ExtResource("10_touch_helper")
+player_path = NodePath("../ChronosCharacter2D")
