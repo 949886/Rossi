@@ -9,6 +9,7 @@ class_name PlayerAudioController
 @export var dash_cue: AudioCue
 @export var attack_swing_cue: AudioCue
 @export var attack_hit_cue: AudioCue
+@export var attack_guarded_cue: AudioCue
 @export var deflect_cue: AudioCue
 @export var shuriken_throw_cue: AudioCue
 @export var shuriken_stick_cue: AudioCue
@@ -27,6 +28,9 @@ var _chronos_ability: ChronosAbility
 var _last_event_time_by_key: Dictionary = {}
 var _last_footstep_animation: StringName = &""
 var _last_footstep_frame := -1
+var _pending_attack_audio := false
+var _pending_attack_audio_resolved := false
+var _pending_attack_audio_id := 0
 
 
 func _ready() -> void:
@@ -83,14 +87,25 @@ func _on_dashed() -> void:
 
 
 func _on_attack_started(_direction: Vector2) -> void:
-	_play_cue(attack_swing_cue, "attack_swing", _player.global_position)
+	_pending_attack_audio_id += 1
+	_pending_attack_audio = true
+	_pending_attack_audio_resolved = false
+	var attack_audio_id := _pending_attack_audio_id
+	var attack_duration := maxf(0.0, _player.attack_duration if _player != null else 0.0)
+	get_tree().create_timer(attack_duration).timeout.connect(_on_attack_audio_timeout.bind(attack_audio_id))
 
 
 func _on_attack_hit_connected(hit_data: Dictionary, _hurtbox: Hurtbox2D, receiver: Node) -> void:
-	if receiver == null or not receiver.is_in_group("Enemy"):
+	if receiver == null or not receiver.is_in_group("Enemy") or not _pending_attack_audio or _pending_attack_audio_resolved:
 		return
 	var impact_position: Vector2 = hit_data.get("impact_position", _player.global_position)
-	_play_cue(attack_hit_cue, "attack_hit", impact_position)
+	if _has_tag(hit_data, "shield_guarded"):
+		_play_cue(attack_guarded_cue, "attack_guarded", impact_position)
+	else:
+		_play_cue(attack_swing_cue, "attack_swing", _player.global_position)
+		_play_cue(attack_hit_cue, "attack_hit", impact_position)
+	_pending_attack_audio_resolved = true
+	_pending_attack_audio = false
 
 
 func _on_shuriken_spawned(shuriken: Shuriken) -> void:
@@ -117,6 +132,16 @@ func _on_died() -> void:
 func _on_deflect_success(context: Dictionary) -> void:
 	var impact_position: Vector2 = context.get("impact_position", _player.global_position)
 	_play_cue(deflect_cue if deflect_cue != null else attack_hit_cue, "deflect", impact_position)
+
+func _on_attack_audio_timeout(attack_audio_id: int) -> void:
+	if attack_audio_id != _pending_attack_audio_id:
+		return
+	if not _pending_attack_audio or _pending_attack_audio_resolved or _player == null:
+		return
+
+	_play_cue(attack_swing_cue, "attack_swing", _player.global_position)
+	_pending_attack_audio_resolved = true
+	_pending_attack_audio = false
 
 func _on_chronos_started() -> void:
 	_play_cue(chronos_start_cue, "chronos_start", _player.global_position)
@@ -179,3 +204,12 @@ func _can_trigger_event(key: String, cooldown_sec: float) -> bool:
 
 	_last_event_time_by_key[key] = now_sec + cooldown_sec
 	return true
+
+
+func _has_tag(hit_data: Dictionary, tag: String) -> bool:
+	var tags_variant = hit_data.get("tags", PackedStringArray())
+	if tags_variant is PackedStringArray:
+		return (tags_variant as PackedStringArray).has(tag)
+	if tags_variant is Array:
+		return (tags_variant as Array).has(tag)
+	return false

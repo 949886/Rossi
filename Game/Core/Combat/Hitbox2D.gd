@@ -46,7 +46,9 @@ func _physics_process(_delta: float) -> void:
 
 		if receiver.has_method("receive_attack"):
 			var hit_data := _build_hit_data(hurtbox, receiver)
-			receiver.receive_attack(hit_data)
+			var resolved_hit_data: Variant = receiver.receive_attack(hit_data)
+			if resolved_hit_data is Dictionary:
+				hit_data = resolved_hit_data
 			_already_hit[receiver_id] = true
 			hit_connected.emit(hit_data, hurtbox, receiver)
 

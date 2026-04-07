@@ -242,9 +242,9 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_update_debug_label()
 
-func receive_attack(hit_data: Dictionary) -> void:
+func receive_attack(hit_data: Dictionary) -> Dictionary:
 	if _state == State.DEAD or _invulnerable_timer > 0.0:
-		return
+		return hit_data
 
 	var damage := int(hit_data.get("damage", 1))
 	var blood_context := _build_blood_context(hit_data)
@@ -258,11 +258,12 @@ func receive_attack(hit_data: Dictionary) -> void:
 	if _current_health <= 0:
 		_last_damage_context = blood_context
 		die()
-		return
+		return hit_data
 
 	if not _should_suppress_hit_blood(hit_data, damage):
 		_emit_hit_blood(blood_context)
 	_change_state(State.HIT)
+	return hit_data
 
 func interact_with(node: Node) -> void:
 	if node is LaserBeam:

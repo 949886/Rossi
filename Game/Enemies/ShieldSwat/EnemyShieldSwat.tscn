@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://cf7wpyx5tgv1k"]
 
-[ext_resource type="Script" uid="uid://d2xwwrsr472c5" path="res://Game/Enemies/EnemyBase.gd" id="1_6l2tu"]
+[ext_resource type="Script" path="res://Game/Enemies/ShieldSwat/EnemyShieldSwat.gd" id="1_6l2tu"]
 [ext_resource type="SpriteFrames" uid="uid://cfi40qiwxvwa7" path="res://Game/Enemies/ShieldSwat/shield_swat_animations.tres" id="2_6l2tu"]
 [ext_resource type="Script" uid="uid://r1ixpk5r2m4x" path="res://Game/Enemies/VisionSensor2D.gd" id="3_p7m1s"]
 [ext_resource type="Script" uid="uid://vvvc1tiw61sd" path="res://Game/Core/Combat/Hurtbox2D.gd" id="4_qiha6"]

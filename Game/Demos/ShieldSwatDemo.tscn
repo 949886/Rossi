@@ -1,0 +1,188 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Game/Enemies/EncounterController.gd" id="1_encounter"]
+[ext_resource type="PackedScene" path="res://Game/Characters/Shiro/Shiro.tscn" id="2_shiro"]
+[ext_resource type="PackedScene" path="res://Game/Characters/Shiro/Items/Shuriken/Shuriken.tscn" id="3_shuriken"]
+[ext_resource type="PackedScene" path="res://Game/Enemies/ShieldSwat/EnemyShieldSwat.tscn" id="4_enemy"]
+[ext_resource type="Script" path="res://Game/Enemies/EnemySpawner2D.gd" id="5_spawner"]
+[ext_resource type="Script" path="res://Game/Demos/EnemyDemoHud.gd" id="6_hud"]
+[ext_resource type="Script" path="res://Game/Effects/BloodFxLayer.gd" id="7_blood"]
+[ext_resource type="Script" path="res://Game/Demos/DemoTouchWebUi.gd" id="8_touch_helper"]
+[ext_resource type="PackedScene" path="res://Game/UI/Mobile/TouchUI.tscn" id="9_touch_ui"]
+[ext_resource type="PackedScene" path="res://Game/UI/Web/WebFullscreenButton.tscn" id="10_web_ui"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_floor"]
+size = Vector2(1500, 56)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_wall"]
+size = Vector2(48, 288)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cover_wide"]
+size = Vector2(72, 164)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_cover_narrow"]
+size = Vector2(40, 140)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_platform"]
+size = Vector2(260, 24)
+
+[node name="ShieldSwatDemo" type="Node2D"]
+
+[node name="Backdrop" type="Polygon2D" parent="."]
+z_index = -20
+color = Color(0.0588235, 0.0823529, 0.113725, 1)
+polygon = PackedVector2Array(0, 0, 1536, 0, 1536, 768, 0, 768)
+
+[node name="BackdropGlow" type="Polygon2D" parent="."]
+z_index = -18
+color = Color(0.164706, 0.239216, 0.258824, 0.2)
+polygon = PackedVector2Array(0, 390, 1536, 390, 1536, 768, 0, 768)
+
+[node name="EncounterController" type="Node" parent="."]
+script = ExtResource("1_encounter")
+player_path = NodePath("../CharacterBody2D")
+
+[node name="BloodFxLayer" type="Node" parent="."]
+script = ExtResource("7_blood")
+
+[node name="Environment" type="Node2D" parent="."]
+
+[node name="Floor" type="StaticBody2D" parent="Environment"]
+position = Vector2(768, 500)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/Floor"]
+shape = SubResource("RectangleShape2D_floor")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/Floor"]
+color = Color(0.117647, 0.141176, 0.180392, 1)
+polygon = PackedVector2Array(-750, -28, 750, -28, 750, 28, -750, 28)
+
+[node name="LeftWall" type="StaticBody2D" parent="Environment"]
+position = Vector2(72, 356)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/LeftWall"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/LeftWall"]
+color = Color(0.0941176, 0.117647, 0.14902, 1)
+polygon = PackedVector2Array(-24, -144, 24, -144, 24, 144, -24, 144)
+
+[node name="RightWall" type="StaticBody2D" parent="Environment"]
+position = Vector2(1464, 356)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/RightWall"]
+shape = SubResource("RectangleShape2D_wall")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/RightWall"]
+color = Color(0.0941176, 0.117647, 0.14902, 1)
+polygon = PackedVector2Array(-24, -144, 24, -144, 24, 144, -24, 144)
+
+[node name="CenterCover" type="StaticBody2D" parent="Environment"]
+position = Vector2(764, 418)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/CenterCover"]
+shape = SubResource("RectangleShape2D_cover_wide")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/CenterCover"]
+color = Color(0.152941, 0.176471, 0.211765, 1)
+polygon = PackedVector2Array(-36, -82, 36, -82, 36, 82, -36, 82)
+
+[node name="FarCover" type="StaticBody2D" parent="Environment"]
+position = Vector2(1088, 430)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/FarCover"]
+shape = SubResource("RectangleShape2D_cover_narrow")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/FarCover"]
+color = Color(0.145098, 0.172549, 0.207843, 1)
+polygon = PackedVector2Array(-20, -70, 20, -70, 20, 70, -20, 70)
+
+[node name="UpperPlatform" type="StaticBody2D" parent="Environment"]
+position = Vector2(1198, 320)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Environment/UpperPlatform"]
+shape = SubResource("RectangleShape2D_platform")
+
+[node name="Polygon2D" type="Polygon2D" parent="Environment/UpperPlatform"]
+color = Color(0.168627, 0.2, 0.239216, 1)
+polygon = PackedVector2Array(-130, -12, 130, -12, 130, 12, -130, 12)
+
+[node name="CharacterBody2D" parent="." instance=ExtResource("2_shiro")]
+position = Vector2(220, 456)
+shuriken_scene = ExtResource("3_shuriken")
+
+[node name="Camera2D" type="Camera2D" parent="CharacterBody2D"]
+position = Vector2(250, -120)
+zoom = Vector2(1.2, 1.2)
+limit_left = 0
+limit_top = 0
+limit_right = 1536
+limit_bottom = 768
+
+[node name="GroundSpawnerNear" type="Node2D" parent="."]
+position = Vector2(540, 456)
+script = ExtResource("5_spawner")
+enemy_scene = ExtResource("4_enemy")
+facing_direction = -1
+
+[node name="GroundSpawnerFar" type="Node2D" parent="."]
+position = Vector2(944, 456)
+script = ExtResource("5_spawner")
+enemy_scene = ExtResource("4_enemy")
+facing_direction = -1
+spawn_delay = 0.25
+
+[node name="PlatformSpawner" type="Node2D" parent="."]
+position = Vector2(1218, 266)
+script = ExtResource("5_spawner")
+enemy_scene = ExtResource("4_enemy")
+facing_direction = -1
+spawn_delay = 0.45
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+script = ExtResource("6_hud")
+player_path = NodePath("../CharacterBody2D")
+title_text = "Shield Swat Demo"
+controls_text = "LMB attack | Q throw/teleport | V vision debug | R reset encounter\nFront hits are blocked. Use cover and the upper route to circle behind."
+
+[node name="Panel" type="Panel" parent="CanvasLayer"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 472.0
+offset_bottom = 156.0
+
+[node name="VBox" type="VBoxContainer" parent="CanvasLayer/Panel"]
+layout_mode = 0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = 442.0
+offset_bottom = 138.0
+
+[node name="Title" type="Label" parent="CanvasLayer/Panel/VBox"]
+layout_mode = 2
+text = "Shield Swat Demo"
+
+[node name="EnemyCount" type="Label" parent="CanvasLayer/Panel/VBox"]
+layout_mode = 2
+text = "Enemies: ..."
+
+[node name="Player" type="Label" parent="CanvasLayer/Panel/VBox"]
+layout_mode = 2
+text = "Player: ..."
+
+[node name="Controls" type="Label" parent="CanvasLayer/Panel/VBox"]
+layout_mode = 2
+autowrap_mode = 2
+text = "LMB attack | Q throw/teleport | V vision debug | R reset encounter"
+
+[node name="TouchUI" parent="." instance=ExtResource("9_touch_ui")]
+
+[node name="WebUI" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="WebFullscreenButtonHost" parent="WebUI" instance=ExtResource("10_web_ui")]
+visible = false
+
+[node name="DemoTouchWebUi" type="Node" parent="."]
+script = ExtResource("8_touch_helper")
+player_path = NodePath("../CharacterBody2D")

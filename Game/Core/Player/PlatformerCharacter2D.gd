@@ -206,6 +206,8 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	super._physics_process(delta)
+#	print("State: %s" % State.find_key(_current_state))
+	
 	delta = get_time_scaled_delta(delta)
 
 	if _floor_snap_restore_time_left > 0.0:

@@ -6,6 +6,8 @@ class_name EnemyDemoHud
 @export var enemy_count_label_path: NodePath = NodePath("Panel/VBox/EnemyCount")
 @export var player_label_path: NodePath = NodePath("Panel/VBox/Player")
 @export var controls_label_path: NodePath = NodePath("Panel/VBox/Controls")
+@export var title_text := "Enemy Demo"
+@export_multiline var controls_text := "LMB attack | Q throw/teleport | F switch laser | V vision debug | R reset encounter"
 
 var _player: Node
 var _title_label: Label
@@ -39,10 +41,10 @@ func _resolve_player() -> Node:
 
 func _update_labels() -> void:
 	if _title_label != null:
-		_title_label.text = "Enemy Demo"
+		_title_label.text = title_text
 
 	if _controls_label != null:
-		_controls_label.text = "LMB attack | Q throw/teleport | F switch laser | V vision debug | R reset encounter"
+		_controls_label.text = controls_text
 
 	if _enemy_count_label != null:
 		var alive := 0

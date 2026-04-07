@@ -12,6 +12,7 @@
 [ext_resource type="Resource" uid="uid://cgsvk4qn104e7" path="res://Game/Audios/SFX/Player/Ability/player_dash.tres" id="9_player_dash"]
 [ext_resource type="Resource" uid="uid://gq0pihwy4wxe" path="res://Game/Audios/SFX/Player/Combat/player_attack_swing.tres" id="10_player_attack_swing"]
 [ext_resource type="Resource" path="res://Game/Audios/SFX/Player/Ability/player_deflect_bullet.tres" id="11a_player_deflect"]
+[ext_resource type="Resource" uid="uid://d3cs7jny4ikhc" path="res://Game/Audios/SFX/Player/Combat/player_attack_guarded.tres" id="11b_player_guarded"]
 [ext_resource type="Resource" uid="uid://cm6x6wi1jkob8" path="res://Game/Audios/SFX/Player/Combat/player_attack_hit.tres" id="11_player_attack_hit"]
 [ext_resource type="Resource" uid="uid://bpyrvg333mmxl" path="res://Game/Audios/SFX/Player/Ability/player_shuriken_throw.tres" id="12_player_shuriken_throw"]
 [ext_resource type="Resource" uid="uid://eid5pfylwlf6" path="res://Game/Audios/SFX/Player/Ability/player_shuriken_stick.tres" id="13_player_shuriken_stick"]
@@ -641,6 +642,7 @@ land_cue = ExtResource("8_player_land")
 dash_cue = ExtResource("9_player_dash")
 attack_swing_cue = ExtResource("10_player_attack_swing")
 attack_hit_cue = ExtResource("11_player_attack_hit")
+attack_guarded_cue = ExtResource("11b_player_guarded")
 deflect_cue = ExtResource("11a_player_deflect")
 shuriken_throw_cue = ExtResource("12_player_shuriken_throw")
 shuriken_stick_cue = ExtResource("13_player_shuriken_stick")
