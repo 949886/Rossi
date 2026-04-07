@@ -70,7 +70,7 @@ signal attack_performed
 ## Size of the rectangular melee hitbox collision shape.
 @export var attack_hitbox_size := Vector2(26.0, 18.0)
 
-@export_subgroup("Detection")
+@export_group("Detection")
 ## Patrol radius measured from the spawn point. Set to 0 to keep the enemy idle in place.
 @export var patrol_distance := 96.0
 ## Maximum distance from the spawn point before the enemy gives up pursuit and returns home.
