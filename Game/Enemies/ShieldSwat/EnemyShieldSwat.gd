@@ -4,6 +4,7 @@ class_name EnemyShieldSwat
 @export_group("Shield")
 @export_range(0.0, 5.0, 0.05) var guard_duration := 0.6
 @export_range(0.0, 5.0, 0.05) var post_guard_attack_lockout_duration := 0.35
+@export_range(0.0, 64.0, 1.0) var guard_turn_min_distance := 20.0
 
 var _guard_timer := 0.0
 var _attack_lockout_timer := 0.0
@@ -53,6 +54,24 @@ func _change_state(new_state: State) -> void:
 	super._change_state(new_state)
 	if _guard_timer > 0.0 and new_state != State.DEAD and new_state != State.HIT:
 		_play_guard_animation()
+
+
+func _update_facing(direction: float) -> void:
+	if _guard_timer > 0.0 or _attack_lockout_timer > 0.0:
+		var desired_direction := _facing_direction
+		if direction > 0.1:
+			desired_direction = 1
+		elif direction < -0.1:
+			desired_direction = -1
+
+		if desired_direction != _facing_direction:
+			if not _is_target_valid(_target):
+				return
+			var target_distance_x := absf(_target.global_position.x - global_position.x)
+			if target_distance_x < guard_turn_min_distance:
+				return
+
+	super._update_facing(direction)
 
 
 func _should_guard_attack(hit_data: Dictionary) -> bool:
