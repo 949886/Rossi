@@ -41,6 +41,8 @@ func _ready() -> void:
 	_update_minimum_size()
 
 func _input(event: InputEvent) -> void:
+	if not _can_process_touch_input():
+		return
 	if event is InputEventScreenTouch:
 		_handle_touch(event)
 	elif event is InputEventScreenDrag:
@@ -129,5 +131,16 @@ func _update_minimum_size() -> void:
 	custom_minimum_size = _get_minimum_size()
 
 func _notification(what: int) -> void:
+	if what == NOTIFICATION_VISIBILITY_CHANGED:
+		if not _can_process_touch_input():
+			_cancel_press()
 	if what == NOTIFICATION_RESIZED:
 		queue_redraw()
+
+func _can_process_touch_input() -> bool:
+	return not Engine.is_editor_hint() and is_visible_in_tree()
+
+func _cancel_press() -> void:
+	_is_pressed = false
+	_touch_index = -1
+	queue_redraw()

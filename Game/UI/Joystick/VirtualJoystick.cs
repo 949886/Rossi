@@ -249,6 +249,11 @@ namespace VirtualJoystickPlugin
 
         public override void _Input(InputEvent @event)
         {
+            if (!_CanProcessTouchInput())
+            {
+                return;
+            }
+
             if (@event is InputEventScreenTouch touchEvent)
             {
                 _HandleTouchEvent(touchEvent);
@@ -332,6 +337,11 @@ namespace VirtualJoystickPlugin
 
         private void _EndTouch()
         {
+            if (!_isPressed && _touchIndex == -1 && _output == Vector2.Zero)
+            {
+                return;
+            }
+
             _isPressed = false;
             _touchIndex = -1;
             _output = Vector2.Zero;
@@ -562,6 +572,13 @@ namespace VirtualJoystickPlugin
                 }
                 QueueRedraw();
             }
+            else if (what == NotificationVisibilityChanged)
+            {
+                if (!_CanProcessTouchInput())
+                {
+                    _EndTouch();
+                }
+            }
         }
 
         private void _ReleaseAllActions()
@@ -580,6 +597,11 @@ namespace VirtualJoystickPlugin
             {
                 Input.ActionRelease(action);
             }
+        }
+
+        private bool _CanProcessTouchInput()
+        {
+            return !Engine.IsEditorHint() && IsVisibleInTree();
         }
 
         #endregion

@@ -105,6 +105,8 @@ func _ready() -> void:
 	_update_minimum_size()
 
 func _input(event: InputEvent) -> void:
+	if not _can_process_touch_input():
+		return
 	if event is InputEventScreenTouch:
 		_handle_touch_event(event)
 	elif event is InputEventScreenDrag:
@@ -151,6 +153,8 @@ func _start_touch(index: int, local_pos: Vector2) -> void:
 	queue_redraw()
 
 func _end_touch() -> void:
+	if not _is_pressed and _touch_index == -1 and _output == Vector2.ZERO:
+		return
 	_is_pressed = false
 	_touch_index = -1
 	_output = Vector2.ZERO
@@ -268,11 +272,17 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE:
 		if not Engine.is_editor_hint():
 			_release_all_actions()
+	elif what == NOTIFICATION_VISIBILITY_CHANGED:
+		if not _can_process_touch_input():
+			_end_touch()
 	elif what == NOTIFICATION_RESIZED:
 		_base_center = size / 2.0
 		if not _is_pressed:
 			_handle_position = _base_center
 		queue_redraw()
+
+func _can_process_touch_input() -> bool:
+	return not Engine.is_editor_hint() and is_visible_in_tree()
 
 func _release_all_actions() -> void:
 	_release_action(action_left)

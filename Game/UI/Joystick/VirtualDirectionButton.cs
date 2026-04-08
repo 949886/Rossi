@@ -78,6 +78,11 @@ namespace VirtualJoystickPlugin
 
         public override void _Input(InputEvent @event)
         {
+            if (!_CanProcessTouchInput())
+            {
+                return;
+            }
+
             if (@event is InputEventScreenTouch touchEvent)
             {
                 _HandleTouch(touchEvent);
@@ -252,10 +257,29 @@ namespace VirtualJoystickPlugin
 
         public override void _Notification(int what)
         {
-            if (what == NotificationResized)
+            if (what == NotificationVisibilityChanged)
+            {
+                if (!_CanProcessTouchInput())
+                {
+                    _CancelPress();
+                }
+            }
+            else if (what == NotificationResized)
             {
                 QueueRedraw();
             }
+        }
+
+        private bool _CanProcessTouchInput()
+        {
+            return !Engine.IsEditorHint() && IsVisibleInTree();
+        }
+
+        private void _CancelPress()
+        {
+            _isPressed = false;
+            _touchIndex = -1;
+            QueueRedraw();
         }
 
         #endregion

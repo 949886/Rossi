@@ -69,6 +69,8 @@ func _ready() -> void:
 	_update_minimum_size()
 
 func _input(event: InputEvent) -> void:
+	if not _can_process_touch_input():
+		return
 	if event is not InputEventScreenTouch:
 		return
 
@@ -164,5 +166,21 @@ func _notification(what: int) -> void:
 	if what == NOTIFICATION_PREDELETE and not Engine.is_editor_hint():
 		if not action.is_empty() and InputMap.has_action(action) and Input.is_action_pressed(action):
 			Input.action_release(action)
+	elif what == NOTIFICATION_VISIBILITY_CHANGED:
+		if not _can_process_touch_input():
+			_release_if_needed()
 	elif what == NOTIFICATION_RESIZED:
 		queue_redraw()
+
+func _can_process_touch_input() -> bool:
+	return not Engine.is_editor_hint() and is_visible_in_tree()
+
+func _release_if_needed() -> void:
+	if not _is_pressed:
+		return
+	_is_pressed = false
+	_touch_index = -1
+	if not action.is_empty() and InputMap.has_action(action):
+		Input.action_release(action)
+	button_up.emit()
+	queue_redraw()
