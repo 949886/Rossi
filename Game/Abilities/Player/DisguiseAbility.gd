@@ -94,6 +94,13 @@ func get_selected_index() -> int:
 	return _selected_index
 
 
+func set_selected_index(index: int) -> void:
+	if profiles.is_empty():
+		_selected_index = 0
+		return
+	_selected_index = clampi(index, 0, profiles.size() - 1)
+
+
 func can_activate(_payload: Dictionary = {}) -> bool:
 	return _can_transform_now()
 
@@ -182,6 +189,7 @@ func _update_menu_input() -> void:
 		return
 	if Input.is_action_just_pressed(&"disguise_menu"):
 		_menu_open = true
+		_selected_index = clampi(_selected_index, 0, max(0, profiles.size() - 1))
 		disguise_menu_opened.emit()
 		return
 	if not _menu_open:
