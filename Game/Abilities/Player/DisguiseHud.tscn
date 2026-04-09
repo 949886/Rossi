@@ -1,0 +1,29 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Game/Abilities/Player/DisguiseHud.gd" id="1_script"]
+
+[node name="DisguiseHud" type="CanvasLayer"]
+script = ExtResource("1_script")
+layer = 20
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 260.0
+offset_bottom = 152.0
+
+[node name="Panel" type="PanelContainer" parent="MarginContainer"]
+offset_right = 244.0
+offset_bottom = 136.0
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer/Panel"]
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="MarginContainer/Panel/VBox"]
+text = "Disguise"
+
+[node name="Status" type="Label" parent="MarginContainer/Panel/VBox"]
+text = "..."
+
+[node name="Options" type="Label" parent="MarginContainer/Panel/VBox"]
+text = "..."

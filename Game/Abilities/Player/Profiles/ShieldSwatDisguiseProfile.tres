@@ -1,0 +1,28 @@
+[gd_resource type="Resource" script_class="DisguiseProfile" load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://Game/Abilities/Player/DisguiseProfile.gd" id="1_profile"]
+[ext_resource type="SpriteFrames" uid="uid://cfi40qiwxvwa7" path="res://Game/Enemies/ShieldSwat/shield_swat_animations.tres" id="2_frames"]
+
+[resource]
+script = ExtResource("1_profile")
+id = &"shield_swat"
+display_name = "Shield SWAT"
+faction_id = &"shield_swat"
+sprite_frames = ExtResource("2_frames")
+sprite_offset = Vector2(0, -64)
+animation_map = {
+"double_jump": "jump",
+"fall": "jump",
+"fall_to_idle": "idle",
+"idle": "idle",
+"idle_to_run": "walk",
+"jump": "jump",
+"jump_to_fall": "jump",
+"landing": "idle",
+"respawn": "idle",
+"run": "walk",
+"run_to_idle": "idle",
+"wall_slide": "jump"
+}
+move_speed_multiplier = 0.62
+suspicion_move_speed = 124.0

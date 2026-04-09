@@ -12,6 +12,9 @@ signal attack_windup_started
 signal attack_performed
 
 @export_group("Stats")
+@export_subgroup("Identity")
+## Shared faction tag used by disguise and team-recognition logic.
+@export var faction_id: StringName = &"enemy"
 @export_subgroup("Vitality")
 ## Enemy maximum health. When health reaches 0, the enemy dies and enters the DEAD state.
 @export var max_health := 1
@@ -645,7 +648,30 @@ func _update_target() -> void:
 func _find_visible_target() -> Node2D:
 	if vision_sensor == null:
 		return null
-	return vision_sensor.find_best_target(Callable(self, "_is_target_valid"))
+	var nearest_target: Node2D
+	var nearest_distance := INF
+	var scrutiny_delta := maxf(get_physics_process_delta_time(), 0.0)
+
+	for body in vision_sensor.get_overlapping_bodies():
+		if not _is_target_candidate_discoverable(body):
+			continue
+		var candidate := body as Node2D
+		if candidate == null:
+			continue
+		if not vision_sensor.can_retain_target(candidate, Callable(self, "_is_target_candidate_discoverable")):
+			continue
+		if not _can_identify_candidate(candidate, scrutiny_delta):
+			continue
+
+		var distance_to_candidate := global_position.distance_to(candidate.global_position)
+		if distance_to_candidate < nearest_distance:
+			nearest_distance = distance_to_candidate
+			nearest_target = candidate
+
+	if nearest_target != null:
+		vision_sensor.track_visible_target(nearest_target)
+	vision_sensor.set_debug_target(nearest_target)
+	return nearest_target
 
 func _is_target_valid(candidate: Variant) -> bool:
 	if not (candidate is Node2D) or not is_instance_valid(candidate):
@@ -655,18 +681,41 @@ func _is_target_valid(candidate: Variant) -> bool:
 	var dead_state = candidate.get("is_dead")
 	return dead_state == null or dead_state == false
 
+func _is_target_candidate_discoverable(candidate: Variant) -> bool:
+	return _is_target_valid(candidate)
+
+func _can_identify_candidate(candidate: Node2D, scrutiny_delta := 0.0) -> bool:
+	if not _is_target_candidate_discoverable(candidate):
+		return false
+	if not candidate.has_method("can_be_identified_by"):
+		return true
+	if bool(candidate.call("can_be_identified_by", self)):
+		return true
+	if scrutiny_delta > 0.0 and candidate.has_method("register_disguise_scrutiny"):
+		return bool(candidate.call("register_disguise_scrutiny", self, scrutiny_delta))
+	return false
+
 func _has_line_of_sight(target: Node2D) -> bool:
 	if vision_sensor == null:
 		return true
 	return vision_sensor.has_line_of_sight(target)
 
 func _can_retain_target(target: Node2D) -> bool:
+	if not _is_target_candidate_discoverable(target):
+		return false
 	if vision_sensor == null:
-		return _has_line_of_sight(target)
-	return vision_sensor.can_retain_target(target, Callable(self, "_is_target_valid"))
+		return _has_line_of_sight(target) and _can_identify_candidate(target, maxf(get_physics_process_delta_time(), 0.0))
+	if not vision_sensor.can_retain_target(target, Callable(self, "_is_target_candidate_discoverable")):
+		return false
+	return _can_identify_candidate(target, maxf(get_physics_process_delta_time(), 0.0))
 
 func _can_detect_target() -> bool:
 	return _is_target_valid(_target) and _can_retain_target(_target)
+
+func can_currently_see_candidate(candidate: Node2D) -> bool:
+	if vision_sensor == null or not _is_target_candidate_discoverable(candidate):
+		return false
+	return vision_sensor.can_retain_target(candidate, Callable(self, "_is_target_candidate_discoverable"))
 
 func _can_resume_engagement() -> bool:
 	return _is_target_valid(_target) or _has_investigation_target()

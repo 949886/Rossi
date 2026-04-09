@@ -320,6 +320,7 @@ size = Vector2(26, 18)
 [node name="CharacterBody2D3" type="CharacterBody2D" unique_id=2018056203 groups=["Enemy"]]
 collision_mask = 3
 script = ExtResource("1_6l2tu")
+faction_id = &"shield_swat"
 move_speed = 88.0
 attack_range = 28.0
 windup_duration = 0.24

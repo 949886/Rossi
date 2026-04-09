@@ -12,6 +12,9 @@ signal landed
 signal dashed
 signal damage_taken(hit_data: Dictionary, current_health: int)
 signal deflect_success(context: Dictionary)
+signal disguise_started(profile_id: StringName)
+signal disguise_changed(profile_id: StringName)
+signal disguise_broken(reason: String)
 
 @export_group("Movement")
 @export var move_speed := 200.0
@@ -203,6 +206,7 @@ func _ready() -> void:
 
 	# Start in idle
 	_change_state(State.IDLE)
+	_connect_disguise_signals()
 
 func _physics_process(delta: float) -> void:
 	super._physics_process(delta)
@@ -676,6 +680,7 @@ func _change_state(new_state: State) -> void:
 		State.RESPAWN:
 			velocity = Vector2.ZERO
 			play_animation("respawn")
+	_notify_abilities_state_changed(previous_state, new_state)
 
 func _try_attack() -> bool:
 	if _is_dead or _attack_cooldown_timer > 0.0:
@@ -749,6 +754,37 @@ func _try_flying_thunder_god_teleport() -> bool:
 	teleported.emit(start_pos, target_pos)
 	_change_state(State.IDLE if is_on_floor() else State.FALL)
 	return true
+
+func get_disguise_ability() -> DisguiseAbility:
+	return abilities.get("disguise", null) as DisguiseAbility
+
+func is_disguised() -> bool:
+	var disguise_ability := get_disguise_ability()
+	return disguise_ability != null and disguise_ability.is_disguised
+
+func get_current_disguise_id() -> StringName:
+	var disguise_ability := get_disguise_ability()
+	if disguise_ability == null or disguise_ability.get_current_profile() == null:
+		return StringName()
+	return disguise_ability.get_current_profile().id
+
+func get_current_disguise_faction() -> StringName:
+	var disguise_ability := get_disguise_ability()
+	if disguise_ability == null:
+		return StringName()
+	return disguise_ability.get_current_faction_id()
+
+func can_be_identified_by(enemy: EnemyBase) -> bool:
+	var disguise_ability := get_disguise_ability()
+	if disguise_ability == null:
+		return true
+	return disguise_ability.can_be_identified_by(enemy)
+
+func register_disguise_scrutiny(enemy: EnemyBase, delta: float) -> bool:
+	var disguise_ability := get_disguise_ability()
+	if disguise_ability == null:
+		return true
+	return disguise_ability.register_scrutiny(enemy, delta)
 
 func is_attack_active() -> bool:
 	return _current_state == State.ATTACK and _attack_timer > 0.0
@@ -1283,3 +1319,23 @@ func interact_with(node: Node) -> void:
 	if node is LaserBeam:
 		if not (is_dead or is_invulnerable):
 			die()
+
+func _connect_disguise_signals() -> void:
+	var disguise_ability := get_disguise_ability()
+	if disguise_ability == null:
+		return
+	if not disguise_ability.disguise_started.is_connected(_on_disguise_started):
+		disguise_ability.disguise_started.connect(_on_disguise_started)
+	if not disguise_ability.disguise_changed.is_connected(_on_disguise_changed):
+		disguise_ability.disguise_changed.connect(_on_disguise_changed)
+	if not disguise_ability.disguise_broken.is_connected(_on_disguise_broken):
+		disguise_ability.disguise_broken.connect(_on_disguise_broken)
+
+func _on_disguise_started(profile_id: StringName) -> void:
+	disguise_started.emit(profile_id)
+
+func _on_disguise_changed(profile_id: StringName) -> void:
+	disguise_changed.emit(profile_id)
+
+func _on_disguise_broken(reason: String) -> void:
+	disguise_broken.emit(reason)

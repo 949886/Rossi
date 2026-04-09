@@ -22,6 +22,9 @@
 [ext_resource type="Resource" uid="uid://dmi43q4nmubvq" path="res://Game/Audios/SFX/Player/Movement/player_footstep.tres" id="17_player_footstep"]
 [ext_resource type="Resource" uid="uid://bm2w1fpgpltu1" path="res://Game/Audios/SFX/Player/Ability/player_chronos_start.tres" id="18_player_chronos_start"]
 [ext_resource type="Resource" uid="uid://dvgjwt7uwlwfa" path="res://Game/Audios/SFX/Player/Ability/player_chronos_stop.tres" id="19_player_chronos_stop"]
+[ext_resource type="PackedScene" path="res://Game/Abilities/Player/DisguiseAvatarController.tscn" id="20_disguise_avatar"]
+[ext_resource type="PackedScene" path="res://Game/Abilities/Player/DisguiseHud.tscn" id="21_disguise_hud"]
+[ext_resource type="Script" path="res://Game/Abilities/Player/DisguiseAbility.gd" id="22_disguise_ability"]
 
 [sub_resource type="CapsuleShape2D" id="CapsuleShape2D_xjagb"]
 radius = 6.0
@@ -652,3 +655,10 @@ death_cue = ExtResource("16_player_death")
 footstep_cue = ExtResource("17_player_footstep")
 chronos_start_cue = ExtResource("18_player_chronos_start")
 chronos_stop_cue = ExtResource("19_player_chronos_stop")
+
+[node name="DisguiseAvatarController" parent="." instance=ExtResource("20_disguise_avatar")]
+
+[node name="DisguiseHud" parent="." instance=ExtResource("21_disguise_hud")]
+
+[node name="DisguiseAbility" type="Node" parent="."]
+script = ExtResource("22_disguise_ability")

@@ -1,0 +1,14 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://Game/Abilities/Player/DisguiseAvatarController.gd" id="1_script"]
+
+[node name="DisguiseAvatarController" type="Node2D"]
+script = ExtResource("1_script")
+
+[node name="DisplaySprite" type="AnimatedSprite2D" parent="."]
+visible = false
+texture_filter = 1
+
+[node name="TransitionSprite" type="Sprite2D" parent="."]
+visible = false
+texture_filter = 1
