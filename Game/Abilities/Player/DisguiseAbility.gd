@@ -188,6 +188,9 @@ func _update_menu_input() -> void:
 	if profiles.is_empty():
 		return
 	if Input.is_action_just_pressed(&"disguise_menu"):
+		if is_disguised:
+			break_disguise("manual")
+			return
 		_menu_open = true
 		_selected_index = clampi(_selected_index, 0, max(0, profiles.size() - 1))
 		disguise_menu_opened.emit()

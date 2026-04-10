@@ -95,7 +95,7 @@ func _sync_with_player() -> void:
 	var mapped_animation: StringName = _active_profile.get_animation_for(_player.animated_sprite.animation)
 	if String(mapped_animation).is_empty():
 		mapped_animation = &"idle"
-	if _display_sprite.animation != mapped_animation:
+	if _display_sprite.animation != mapped_animation or not _display_sprite.is_playing():
 		_display_sprite.play(mapped_animation)
 
 
