@@ -6,6 +6,8 @@ class_name DisguiseHud
 @onready var _wheel: DisguiseRadialMenu = $Overlay/Wheel
 
 var _ability: DisguiseAbility
+var _was_menu_open := false
+var _menu_center := Vector2.ZERO
 
 
 func _ready() -> void:
@@ -21,11 +23,20 @@ func _process(_delta: float) -> void:
 
 	visible = _ability.is_menu_open
 	if not visible:
+		_was_menu_open = false
 		return
+
+	if not _was_menu_open:
+		_menu_center = get_viewport().get_mouse_position()
+		_wheel.set_menu_center(_menu_center)
+		_menu_center = _wheel.get_menu_center()
+		_layout_overlay(_menu_center)
+		_was_menu_open = true
 
 	_status_label.text = _ability.get_status_text()
 	_hint_label.text = "Hold E, aim with mouse, release to confirm"
 	_wheel.set_ability(_ability)
+	_layout_overlay(_menu_center)
 
 
 func _resolve_ability() -> void:
@@ -37,3 +48,8 @@ func _resolve_ability() -> void:
 	_ability = player.get_node_or_null("DisguiseAbility") as DisguiseAbility
 	if _ability != null:
 		_wheel.set_ability(_ability)
+
+
+func _layout_overlay(center: Vector2) -> void:
+	_status_label.position = center + Vector2(-140.0, -30.0)
+	_hint_label.position = center + Vector2(-180.0, 12.0)

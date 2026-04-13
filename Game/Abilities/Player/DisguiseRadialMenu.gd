@@ -12,11 +12,13 @@ const OUTLINE_COLOR := Color(1.0, 1.0, 1.0, 0.18)
 
 var _ability: DisguiseAbility
 var _label_nodes: Array[Label] = []
+var _menu_center := Vector2.ZERO
 
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_preset(Control.PRESET_FULL_RECT)
+	_menu_center = size * 0.5
 
 
 func set_ability(ability: DisguiseAbility) -> void:
@@ -25,6 +27,16 @@ func set_ability(ability: DisguiseAbility) -> void:
 	_ability = ability
 	_rebuild_labels()
 	queue_redraw()
+
+
+func set_menu_center(center: Vector2) -> void:
+	_menu_center = _clamp_menu_center(center)
+	_layout_labels()
+	queue_redraw()
+
+
+func get_menu_center() -> Vector2:
+	return _menu_center
 
 
 func _process(_delta: float) -> void:
@@ -39,13 +51,11 @@ func _draw() -> void:
 	if _ability == null or not _ability.is_menu_open:
 		return
 
-	draw_rect(Rect2(Vector2.ZERO, size), Color(0.02, 0.03, 0.05, 0.42), true)
-
 	var profiles := _ability.get_profiles()
 	if profiles.is_empty():
 		return
 
-	var center := size * 0.5
+	var center := _menu_center
 	var count := profiles.size()
 	var angle_step := TAU / float(count)
 	var start_angle := -PI * 0.5
@@ -74,9 +84,8 @@ func _update_hover_selection() -> void:
 	if profiles.is_empty():
 		return
 
-	var center := get_viewport_rect().size * 0.5
 	var pointer := get_viewport().get_mouse_position()
-	var delta := pointer - center
+	var delta := pointer - _menu_center
 	if delta.length() < inner_radius * 0.45:
 		return
 
@@ -116,7 +125,7 @@ func _layout_labels() -> void:
 	if profiles.is_empty():
 		return
 
-	var center := size * 0.5
+	var center := _menu_center
 	var count := profiles.size()
 	var angle_step := TAU / float(count)
 	var start_angle := -PI * 0.5
@@ -135,6 +144,15 @@ func _layout_labels() -> void:
 			label.modulate = ACTIVE_COLOR
 		else:
 			label.modulate = Color(0.86, 0.9, 0.96, 0.82)
+
+
+func _clamp_menu_center(center: Vector2) -> Vector2:
+	var viewport_size := get_viewport_rect().size
+	var margin := outer_radius + label_radius_padding + 64.0
+	return Vector2(
+		clampf(center.x, margin, viewport_size.x - margin),
+		clampf(center.y, margin, viewport_size.y - margin)
+	)
 
 
 func _build_ring_segment(center: Vector2, inner_r: float, outer_r: float, start_angle: float, end_angle: float, steps: int) -> PackedVector2Array:
