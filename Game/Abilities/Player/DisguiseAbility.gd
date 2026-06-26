@@ -44,6 +44,7 @@ var _selected_index := 0
 var _menu_open := false
 var _base_move_speed := 0.0
 var _recognition_by_enemy: Dictionary = {}
+var _menu_started_from_valid_state := false
 
 var is_menu_open: bool:
 	get: return _menu_open
@@ -162,6 +163,7 @@ func register_scrutiny(enemy: EnemyBase, delta: float) -> bool:
 
 
 func break_disguise(reason := "manual") -> void:
+	_menu_started_from_valid_state = false
 	if not is_disguised:
 		_menu_open = false
 		return
@@ -191,7 +193,10 @@ func _update_menu_input() -> void:
 		if is_disguised:
 			break_disguise("manual")
 			return
+		if not _can_transform_now():
+			return
 		_menu_open = true
+		_menu_started_from_valid_state = true
 		_selected_index = clampi(_selected_index, 0, max(0, profiles.size() - 1))
 		disguise_menu_opened.emit()
 		return
@@ -212,13 +217,16 @@ func _confirm_selection() -> void:
 	disguise_menu_closed.emit()
 	var selected_profile: DisguiseProfile = get_selected_profile()
 	if selected_profile == null:
+		_menu_started_from_valid_state = false
 		return
 	if _current_profile == selected_profile:
 		break_disguise("manual")
 		return
-	if not _can_transform_now():
+	if not _can_finish_transform_now():
+		_menu_started_from_valid_state = false
 		return
 	_apply_disguise(selected_profile)
+	_menu_started_from_valid_state = false
 
 
 func _apply_disguise(profile: DisguiseProfile) -> void:
@@ -248,6 +256,16 @@ func _can_transform_now() -> bool:
 	if _is_chronos_running():
 		return false
 	return not _is_enemy_observing_player()
+
+
+func _can_finish_transform_now() -> bool:
+	if not _menu_started_from_valid_state:
+		return false
+	if _player == null or _player.is_dead:
+		return false
+	if not _player.is_on_floor():
+		return false
+	return not _is_chronos_running()
 
 
 func _is_enemy_observing_player() -> bool:
