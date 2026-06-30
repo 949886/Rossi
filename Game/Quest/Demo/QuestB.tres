@@ -1,0 +1,40 @@
+[gd_resource type="Resource" script_class="QuestData" load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://Game/Quest/QuestData.gd" id="1_quest"]
+[ext_resource type="Script" path="res://Game/Quest/QuestObjectiveData.gd" id="2_objective"]
+[ext_resource type="Script" path="res://Game/Quest/QuestRewardData.gd" id="3_reward"]
+[ext_resource type="Texture2D" path="res://Game/Sprites/cursor_crosshair.png" id="4_icon"]
+
+[sub_resource type="Resource" id="QuestObjectiveData_findsigils"]
+script = ExtResource("2_objective")
+objective_id = &"recover_seals"
+description = "Recover two missing seals from the lower ruins."
+event_key = &"recover_seals"
+required_count = 2
+target_display_name = "Missing Seal"
+
+[sub_resource type="Resource" id="QuestObjectiveData_report"]
+script = ExtResource("2_objective")
+objective_id = &"report_back"
+description = "Report back to the patrol captain."
+event_key = &"report_back"
+target_display_name = "Captain"
+auto_complete_on_match = true
+
+[sub_resource type="Resource" id="QuestRewardData_marks"]
+script = ExtResource("3_reward")
+label = "Patrol Marks"
+amount = 125
+icon = ExtResource("4_icon")
+
+[resource]
+script = ExtResource("1_quest")
+quest_id = &"missing_seals"
+title = "Missing Seals"
+subtitle = "South Watch"
+summary = "The patrol has lost two seals in the ruins below. Track them down when you have time."
+category = &"world"
+sort_order = 1
+objectives = Array[Resource]([SubResource("QuestObjectiveData_findsigils"), SubResource("QuestObjectiveData_report")])
+rewards = Array[Resource]([SubResource("QuestRewardData_marks")])
+starts_active = true

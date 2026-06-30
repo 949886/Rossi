@@ -1,0 +1,55 @@
+[gd_resource type="Resource" script_class="QuestData" load_steps=7 format=3]
+
+[ext_resource type="Script" path="res://Game/Quest/QuestData.gd" id="1_quest"]
+[ext_resource type="Script" path="res://Game/Quest/QuestObjectiveData.gd" id="2_objective"]
+[ext_resource type="Script" path="res://Game/Quest/QuestRewardData.gd" id="3_reward"]
+[ext_resource type="Texture2D" path="res://icon.svg" id="4_icon"]
+[ext_resource type="Texture2D" path="res://Game/Characters/Shiro/Sprites/Sprite_Player_Shuriken.png" id="5_shuriken"]
+
+[sub_resource type="Resource" id="QuestObjectiveData_reach"]
+script = ExtResource("2_objective")
+objective_id = &"reach_ridge"
+description = "Reach the ridge above the old path."
+event_key = &"reach_ridge"
+target_display_name = "Ridge"
+auto_complete_on_match = true
+
+[sub_resource type="Resource" id="QuestObjectiveData_relay"]
+script = ExtResource("2_objective")
+objective_id = &"activate_relay"
+description = "Inspect the signal relay."
+event_key = &"activate_relay"
+target_display_name = "Signal Relay"
+auto_complete_on_match = true
+
+[sub_resource type="Resource" id="QuestObjectiveData_guard"]
+script = ExtResource("2_objective")
+objective_id = &"defeat_guard"
+description = "Defeat the gangster guarding the route."
+event_key = &"defeat_guard"
+target_display_name = "Guard"
+auto_complete_on_match = true
+
+[sub_resource type="Resource" id="QuestRewardData_token"]
+script = ExtResource("3_reward")
+label = "Relay Token"
+amount = 40
+icon = ExtResource("4_icon")
+
+[sub_resource type="Resource" id="QuestRewardData_shuriken"]
+script = ExtResource("3_reward")
+label = "Shuriken Supply"
+amount = 3
+icon = ExtResource("5_shuriken")
+
+[resource]
+script = ExtResource("1_quest")
+quest_id = &"ridge_signal"
+title = "The Ridge Signal"
+subtitle = "Oak Woods Overlook"
+summary = "Scout the overlook, reactivate the relay, and clear the guard blocking the route."
+category = &"world"
+sort_order = 0
+objectives = Array[Resource]([SubResource("QuestObjectiveData_reach"), SubResource("QuestObjectiveData_relay"), SubResource("QuestObjectiveData_guard")])
+rewards = Array[Resource]([SubResource("QuestRewardData_token"), SubResource("QuestRewardData_shuriken")])
+starts_active = true

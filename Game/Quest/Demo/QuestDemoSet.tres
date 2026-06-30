@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="QuestSetData" load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://Game/Quest/QuestSetData.gd" id="1_set"]
+[ext_resource type="Resource" path="res://Game/Quest/Demo/QuestA.tres" id="2_quest_a"]
+[ext_resource type="Resource" path="res://Game/Quest/Demo/QuestB.tres" id="3_quest_b"]
+[ext_resource type="Resource" path="res://Game/Quest/Demo/QuestC.tres" id="4_quest_c"]
+
+[resource]
+script = ExtResource("1_set")
+quests = Array[Resource]([ExtResource("2_quest_a"), ExtResource("3_quest_b"), ExtResource("4_quest_c")])

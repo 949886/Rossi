@@ -1,0 +1,172 @@
+[gd_scene format=3]
+
+[ext_resource type="Script" path="res://Game/UI/Quest/QuestJournalPanel.gd" id="1"]
+[ext_resource type="PackedScene" path="res://Game/UI/Quest/QuestListEntry.tscn" id="2"]
+[ext_resource type="PackedScene" path="res://Game/UI/Quest/QuestRewardEntry.tscn" id="3"]
+
+[node name="QuestJournalPanel" type="CanvasLayer"]
+script = ExtResource("1")
+list_entry_scene = ExtResource("2")
+reward_entry_scene = ExtResource("3")
+
+[node name="Root" type="PanelContainer" parent="."]
+visible = false
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+
+[node name="MainShell" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -470.0
+offset_top = -250.0
+offset_right = 470.0
+offset_bottom = 250.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Header" type="VBoxContainer" parent="Root/MainShell"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="TitleRow" type="HBoxContainer" parent="Root/MainShell/Header"]
+layout_mode = 2
+
+[node name="JournalTitle" type="Label" parent="Root/MainShell/Header/TitleRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 30
+text = "Quest Journal"
+
+[node name="Hint" type="Label" parent="Root/MainShell/Header/TitleRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+text = "Press J to close"
+
+[node name="TabRow" type="HBoxContainer" parent="Root/MainShell/Header"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ActiveButton" type="Button" parent="Root/MainShell/Header/TabRow"]
+custom_minimum_size = Vector2(120, 38)
+layout_mode = 2
+text = "Active"
+
+[node name="CompletedButton" type="Button" parent="Root/MainShell/Header/TabRow"]
+custom_minimum_size = Vector2(120, 38)
+layout_mode = 2
+text = "Completed"
+
+[node name="Body" type="HSplitContainer" parent="Root/MainShell"]
+layout_mode = 2
+size_flags_vertical = 3
+split_offset = 302
+
+[node name="LeftPane" type="PanelContainer" parent="Root/MainShell/Body"]
+custom_minimum_size = Vector2(286, 0)
+layout_mode = 2
+
+[node name="LeftMargin" type="MarginContainer" parent="Root/MainShell/Body/LeftPane"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="QuestListScroll" type="ScrollContainer" parent="Root/MainShell/Body/LeftPane/LeftMargin"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="QuestList" type="VBoxContainer" parent="Root/MainShell/Body/LeftPane/LeftMargin/QuestListScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 8
+
+[node name="EmptyLabel" type="Label" parent="Root/MainShell/Body/LeftPane/LeftMargin/QuestListScroll/QuestList"]
+layout_mode = 2
+autowrap_mode = 3
+text = "No quests are visible in this tab."
+
+[node name="RightPane" type="VBoxContainer" parent="Root/MainShell/Body"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="TitleBlock" type="VBoxContainer" parent="Root/MainShell/Body/RightPane"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="Root/MainShell/Body/RightPane/TitleBlock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Quest Title"
+
+[node name="Subtitle" type="Label" parent="Root/MainShell/Body/RightPane/TitleBlock"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "Quest Location"
+
+[node name="Summary" type="Label" parent="Root/MainShell/Body/RightPane/TitleBlock"]
+layout_mode = 2
+autowrap_mode = 3
+text = "Quest summary"
+
+[node name="ObjectivePanel" type="PanelContainer" parent="Root/MainShell/Body/RightPane"]
+custom_minimum_size = Vector2(0, 180)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ObjectiveMargin" type="MarginContainer" parent="Root/MainShell/Body/RightPane/ObjectivePanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="ObjectiveVBox" type="VBoxContainer" parent="Root/MainShell/Body/RightPane/ObjectivePanel/ObjectiveMargin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ObjectiveTitle" type="Label" parent="Root/MainShell/Body/RightPane/ObjectivePanel/ObjectiveMargin/ObjectiveVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Objectives"
+
+[node name="ObjectiveList" type="VBoxContainer" parent="Root/MainShell/Body/RightPane/ObjectivePanel/ObjectiveMargin/ObjectiveVBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="RewardPanel" type="PanelContainer" parent="Root/MainShell/Body/RightPane"]
+custom_minimum_size = Vector2(0, 112)
+layout_mode = 2
+
+[node name="RewardMargin" type="MarginContainer" parent="Root/MainShell/Body/RightPane/RewardPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="RewardVBox" type="VBoxContainer" parent="Root/MainShell/Body/RightPane/RewardPanel/RewardMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RewardTitle" type="Label" parent="Root/MainShell/Body/RightPane/RewardPanel/RewardMargin/RewardVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Rewards"
+
+[node name="RewardList" type="HBoxContainer" parent="Root/MainShell/Body/RightPane/RewardPanel/RewardMargin/RewardVBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="EmptyRewards" type="Label" parent="Root/MainShell/Body/RightPane/RewardPanel/RewardMargin/RewardVBox"]
+layout_mode = 2
+text = "This quest has no configured rewards."

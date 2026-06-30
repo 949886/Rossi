@@ -1,0 +1,102 @@
+[gd_scene format=3]
+
+[ext_resource type="PackedScene" path="res://Game/Demos/playground.tscn" id="1_playground"]
+[ext_resource type="Script" path="res://Game/Quest/QuestLogController.gd" id="2_quest_log"]
+[ext_resource type="Resource" path="res://Game/Quest/Demo/QuestDemoSet.tres" id="3_quest_set"]
+[ext_resource type="PackedScene" path="res://Game/UI/Quest/QuestJournalPanel.tscn" id="4_quest_panel"]
+[ext_resource type="Script" path="res://Game/Quest/QuestDemoController.gd" id="5_demo_controller"]
+[ext_resource type="Script" path="res://Game/Quest/QuestEventTrigger2D.gd" id="6_event_trigger"]
+[ext_resource type="Script" path="res://Game/Quest/QuestInteractTrigger2D.gd" id="7_interact_trigger"]
+[ext_resource type="PackedScene" path="res://Game/Enemies/Gangsters/EnemyGangster.tscn" id="8_enemy"]
+[ext_resource type="PackedScene" path="res://Game/UI/Mobile/TouchUI.tscn" id="9_touch_ui"]
+[ext_resource type="PackedScene" path="res://Game/UI/Web/WebFullscreenButton.tscn" id="10_web_button"]
+[ext_resource type="Script" path="res://Game/Demos/DemoTouchWebUi.gd" id="11_touch_helper"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_reach"]
+size = Vector2(88, 140)
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_interact"]
+radius = 38.0
+
+[node name="QuestDemo" type="Node2D"]
+
+[node name="Playground" parent="." instance=ExtResource("1_playground")]
+
+[node name="QuestLogController" type="Node" parent="."]
+script = ExtResource("2_quest_log")
+quest_set = ExtResource("3_quest_set")
+
+[node name="QuestJournalPanel" parent="." instance=ExtResource("4_quest_panel")]
+quest_controller_path = NodePath("../QuestLogController")
+
+[node name="QuestDemoController" type="Node" parent="."]
+script = ExtResource("5_demo_controller")
+enemy_paths = Array[NodePath]([NodePath("../GuardEnemy")])
+enemy_event_keys = PackedStringArray("defeat_guard")
+
+[node name="ReachTrigger" type="Area2D" parent="."]
+position = Vector2(620, 330)
+script = ExtResource("6_event_trigger")
+quest_controller_path = NodePath("../QuestLogController")
+event_key = &"reach_ridge"
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="ReachTrigger"]
+shape = SubResource("RectangleShape2D_reach")
+
+[node name="ReachMarker" type="Polygon2D" parent="ReachTrigger"]
+color = Color(0.78, 0.70, 0.38, 0.22)
+polygon = PackedVector2Array(-44, -70, 44, -70, 44, 70, -44, 70)
+
+[node name="InteractTrigger" type="Area2D" parent="."]
+position = Vector2(744, 336)
+script = ExtResource("7_interact_trigger")
+quest_controller_path = NodePath("../QuestLogController")
+event_key = &"activate_relay"
+prompt_text = "Press F to inspect the relay"
+prompt_offset = Vector2(-76, -52)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="InteractTrigger"]
+shape = SubResource("CircleShape2D_interact")
+
+[node name="RelayPole" type="Polygon2D" parent="InteractTrigger"]
+color = Color(0.73, 0.72, 0.64, 1)
+polygon = PackedVector2Array(-7, -56, 7, -56, 7, 0, -7, 0)
+
+[node name="RelayLamp" type="Polygon2D" parent="InteractTrigger"]
+color = Color(0.89, 0.79, 0.45, 0.92)
+polygon = PackedVector2Array(-14, -70, 14, -70, 14, -52, -14, -52)
+
+[node name="GuardEnemy" parent="." instance=ExtResource("8_enemy")]
+position = Vector2(870, 344)
+
+[node name="CanvasLayer" type="CanvasLayer" parent="."]
+
+[node name="HelpPanel" type="PanelContainer" parent="CanvasLayer"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 344.0
+offset_bottom = 98.0
+
+[node name="HelpMargin" type="MarginContainer" parent="CanvasLayer/HelpPanel"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 8
+
+[node name="HelpText" type="Label" parent="CanvasLayer/HelpPanel/HelpMargin"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Quest Demo\nJ: journal  F: interact\nMove to the ridge, inspect the relay, then defeat the guard."
+
+[node name="TouchUI" parent="." instance=ExtResource("9_touch_ui")]
+
+[node name="WebUI" type="CanvasLayer" parent="."]
+layer = 20
+
+[node name="WebFullscreenButtonHost" parent="WebUI" instance=ExtResource("10_web_button")]
+visible = false
+
+[node name="DemoTouchWebUi" type="Node" parent="."]
+script = ExtResource("11_touch_helper")
+player_path = NodePath("../Playground/CharacterBody2D")
