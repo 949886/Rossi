@@ -20,153 +20,234 @@ mouse_filter = 0
 
 [node name="MainShell" type="PanelContainer" parent="Root"]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
-offset_left = -470.0
-offset_top = -250.0
-offset_right = 470.0
-offset_bottom = 250.0
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 10.0
+offset_top = 10.0
+offset_right = -10.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Header" type="VBoxContainer" parent="Root/MainShell"]
+[node name="MainVBox" type="VBoxContainer" parent="Root/MainShell"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+
+[node name="HeaderBar" type="HBoxContainer" parent="Root/MainShell/MainVBox"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="TitleRow" type="HBoxContainer" parent="Root/MainShell/Header"]
-layout_mode = 2
-
-[node name="JournalTitle" type="Label" parent="Root/MainShell/Header/TitleRow"]
+[node name="HeaderTitle" type="Label" parent="Root/MainShell/MainVBox/HeaderBar"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 30
-text = "Quest Journal"
+theme_override_font_sizes/font_size = 31
+text = "Ongoing"
 
-[node name="Hint" type="Label" parent="Root/MainShell/Header/TitleRow"]
+[node name="ActiveButton" type="Button" parent="Root/MainShell/MainVBox/HeaderBar"]
+custom_minimum_size = Vector2(76, 34)
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
-text = "Press J to close"
+text = "Quests"
 
-[node name="TabRow" type="HBoxContainer" parent="Root/MainShell/Header"]
+[node name="TrackingLabel" type="Label" parent="Root/MainShell/MainVBox/HeaderBar"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_font_sizes/font_size = 15
+text = "Tracking"
 
-[node name="ActiveButton" type="Button" parent="Root/MainShell/Header/TabRow"]
-custom_minimum_size = Vector2(120, 38)
+[node name="CompletedButton" type="Button" parent="Root/MainShell/MainVBox/HeaderBar"]
+custom_minimum_size = Vector2(76, 34)
 layout_mode = 2
-text = "Active"
+text = "Archive"
 
-[node name="CompletedButton" type="Button" parent="Root/MainShell/Header/TabRow"]
-custom_minimum_size = Vector2(120, 38)
+[node name="CloseButton" type="Button" parent="Root/MainShell/MainVBox/HeaderBar"]
+custom_minimum_size = Vector2(40, 40)
 layout_mode = 2
-text = "Completed"
+text = "X"
 
-[node name="Body" type="HSplitContainer" parent="Root/MainShell"]
-layout_mode = 2
-size_flags_vertical = 3
-split_offset = 302
-
-[node name="LeftPane" type="PanelContainer" parent="Root/MainShell/Body"]
-custom_minimum_size = Vector2(286, 0)
-layout_mode = 2
-
-[node name="LeftMargin" type="MarginContainer" parent="Root/MainShell/Body/LeftPane"]
-layout_mode = 2
-theme_override_constants/margin_left = 10
-theme_override_constants/margin_top = 10
-theme_override_constants/margin_right = 10
-theme_override_constants/margin_bottom = 10
-
-[node name="QuestListScroll" type="ScrollContainer" parent="Root/MainShell/Body/LeftPane/LeftMargin"]
+[node name="Body" type="HSplitContainer" parent="Root/MainShell/MainVBox"]
 layout_mode = 2
 size_flags_vertical = 3
+split_offset = 320
 
-[node name="QuestList" type="VBoxContainer" parent="Root/MainShell/Body/LeftPane/LeftMargin/QuestListScroll"]
+[node name="LeftPane" type="PanelContainer" parent="Root/MainShell/MainVBox/Body"]
+custom_minimum_size = Vector2(322, 0)
+layout_mode = 2
+
+[node name="LeftMargin" type="MarginContainer" parent="Root/MainShell/MainVBox/Body/LeftPane"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 18
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 18
+
+[node name="LeftVBox" type="VBoxContainer" parent="Root/MainShell/MainVBox/Body/LeftPane/LeftMargin"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="GroupCaption" type="Label" parent="Root/MainShell/MainVBox/Body/LeftPane/LeftMargin/LeftVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Quest Group"
+
+[node name="GroupTitle" type="Label" parent="Root/MainShell/MainVBox/Body/LeftPane/LeftMargin/LeftVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "World Quest"
+
+[node name="QuestListScroll" type="ScrollContainer" parent="Root/MainShell/MainVBox/Body/LeftPane/LeftMargin/LeftVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="QuestList" type="VBoxContainer" parent="Root/MainShell/MainVBox/Body/LeftPane/LeftMargin/LeftVBox/QuestListScroll"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 8
+theme_override_constants/separation = 10
 
-[node name="EmptyLabel" type="Label" parent="Root/MainShell/Body/LeftPane/LeftMargin/QuestListScroll/QuestList"]
+[node name="EmptyLabel" type="Label" parent="Root/MainShell/MainVBox/Body/LeftPane/LeftMargin/LeftVBox/QuestListScroll/QuestList"]
 layout_mode = 2
 autowrap_mode = 3
 text = "No quests are visible in this tab."
 
-[node name="RightPane" type="VBoxContainer" parent="Root/MainShell/Body"]
+[node name="RightPane" type="PanelContainer" parent="Root/MainShell/MainVBox/Body"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 12
 
-[node name="TitleBlock" type="VBoxContainer" parent="Root/MainShell/Body/RightPane"]
+[node name="RightScroll" type="ScrollContainer" parent="Root/MainShell/MainVBox/Body/RightPane"]
 layout_mode = 2
-theme_override_constants/separation = 6
+size_flags_vertical = 3
+horizontal_scroll_mode = 0
 
-[node name="Title" type="Label" parent="Root/MainShell/Body/RightPane/TitleBlock"]
+[node name="RightMargin" type="MarginContainer" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 30
-text = "Quest Title"
+theme_override_constants/margin_left = 28
+theme_override_constants/margin_top = 28
+theme_override_constants/margin_right = 28
+theme_override_constants/margin_bottom = 22
 
-[node name="Subtitle" type="Label" parent="Root/MainShell/Body/RightPane/TitleBlock"]
+[node name="RightVBox" type="VBoxContainer" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
-text = "Quest Location"
+size_flags_horizontal = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 16
 
-[node name="Summary" type="Label" parent="Root/MainShell/Body/RightPane/TitleBlock"]
+[node name="Title" type="Label" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 31
+text = "[Quest Title]"
+
+[node name="Meta" type="Label" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "World Quest  |  Quest Record"
+
+[node name="ObjectiveBanner" type="PanelContainer" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox"]
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+
+[node name="ObjectiveBannerMargin" type="MarginContainer" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox/ObjectiveBanner"]
+layout_mode = 2
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
+
+[node name="ObjectiveFocus" type="Label" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox/ObjectiveBanner/ObjectiveBannerMargin"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Current objective"
+
+[node name="Summary" type="Label" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox"]
 layout_mode = 2
 autowrap_mode = 3
+theme_override_font_sizes/font_size = 17
 text = "Quest summary"
 
-[node name="ObjectivePanel" type="PanelContainer" parent="Root/MainShell/Body/RightPane"]
-custom_minimum_size = Vector2(0, 180)
+[node name="ObjectivePanel" type="PanelContainer" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox"]
+custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="ObjectiveMargin" type="MarginContainer" parent="Root/MainShell/Body/RightPane/ObjectivePanel"]
+[node name="ObjectiveMargin" type="MarginContainer" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox/ObjectivePanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
 
-[node name="ObjectiveVBox" type="VBoxContainer" parent="Root/MainShell/Body/RightPane/ObjectivePanel/ObjectiveMargin"]
+[node name="ObjectiveVBox" type="VBoxContainer" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox/ObjectivePanel/ObjectiveMargin"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 12
 
-[node name="ObjectiveTitle" type="Label" parent="Root/MainShell/Body/RightPane/ObjectivePanel/ObjectiveMargin/ObjectiveVBox"]
+[node name="ObjectiveTitle" type="Label" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox/ObjectivePanel/ObjectiveMargin/ObjectiveVBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "Objectives"
+theme_override_font_sizes/font_size = 17
+text = "Quest Steps"
 
-[node name="ObjectiveList" type="VBoxContainer" parent="Root/MainShell/Body/RightPane/ObjectivePanel/ObjectiveMargin/ObjectiveVBox"]
+[node name="ObjectiveList" type="VBoxContainer" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox/ObjectivePanel/ObjectiveMargin/ObjectiveVBox"]
 layout_mode = 2
-theme_override_constants/separation = 10
+theme_override_constants/separation = 12
 
-[node name="RewardPanel" type="PanelContainer" parent="Root/MainShell/Body/RightPane"]
+[node name="FooterPanel" type="PanelContainer" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox"]
 custom_minimum_size = Vector2(0, 112)
 layout_mode = 2
 
-[node name="RewardMargin" type="MarginContainer" parent="Root/MainShell/Body/RightPane/RewardPanel"]
+[node name="FooterMargin" type="MarginContainer" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox/FooterPanel"]
 layout_mode = 2
-theme_override_constants/margin_left = 12
-theme_override_constants/margin_top = 12
-theme_override_constants/margin_right = 12
-theme_override_constants/margin_bottom = 12
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 14
 
-[node name="RewardVBox" type="VBoxContainer" parent="Root/MainShell/Body/RightPane/RewardPanel/RewardMargin"]
+[node name="FooterVBox" type="VBoxContainer" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox/FooterPanel/FooterMargin"]
 layout_mode = 2
-theme_override_constants/separation = 8
+theme_override_constants/separation = 14
 
-[node name="RewardTitle" type="Label" parent="Root/MainShell/Body/RightPane/RewardPanel/RewardMargin/RewardVBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "Rewards"
-
-[node name="RewardList" type="HBoxContainer" parent="Root/MainShell/Body/RightPane/RewardPanel/RewardMargin/RewardVBox"]
+[node name="RewardRow" type="HBoxContainer" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox/FooterPanel/FooterMargin/FooterVBox"]
 layout_mode = 2
 theme_override_constants/separation = 10
 
-[node name="EmptyRewards" type="Label" parent="Root/MainShell/Body/RightPane/RewardPanel/RewardMargin/RewardVBox"]
+[node name="RewardTitle" type="Label" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox/FooterPanel/FooterMargin/FooterVBox/RewardRow"]
 layout_mode = 2
-text = "This quest has no configured rewards."
+theme_override_font_sizes/font_size = 15
+text = "Rewards"
+
+[node name="RewardList" type="HBoxContainer" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox/FooterPanel/FooterMargin/FooterVBox/RewardRow"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="EmptyRewards" type="Label" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox/FooterPanel/FooterMargin/FooterVBox/RewardRow"]
+layout_mode = 2
+text = "No rewards configured."
+
+[node name="StatusRow" type="HBoxContainer" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox/FooterPanel/FooterMargin/FooterVBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="StatusCaption" type="Label" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox/FooterPanel/FooterMargin/FooterVBox/StatusRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Status"
+
+[node name="StatusPillPanel" type="PanelContainer" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox/FooterPanel/FooterMargin/FooterVBox/StatusRow"]
+custom_minimum_size = Vector2(88, 34)
+layout_mode = 2
+
+[node name="StatusPill" type="Label" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox/FooterPanel/FooterMargin/FooterVBox/StatusRow/StatusPillPanel"]
+layout_mode = 2
+horizontal_alignment = 1
+vertical_alignment = 1
+theme_override_font_sizes/font_size = 16
+text = "Ongoing"
+
+[node name="ControlsLabel" type="Label" parent="Root/MainShell/MainVBox/Body/RightPane/RightScroll/RightMargin/RightVBox/FooterPanel/FooterMargin/FooterVBox/StatusRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+horizontal_alignment = 2
+theme_override_font_sizes/font_size = 14
+text = "J close menu   |   Esc back   |   Up/Down change selection"

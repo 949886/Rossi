@@ -265,19 +265,24 @@ func _build_quest_view_model(quest_id: StringName) -> Dictionary:
 		})
 
 	var is_completed := bool(state.get("is_completed", false))
+	var current_objective_text := _get_current_objective_text(objectives, is_completed)
+	var list_preview_text := current_objective_text if not current_objective_text.is_empty() else quest_data.summary
 	return {
 		"quest_id": quest_id,
 		"title": quest_data.get_safe_title(),
 		"subtitle": quest_data.subtitle,
 		"summary": quest_data.summary,
 		"category": quest_data.category,
+		"category_label": _format_category_label(quest_data.category),
 		"sort_order": quest_data.sort_order,
 		"status": "completed" if is_completed else "active",
-		"status_label": "Completed" if is_completed else "Active",
+		"status_label": "Completed" if is_completed else "Ongoing",
 		"is_completed": is_completed,
 		"is_active": bool(state.get("is_active", false)),
 		"is_selected": _selected_quest_id == quest_id,
 		"current_objective_index": current_index,
+		"current_objective_text": current_objective_text,
+		"list_preview_text": list_preview_text,
 		"completed_objective_count": completed_count,
 		"objective_count": objectives.size(),
 		"objectives": objectives,
@@ -303,3 +308,30 @@ func _find_fallback_selection() -> StringName:
 	if not completed.is_empty():
 		return StringName(completed[0].get("quest_id", &""))
 	return &""
+
+
+func _get_current_objective_text(objectives: Array[Dictionary], is_completed: bool) -> String:
+	if objectives.is_empty():
+		return ""
+	if is_completed:
+		return str(objectives[objectives.size() - 1].get("description", ""))
+	for objective in objectives:
+		if bool(objective.get("is_current", false)):
+			return str(objective.get("description", ""))
+	return str(objectives[0].get("description", ""))
+
+
+func _format_category_label(category: StringName) -> String:
+	var category_text := String(category)
+	if category_text.is_empty():
+		return "Quest"
+	var words := category_text.split("_")
+	var capitalized: Array[String] = []
+	for word in words:
+		if word.is_empty():
+			continue
+		capitalized.append(word.substr(0, 1).to_upper() + word.substr(1))
+	var label := " ".join(capitalized)
+	if not label.ends_with("Quest"):
+		label += " Quest"
+	return label

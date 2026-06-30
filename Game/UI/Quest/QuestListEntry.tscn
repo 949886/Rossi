@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://Game/UI/Quest/QuestListEntry.gd" id="1"]
 
 [node name="QuestListEntry" type="Button"]
-custom_minimum_size = Vector2(0, 68)
+custom_minimum_size = Vector2(0, 82)
 size_flags_horizontal = 3
 toggle_mode = true
 text = ""
@@ -15,24 +15,45 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 2.0
-offset_top = 2.0
-offset_right = -2.0
-offset_bottom = -2.0
+offset_left = 6.0
+offset_top = 4.0
+offset_right = -6.0
+offset_bottom = -4.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 
-[node name="VBox" type="VBoxContainer" parent="Margin"]
+[node name="Row" type="HBoxContainer" parent="Margin"]
 layout_mode = 2
-theme_override_constants/separation = 3
+size_flags_vertical = 3
+theme_override_constants/separation = 14
 
-[node name="Title" type="Label" parent="Margin/VBox"]
+[node name="Accent" type="ColorRect" parent="Margin/Row"]
+custom_minimum_size = Vector2(4, 56)
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+color = Color(0.93, 0.84, 0.55, 1)
+
+[node name="VBox" type="VBoxContainer" parent="Margin/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="Title" type="Label" parent="Margin/Row/VBox"]
+layout_mode = 2
+clip_text = true
+theme_override_font_sizes/font_size = 17
 text = "Quest Title"
 
-[node name="Status" type="Label" parent="Margin/VBox"]
+[node name="Subtitle" type="Label" parent="Margin/Row/VBox"]
 layout_mode = 2
+clip_text = true
+theme_override_font_sizes/font_size = 14
+text = "Quest preview text"
+
+[node name="Status" type="Label" parent="Margin/Row"]
+layout_mode = 2
+size_flags_vertical = 4
+horizontal_alignment = 2
+vertical_alignment = 1
 theme_override_font_sizes/font_size = 13
-text = "Active"
+text = "Ongoing"

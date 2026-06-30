@@ -232,6 +232,12 @@ func _physics_process(delta: float) -> void:
 		move_and_slide()
 		return
 
+	if _is_ui_input_blocked():
+		_apply_gravity(delta)
+		_apply_friction(delta, is_on_floor())
+		move_and_slide()
+		return
+
 	if is_on_floor():
 		_air_attack_count = 0
 
@@ -284,6 +290,14 @@ func _physics_process(delta: float) -> void:
 			_process_respawn(delta)
 
 	move_and_slide()
+
+func _is_ui_input_blocked() -> bool:
+	var tree := get_tree()
+	if tree == null:
+		return false
+	if not tree.has_meta("quest_ui_open"):
+		return false
+	return bool(tree.get_meta("quest_ui_open"))
 
 func _process_idle(delta: float) -> void:
 	_apply_gravity(delta)
