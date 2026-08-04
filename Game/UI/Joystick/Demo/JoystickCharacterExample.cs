@@ -1,11 +1,11 @@
 // Created by Copilot on 2026-03-10.
-// Example: Integrating VirtualJoystick with a 2D CharacterBody2D.
+// Example: Integrating CherryVirtualJoystick with a 2D CharacterBody2D.
 
 using Godot;
 using VirtualJoystickPlugin;
 
 /// <summary>
-/// Example showing how to integrate the VirtualJoystick with a CharacterBody2D.
+/// Example showing how to integrate the CherryVirtualJoystick with a CharacterBody2D.
 /// This demonstrates two approaches:
 ///   1. Input Action mapping (recommended) - joystick feeds into Godot Input system
 ///   2. Direct Output reading - read joystick.Output directly
@@ -19,10 +19,10 @@ public partial class JoystickCharacterExample : CharacterBody2D
     [Export] public float Gravity { get; set; } = 980f;
 
     /// <summary>
-    /// Optional: Direct reference to a VirtualJoystick node.
+    /// Optional: Direct reference to a CherryVirtualJoystick node.
     /// If null, the character uses standard Input actions (which the joystick can feed into).
     /// </summary>
-    [Export] public VirtualJoystick Joystick { get; set; }
+    [Export] public CherryVirtualJoystick Joystick { get; set; }
 
     public override void _PhysicsProcess(double delta)
     {

@@ -5,12 +5,12 @@ using Godot;
 using VirtualJoystickPlugin;
 
 /// <summary>
-/// A demo that shows all features of the VirtualJoystick plugin.
+/// A demo that shows all features of the CherryVirtualJoystick plugin.
 /// Includes a character that moves based on joystick input, and action buttons.
 /// </summary>
 public partial class JoystickDemo : Node2D
 {
-    private VirtualJoystick _joystick;
+    private CherryVirtualJoystick _joystick;
     private VirtualButton _jumpButton;
     private VirtualButton _attackButton;
     private ColorRect _player;
@@ -108,9 +108,9 @@ public partial class JoystickDemo : Node2D
         joystickContainer.MouseFilter = Control.MouseFilterEnum.Ignore;
         uiLayer.AddChild(joystickContainer);
 
-        _joystick = new VirtualJoystick();
-        _joystick.Mode = VirtualJoystick.JoystickMode.Fixed;
-        _joystick.Visibility = VirtualJoystick.VisibilityMode.FadeInOut;
+        _joystick = new CherryVirtualJoystick();
+        _joystick.Mode = CherryVirtualJoystick.JoystickMode.Fixed;
+        _joystick.Visibility = CherryVirtualJoystick.VisibilityMode.FadeInOut;
         _joystick.BaseRadius = 80f;
         _joystick.HandleRadius = 35f;
         _joystick.DeadZone = 0.15f;
@@ -194,7 +194,7 @@ public partial class JoystickDemo : Node2D
     private void OnModeSwitchPressed()
     {
         _currentMode = (_currentMode + 1) % 3;
-        _joystick.Mode = (VirtualJoystick.JoystickMode)_currentMode;
+        _joystick.Mode = (CherryVirtualJoystick.JoystickMode)_currentMode;
         GD.Print($"Joystick Mode: {_joystick.Mode}");
     }
 }

@@ -7,8 +7,8 @@ signal joystick_input_changed(output: Vector2)
 @export_range(0.5, 3.0, 0.1) var control_scale := 1.0
 
 @export_group("Joystick Settings")
-@export var joystick_mode: int = VirtualJoystick.JoystickMode.FIXED
-@export var joystick_visibility: int = VirtualJoystick.VisibilityMode.ALWAYS
+@export var joystick_mode: int = CherryVirtualJoystick.JoystickMode.FIXED
+@export var joystick_visibility: int = CherryVirtualJoystick.VisibilityMode.ALWAYS
 @export var move_left_action := "move_left"
 @export var move_right_action := "move_right"
 @export var move_up_action := "jump"
@@ -66,8 +66,8 @@ func _create_joystick() -> void:
 	joystick_area.position = Vector2(30.0 * control_scale, -area_size - 30.0 * control_scale)
 	_container.add_child(joystick_area)
 
-	_joystick = VirtualJoystick.new()
-	_joystick.name = "VirtualJoystick"
+	_joystick = CherryVirtualJoystick.new()
+	_joystick.name = "CherryVirtualJoystick"
 	_joystick.mode = joystick_mode
 	_joystick.visibility_mode = joystick_visibility
 	_joystick.base_radius = local_base_radius

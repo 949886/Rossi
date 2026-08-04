@@ -81,9 +81,9 @@ func _create_ui() -> void:
 	joystick_container.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	ui_layer.add_child(joystick_container)
 
-	_joystick = VirtualJoystick.new()
-	_joystick.mode = VirtualJoystick.JoystickMode.FIXED
-	_joystick.visibility_mode = VirtualJoystick.VisibilityMode.FADE_IN_OUT
+	_joystick = CherryVirtualJoystick.new()
+	_joystick.mode = CherryVirtualJoystick.JoystickMode.FIXED
+	_joystick.visibility_mode = CherryVirtualJoystick.VisibilityMode.FADE_IN_OUT
 	_joystick.base_radius = 80.0
 	_joystick.handle_radius = 35.0
 	_joystick.dead_zone = 0.15

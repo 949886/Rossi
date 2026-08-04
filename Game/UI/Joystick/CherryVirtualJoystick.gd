@@ -1,6 +1,6 @@
 @tool
 extends Control
-class_name VirtualJoystick
+class_name CherryVirtualJoystick
 
 enum JoystickMode {
 	FIXED,

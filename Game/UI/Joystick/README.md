@@ -22,7 +22,7 @@
 
 ```text
 UI/Joystick/
-├── VirtualJoystick.cs              # 核心虚拟摇杆
+├── CherryVirtualJoystick.cs              # 核心虚拟摇杆
 ├── VirtualButton.cs                # 普通虚拟按钮
 ├── VirtualDirectionButton.cs       # 方向按钮
 ├── VirtualProgressButton.cs        # 带冷却/充能显示的技能按钮
@@ -91,7 +91,7 @@ public partial class MobileHudBootstrap : Node
 
 ### 3. 手动创建摇杆
 
-如果你想完全控制布局，可以直接实例化 `VirtualJoystick`：
+如果你想完全控制布局，可以直接实例化 `CherryVirtualJoystick`：
 
 ```csharp
 using Godot;
@@ -108,10 +108,10 @@ public partial class ManualJoystickExample : CanvasLayer
         joystickArea.MouseFilter = Control.MouseFilterEnum.Ignore;
         AddChild(joystickArea);
 
-        var joystick = new VirtualJoystick
+        var joystick = new CherryVirtualJoystick
         {
-            Mode = VirtualJoystick.JoystickMode.Fixed,
-            Visibility = VirtualJoystick.VisibilityMode.FadeInOut,
+            Mode = CherryVirtualJoystick.JoystickMode.Fixed,
+            Visibility = CherryVirtualJoystick.VisibilityMode.FadeInOut,
             BaseRadius = 80f,
             HandleRadius = 35f,
             DeadZone = 0.15f,
@@ -178,11 +178,11 @@ float angle = Joystick?.Angle ?? 0f;
 
 ## 核心组件详解
 
-## 1. VirtualJoystick
+## 1. CherryVirtualJoystick
 
 ### 作用
 
-`VirtualJoystick` 是整个系统的核心，用来把触摸拖拽转换为二维方向输入。
+`CherryVirtualJoystick` 是整个系统的核心，用来把触摸拖拽转换为二维方向输入。
 
 它提供两种主要使用方式：
 
@@ -272,7 +272,7 @@ using VirtualJoystickPlugin;
 
 public partial class PlayerController : CharacterBody2D
 {
-    [Export] public VirtualJoystick Joystick { get; set; }
+    [Export] public CherryVirtualJoystick Joystick { get; set; }
     [Export] public float MoveSpeed { get; set; } = 220f;
 
     public override void _PhysicsProcess(double delta)
@@ -289,7 +289,7 @@ public partial class PlayerController : CharacterBody2D
 ```csharp
 public override void _Ready()
 {
-    var joystick = GetNode<VirtualJoystick>("CanvasLayer/Joystick");
+    var joystick = GetNode<CherryVirtualJoystick>("CanvasLayer/Joystick");
 
     joystick.JoystickInput += output =>
     {
@@ -561,7 +561,7 @@ dashButton.Pressed += () => GD.Print("dash triggered");
 
 | 成员 | 说明 |
 |---|---|
-| `Joystick` | 直接访问内部创建的 `VirtualJoystick` |
+| `Joystick` | 直接访问内部创建的 `CherryVirtualJoystick` |
 | `JoystickOutput` | 读取当前摇杆输出 |
 | `SetControlsVisible(bool)` | 运行时整体显示/隐藏触控控件 |
 
@@ -587,8 +587,8 @@ public partial class MainScene : Node2D
         {
             AutoHideOnDesktop = false,
             ControlScale = 1.2f,
-            JoystickMode = VirtualJoystick.JoystickMode.DynamicFollowing,
-            JoystickVisibility = VirtualJoystick.VisibilityMode.FadeInOut,
+            JoystickMode = CherryVirtualJoystick.JoystickMode.DynamicFollowing,
+            JoystickVisibility = CherryVirtualJoystick.VisibilityMode.FadeInOut,
             MoveLeftAction = "move_left",
             MoveRightAction = "move_right",
             MoveUpAction = "jump",
@@ -619,7 +619,7 @@ public partial class MainScene : Node2D
 
 一套常见的移动端操作链路通常是：
 
-1. `VirtualJoystick` 负责持续输出移动方向
+1. `CherryVirtualJoystick` 负责持续输出移动方向
 2. `VirtualButton` 负责跳跃、攻击等离散输入
 3. `VirtualDirectionButton` 负责投掷、瞄准施法
 4. `VirtualProgressButton` 负责有冷却和充能的技能
@@ -627,7 +627,7 @@ public partial class MainScene : Node2D
 
 在项目里的实际示例可以参考：
 
-- [VirtualJoystick.cs](Z:\Programming\Game\Godot\Learning\demos\UI\Joystick\VirtualJoystick.cs)
+- [CherryVirtualJoystick.cs](Z:\Programming\Game\Godot\Learning\demos\UI\Joystick\CherryVirtualJoystick.cs)
 - [VirtualButton.cs](Z:\Programming\Game\Godot\Learning\demos\UI\Joystick\VirtualButton.cs)
 - [VirtualDirectionButton.cs](Z:\Programming\Game\Godot\Learning\demos\UI\Joystick\VirtualDirectionButton.cs)
 - [VirtualProgressButton.cs](Z:\Programming\Game\Godot\Learning\demos\UI\Joystick\VirtualProgressButton.cs)
@@ -649,7 +649,7 @@ public partial class MainScene : Node2D
 
 直接读取组件状态：
 
-- `VirtualJoystick.Output`
+- `CherryVirtualJoystick.Output`
 - `VirtualButton.IsPressed`
 - `VirtualProgressButton.Pressed`
 - `VirtualDirectionButton.DirectionActivated`
@@ -690,7 +690,7 @@ control.MouseFilter = Control.MouseFilterEnum.Ignore;
 
 ### 5. 组件销毁时输入释放
 
-`VirtualJoystick`、`VirtualButton`、`VirtualProgressButton` 都做了基础清理逻辑，节点删除时会尽量释放已经按下的输入动作，避免残留“卡住按键”的问题。
+`CherryVirtualJoystick`、`VirtualButton`、`VirtualProgressButton` 都做了基础清理逻辑，节点删除时会尽量释放已经按下的输入动作，避免残留“卡住按键”的问题。
 
 ## Demo 参考
 

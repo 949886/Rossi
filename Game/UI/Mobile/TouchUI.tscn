@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://cieg12mva0pyu"]
 
 [ext_resource type="Script" uid="uid://ewq7eiwif7b1" path="res://Game/UI/Mobile/TouchUI.gd" id="1_it0ud"]
-[ext_resource type="Script" uid="uid://d2ugvpjmi7kcp" path="res://Game/UI/Joystick/VirtualJoystick.gd" id="2_8uuep"]
+[ext_resource type="Script" uid="uid://d2ugvpjmi7kcp" path="res://Game/UI/Joystick/CherryVirtualJoystick.gd" id="2_8uuep"]
 [ext_resource type="Script" uid="uid://nokxa4oj4hfo" path="res://Game/UI/Joystick/VirtualButton.gd" id="3_qe6ek"]
 [ext_resource type="Script" uid="uid://ck32leiwbrngy" path="res://Game/UI/Joystick/VirtualDirectionButton.gd" id="4_q1mej"]
 [ext_resource type="Script" uid="uid://dpy6ou57luu5y" path="res://Game/UI/Joystick/VirtualProgressButton.gd" id="5_871gn"]

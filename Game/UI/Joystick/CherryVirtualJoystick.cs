@@ -12,7 +12,7 @@ namespace VirtualJoystickPlugin
     /// </summary>
     [Tool]
     [GlobalClass]
-    public partial class VirtualJoystick : Control
+    public partial class CherryVirtualJoystick : Control
     {
         #region Enums
 

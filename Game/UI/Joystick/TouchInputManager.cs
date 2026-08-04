@@ -25,8 +25,8 @@ namespace VirtualJoystickPlugin
 
         [ExportGroup("Joystick Settings")]
 
-        [Export] public VirtualJoystick.JoystickMode JoystickMode { get; set; } = VirtualJoystick.JoystickMode.Fixed;
-        [Export] public VirtualJoystick.VisibilityMode JoystickVisibility { get; set; } = VirtualJoystick.VisibilityMode.Always;
+        [Export] public CherryVirtualJoystick.JoystickMode JoystickMode { get; set; } = CherryVirtualJoystick.JoystickMode.Fixed;
+        [Export] public CherryVirtualJoystick.VisibilityMode JoystickVisibility { get; set; } = CherryVirtualJoystick.VisibilityMode.Always;
 
         [Export] public string MoveLeftAction { get; set; } = "move_left";
         [Export] public string MoveRightAction { get; set; } = "move_right";
@@ -54,7 +54,7 @@ namespace VirtualJoystickPlugin
 
         #region Private Fields
 
-        private VirtualJoystick _joystick;
+        private CherryVirtualJoystick _joystick;
         private VirtualButton _jumpButton;
         private VirtualButton _attackButton;
         private VirtualButton _dashButton;
@@ -65,7 +65,7 @@ namespace VirtualJoystickPlugin
         #region Public API
 
         /// <summary>Access the joystick component directly.</summary>
-        public VirtualJoystick Joystick => _joystick;
+        public CherryVirtualJoystick Joystick => _joystick;
 
         /// <summary>Current joystick output.</summary>
         public Vector2 JoystickOutput => _joystick?.Output ?? Vector2.Zero;
@@ -131,8 +131,8 @@ namespace VirtualJoystickPlugin
             _container.AddChild(joystickArea);
 
             // Create joystick
-            _joystick = new VirtualJoystick();
-            _joystick.Name = "VirtualJoystick";
+            _joystick = new CherryVirtualJoystick();
+            _joystick.Name = "CherryVirtualJoystick";
             _joystick.Mode = JoystickMode;
             _joystick.Visibility = JoystickVisibility;
             _joystick.BaseRadius = baseRadius;
